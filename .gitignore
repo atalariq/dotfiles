@@ -1,0 +1,7 @@
+*.log
+*.state
+*.db
+state.*
+watch_laters/*
+lyrics/*
+playlist/*

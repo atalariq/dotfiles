@@ -1,0 +1,50 @@
+------------------------------Query
+"query:Unread Articles:unread = \"yes\" and tags !# \"pouet\" and tags !# \"page2rss\" and tags !# \"xiv\""
+"query:Unread Articles (1 year old):unread = \"yes\" and tags !# \"pouet\" and tags !# \"page2rss\" and tags !# \"xiv\" and age between 0:365"
+"query:Unread Articles (1 month old):unread = \"yes\" and tags !# \"pouet\" and tags !# \"page2rss\" and tags !# \"xiv\" and age between 0:31"
+"query:Unread Articles (1 week old):unread = \"yes\" and tags !# \"pouet\" and tags !# \"page2rss\" and tags !# \"xiv\" and age between 0:7"
+"query:Unread Articles (favourite):unread = \"yes\" and tags # \"favourite\""
+------------------------------News
+https://www.antaranews.com/rss/terkini.xml
+https://www.antaranews.com/rss/top-news.xml
+------------------------------World
+https://www.antaranews.com/rss/dunia.xml
+https://www.antaranews.com/rss/dunia-internasional.xml
+------------------------------English
+https://learnenglishwithgulbimg.blogspot.com/feeds/posts/default
+https://oupeltglobalblog.com/feed/
+https://plainenglish.com/feed/
+https://quillbot.com/blog/rss/
+https://r2g-r2g2.blogspot.com/feeds/posts/default?alt=rss
+https://soenglish.me/rss/
+https://www.english-grammar-revolution.com/english-grammar.xml
+https://www.englishclub.com/efl/category/jo/feed/
+https://www.englishclub.com/ref/idiom-of-the-day.xml
+https://www.englishclub.com/ref/phrasal-verb-of-the-day.xml
+https://www.englishclub.com/ref/saying-of-the-day.xml
+https://www.englishclub.com/ref/slang-of-the-day.xml
+https://www.englishclub.com/sub.rss
+https://www.grammarly.com/blog/feed/
+------------------------------Blog
+https://copyblogger.com/blog/feed/
+------------------------------Linux
+https://archlinux.org/feeds/news/
+------------------------------Programming
+https://github.blog/feed/
+https://medium.com/feed/better-programming
+https://www.thecrazyprogrammer.com/category/programming/feed
+https://musicforprogramming.net/rss.xml
+------------------------------Neovim
+https://github.com/neovim/neovim/releases.atom "~Neovim Releases"
+https://this-week-in-neovim.org/rss
+------------------------------Android
+https://www.droid-life.com/feed/
+------------------------------Science
+https://gizmodo.com/tag/science/rss
+------------------------------History
+https://www.historyisnowmagazine.com/blog?format=RSS
+https://www.historynet.com/feed
+https://www.thehistoryreader.com/feed
+------------------------------Gaming
+https://store.steampowered.com/feeds/news.xml
+https://indiegamesplus.com/feed/

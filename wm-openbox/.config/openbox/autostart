@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# These things are run when an Openbox X Session is started.
+# You may place a similar script in $HOME/.config/openbox/autostart
+# to run user-specific things.
+#
+
+# EWW
+pgrep -x eww >/dev/null || eww daemon >/dev/null 2>&1 &
+
+# Picom
+pgrep -x picom > /dev/null || \
+    picom --experimental-backends --config ~/.config/picom/picom.conf >/dev/null 2>&1 &
+
+# Polybar
+pgrep -x polybar > /dev/null || ~/.config/polybar/launch.sh >/dev/null 2>&1 &
+
+# sxhkd
+pgrep -x sxhkd > /dev/null || sxhkd -c "${XDG_CONFIG_HOME:-$HOME/.config}/sxhkd/sxhkdrc" >/dev/null 2>&1 &

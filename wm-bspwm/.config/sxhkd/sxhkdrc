@@ -1,0 +1,127 @@
+# Apps
+# ====================================================
+# ------ Terminal emulator
+super + Return
+	defapps run terminal
+
+# ------ Launcher
+super + r
+	rofi -no-config -show run
+
+# ----- Web Browser, File Manager/Explorer, Text Editor
+super + {w,f,e}
+    defapps run {browser,file,text}
+
+# Controller
+# ====================================================
+# ------ brightness
+XF86MonBrightnessUp
+    brightnessctl up
+
+XF86MonBrightnessDown
+    brightnessctl down
+
+# --------- Audio
+XF86AudioMute
+    volumectl mute
+
+XF86AudioRaiseVolume
+    volumectl up
+
+XF86AudioLowerVolume
+        volumectl down
+
+# ------- Music
+XF86AudioStop
+    musicctl stop
+
+XF86AudioPlay
+    musicctl toggle
+
+XF86AudioNext
+    musicctl next
+
+XF86AudioPrev
+    musicctl prev
+
+# ------- Screenshots
+{super,shift,alt} + Print
+    shot {-i,select,active}
+
+# ------- translate
+super + t
+    rofi-translate -i
+
+# ------ Rofi
+super + {c,n,p}
+    rofi-{calc,network,pass}
+
+super + semicolon
+  rofi-run
+
+super + F12
+    rofi-record
+
+# ----- Clipmenu
+super + Insert
+    clipmenu
+
+# BSPWM
+# ====================================================
+# -------- sxhkd
+super + ctrl + s
+	pkill -USR1 -x sxhkd
+
+# ------- quit/restart
+super + ctrl + {q,r}
+	bspc {quit,wm -r}
+
+# BSPWM: Client Control
+# ====================================================
+# close and kill
+alt + {_,shift + } F4
+	bspc node -{c,k}
+
+# sticky: follow all desktop
+alt + F7
+    bspc node -g sticky
+
+alt + {_,shift +} F6
+    bspc node -t {floating,tiled}
+
+alt + F12
+    bspc node -t fullscreen
+
+super + Delete
+    xkill
+
+# BSPWM: Layout
+# ====================================================
+# alternate between the tiled and monocle layout
+super + space
+	bspc desktop -l next
+
+# BSPWM: Focus/Swap
+# ====================================================
+
+# focus the node in the given direction
+super + {_,alt + }{h,j,k,l}
+	bspc node -{f,s} {west,south,north,east}
+
+# focus the last node
+super + Tab
+	bspc node -f last
+
+# BSPWM: desktop/workspace
+# ====================================================
+# focus or send to the given desktop
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
+
+# BSPWM: Move/Resize
+# =================================================================
+super + shift + {h,j,k,l}
+	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+super + {Left,Down,Up,Right}
+	bspc node -v {-20 0,0 20,0 -20,20 0}

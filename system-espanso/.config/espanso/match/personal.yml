@@ -1,0 +1,9 @@
+matches:
+  - triggers: ['//name',  '//nama']
+    replace: 'atalariq barra hadinugraha'
+    uppercase_style: 'capitalize_words'
+    propagate_case: true
+
+  - triggers: ['//mail', '//email']
+    replace: 'atalariq26@gmail.com'
+

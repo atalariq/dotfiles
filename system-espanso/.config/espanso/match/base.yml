@@ -1,0 +1,21 @@
+matches:
+  # Simple text replacement
+  - trigger: ':espanso'
+    replace: 'Hi there!'
+
+  # Print the current date
+  - trigger: '//date'
+    replace: '{{date}}'
+    vars:
+      - name: date
+        type: date
+        params:
+          format: '%d-%m-%Y'
+
+  # Markdown clipboard format
+  - trigger: '//a'
+    replace: '[$|$]({{clipboard}})'
+    vars:
+      - name: 'clipboard'
+        type: 'clipboard'
+

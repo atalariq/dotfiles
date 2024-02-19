@@ -1,0 +1,109 @@
+" vim: ft=vim:
+
+" ================================================
+" Settings
+" ================================================
+colors dark
+
+set editorcmd /usr/bin/nvim
+set findcase smart
+set smoothscroll true
+
+" set allowautofocus true
+" set modeindicator false
+" set hintchars wasdfhjkli
+
+set searchengine d
+set searchengine.d https://duckduckgo.com/?q=%s
+set searchengine.g https://www.google.com/search?hl=en&q=%s
+set searchengine.r https://www.reddit.com/search/?q=%s
+set searchengine.au https://aur.archlinux.org/packages/?O=0&K=%s
+set searchengine.aw https://wiki.archlinux.org/?search=%s
+set searchengine.gh https://github.com/search?q=%s
+set searchengine.js https://www.npmjs.com/search?q=%s
+set searchengine.py https://pypi.org/search/?q=%s
+set searchengine.np https://search.nixos.org/packages?channel=unstable&sort=relevance&type=packages&query=%s
+set searchengine.yt https://www.youtube.com/results?search_query=%s
+
+
+" ================================================
+" Appearance
+" ================================================
+guiset_quiet hoverlink right
+" guiset_quiet tabs count
+
+" ================================================
+" Key
+" ================================================
+" Disable <C-q>
+bind --mode=insert <C-q> js alert("<C-q> is for quitters.")
+bind --mode=input  <C-q> js alert("<C-q> is for quitters.")
+bind --mode=normal <C-q> js alert("<C-q> is for quitters.")
+bind --mode=ex     <C-q> js alert("<C-q> is for quitters.")
+bind --mode=hint   <C-q> js alert("<C-q> is for quitters.")
+
+" Text Navigation
+bind --mode=ex     <Home> text.beginning_of_line
+bind --mode=insert <Home> text.beginning_of_line
+bind --mode=input  <Home> text.beginning_of_line
+bind --mode=ex     <End> text.end_of_line
+bind --mode=insert <End> text.end_of_line
+bind --mode=input  <End> text.end_of_line
+bind --mode=ex     <C-ArrowLeft> text.forward_word
+bind --mode=insert <C-ArrowLeft> text.forward_word
+bind --mode=input  <C-ArrowLeft> text.forward_word
+bind --mode=ex     <C-u> text.kill_line
+bind --mode=insert <C-u> text.kill_line
+bind --mode=input  <C-u> text.kill_line
+bind --mode=ex     <C-ArrowRight> text.backward_kill_line
+bind --mode=insert <C-ArrowRight> text.backward_kill_line
+bind --mode=input  <C-ArrowRight> text.backward_kill_line
+bind --mode=ex     <C-V> composite getclip selection | text.insert_text
+bind --mode=insert <C-V> composite getclip selection | text.insert_text
+bind --mode=input  <C-V> composite getclip selection | text.insert_text
+bind --mode=ex     <A-Delete> text.backward_kill_word
+bind --mode=insert <A-Delete> text.backward_kill_word
+bind --mode=input  <A-Delete> text.backward_kill_word
+
+" ### Search
+bind ;/ fillcmdline tabopen s
+bind / fillcmdline find
+bind ? fillcmdline find -?
+bind n findnext 1
+bind N findnext -1
+bind <A-n> nohlsearch
+
+" ### Tab
+bind K tabprev
+bind J tabnext
+bind <A-k> tabmove -1
+bind <A-j> tabmove +1
+bind H back
+bind L forward
+
+bind o fillcmdline open
+bind O fillcmdline tabopen
+
+" ### Scroll
+bind <ArrowUp> scrollline -5
+bind <ArrowDown> scrollline 5
+bind <PageUp> scrollline -30
+bind <PageDown> scrollline 30
+
+" ### Misc
+bind ,r source
+bind ,R restart
+
+" Open right click menu on links
+bind ;C composite hint -h; !s xdotool key Menu
+
+" ================================================
+" Autocommand
+" ================================================
+blacklistadd mail.google.com
+blacklistadd facebook.com
+
+" ================================================
+" Misc
+" ================================================
+

@@ -1,0 +1,197 @@
+// vim: ft=jsonc :
+// Global
+{
+  "layer": "top",
+  "position": "top",
+  "margin": 5,
+  // If height property would be not present, it'd be calculated dynamically
+  // "height": 20,
+  "modules-left": [
+    // "wlr/workspaces",
+    "hyprland/workspaces",
+    "hyprland/window",
+
+    "sway/workspaces",
+    "sway/mode",
+    "sway/window"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "mpris",
+    "tray",
+    // "memory",
+    // "cpu",
+    "pulseaudio",
+    "backlight#value",
+    // "network",
+    "battery"
+  ],
+  // Modules
+  "idle_inhibitor": {
+    "format": "{icon} ",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    }
+  },
+  "battery": {
+    "states": {
+      // "good": 95,
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰠠 {capacity}%",
+    "format-plugged": " {capacity}%",
+    // "format-good": "", // An empty format will hide the module
+    // "format-full": "",
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  "clock": {
+    "interval": 10,
+    // "format-alt": " {:%e %b %Y}", // Icon: calendar-alt
+    "format": "  {:%H:%M} ",
+    "tooltip-format": "{:%e %B %Y}"
+  },
+  "cpu": {
+    "interval": 5,
+    "format": " {usage}% ({load})", // Icon: microchip
+    "states": {
+      "warning": 70,
+      "critical": 90
+    },
+    "on-click": "kitty -e 'htop'"
+  },
+  "memory": {
+    "interval": 5,
+    "format": " {}%", // Icon: memory
+    "on-click": "kitty --class memory_info -e 'btm'",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
+  },
+  "network": {
+    "interval": 5,
+    "format-wifi": " ", // Icon: wifi
+    "format-ethernet": " ", // Icon: ethernet
+    "format-disconnected": "⚠  Disconnected",
+    "tooltip-format": "{ifname}: {ipaddr}",
+    "on-click": "kitty -e 'nmtui'"
+  },
+  "network#vpn": {
+    "interface": "tun0",
+    "format": " ",
+    "format-disconnected": "⚠  Disconnected",
+    "tooltip-format": "{ifname}: {ipaddr}/{cidr}"
+  },
+  "hyprland/workspaces": {
+    "all-outputs": true,
+    "on-click":"activate",
+    "format": " {icon} ",
+    "format-icons": {
+      "1": "",
+      "2": "󰖟",
+      "3": "",
+      "4": "",
+      "5": "󰓇",
+      "6": "󰙯",
+      "7": "",
+      "8": ""
+    }
+  },
+  "hyprland/window": {
+    "format": " {} ",
+    "max-length": 50
+  },
+  "sway/mode": {
+    "format": " {}",
+    "max-length": 50
+  },
+  "sway/window": {
+    "format": " {} ",
+    "max-length": 50
+  },
+  "sway/workspaces": {
+    "all-outputs": true,
+    "format": " {icon} ",
+    "format-icons": {
+      "1": "",
+      "2": "󰖟",
+      "3": "",
+      "4": ""
+    }
+  },
+  "pulseaudio": {
+    "scroll-step": 1, // %, can be a float
+    "format": "{icon} {volume}%",
+    "format-bluetooth": "{volume}% {icon}  {format_source}",
+    "format-bluetooth-muted": " {icon}  {format_source}",
+    "format-muted": "",
+    "format-icons": {
+      "headphone": "󰋋",
+      "hands-free": "󰋋",
+      "headset": "󰋋",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [
+        ""
+      ]
+    },
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +1%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -1%"
+  },
+  "tray": {
+    "icon-size": 18,
+    "spacing": 8
+  },
+  "backlight#icon": {
+    "format": "{icon}",
+    "format-icons": [
+      ""
+    ],
+    "on-scroll-down": "brightnessctl -c backlight set 1%-",
+    "on-scroll-up": "brightnessctl -c backlight set +1%"
+  },
+  "backlight#value": {
+    "format": "{icon} {percent}%",
+    "format-icons": [
+      ""
+    ],
+    "on-scroll-down": "brightnessctl -c backlight set 1%-",
+    "on-scroll-up": "brightnessctl -c backlight set +1%"
+  },
+  "mpris": {
+    "format": " {status_icon} {dynamic} ",
+    "format-paused": " {player_icon} <i>{dynamic}</i> ",
+    // "format": " {status_icon} {title} ",
+    "max-length": 20,
+    "player-icons": {
+      "default": "",
+      "spotify": "󰓇",
+      "chromium": "",
+      "firefox": "",
+      "vlc": "󰕼",
+      "mpd": "󰎆"
+    },
+    "status-icons": {
+      "paused": "󰏤",
+      "playing": "󰐊",
+      "stopped": "󰓛"
+    },
+    "on-click": "playerctl play-pause",
+    "on-right-click": "playerctl next",
+    "on-middle-click": "playerctl previous"
+  }
+}
