@@ -1,0 +1,66 @@
+# vim: ft=toml
+
+[user]
+	email = atalariq26@gmail.com
+name = Atalariq Barra Hadinugraha
+username = atalazer
+signingkey = B398F02B7BC1E68B
+
+[core]
+editor = nvim
+pager = delta
+
+[init]
+	defaultBranch = main
+
+[interactive]
+diffFilter = delta --color-only --features=interactive
+
+[delta]
+line-numbers = true
+syntax-theme = base16
+side-by-side = false
+file-modified-label = modified:
+
+[color]
+	ui = auto
+
+[color "branch"]
+current = yellow reverse
+local = yellow
+remote = green
+
+[color "diff"]
+meta = yellow bold
+frag = magenta bold
+old = red bold
+new = green bold
+
+[color "status"]
+added = yellow
+changed = green
+untracked = red
+
+[pull]
+	rebase = false
+ff = only
+
+[alias]
+a = add                                             # Add file contents to the index
+ai = "add --interactive"                            # Add modified contents in the working tree interactively to the index.
+c = commit                                          # Record changes to the repository
+cm = commit -m                                      # Use the given <msg> as the commit message.
+cl = clone                                          # Clone a repository into a new directory
+cld = "clone --depth 1"                             # Create a shallow clone with a history truncated to the specified number of commits.
+d = diff                                            # Show changes between commits, commit and working tree, etc
+o = checkout                                        # Switch branches or restore working tree files.
+ps = push                                           # Update remote refs along with associated objects
+pl = pull                                           # Fetch from and integrate with another repository or a local branch.
+s = status                                          # Show the working tree status
+l = log                                             # Show the working tree log
+# ================================================= #
+aliases = "!git config -l | grep alias | cut -c 7"  # List git aliases
+branches = "branch --all"                           # List both remote-tracking branches and local branches.
+remotes = "remote --verbose"                        # Be a little more verbose and show remote url after name.
+contributors = "shortlog --summary --numbered"      # List contributors with number of commits
+amend = "commit --amend --no-edit"                  # Amend the currently staged files to the latest commit.

@@ -1,0 +1,4 @@
+# File: ~/.shellcheckrc
+# Reference: https://github.com/koalaman/shellcheck/wiki/Ignore
+
+disable=SC1090,SC1091,SC2015,SC2046,SC2086,SC3051,SC3046
