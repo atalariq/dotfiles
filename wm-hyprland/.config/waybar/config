@@ -10,7 +10,6 @@
     // "wlr/workspaces",
     "hyprland/workspaces",
     "hyprland/window",
-
     "sway/workspaces",
     "sway/mode",
     "sway/window"
@@ -26,7 +25,8 @@
     "pulseaudio",
     "backlight#value",
     // "network",
-    "battery"
+    "battery",
+    "privacy"
   ],
   // Modules
   "idle_inhibitor": {
@@ -95,7 +95,7 @@
   },
   "hyprland/workspaces": {
     "all-outputs": true,
-    "on-click":"activate",
+    "on-click": "activate",
     "format": " {icon} ",
     "format-icons": {
       "1": "",
@@ -110,7 +110,7 @@
   },
   "hyprland/window": {
     "format": " {} ",
-    "max-length": 50
+    "max-length": 30
   },
   "sway/mode": {
     "format": " {}",
@@ -153,7 +153,7 @@
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -1%"
   },
   "tray": {
-    "icon-size": 18,
+    "icon-size": 20,
     "spacing": 8
   },
   "backlight#icon": {
@@ -173,10 +173,20 @@
     "on-scroll-up": "brightnessctl -c backlight set +1%"
   },
   "mpris": {
-    "format": " {status_icon} {dynamic} ",
-    "format-paused": " {player_icon} <i>{dynamic}</i> ",
-    // "format": " {status_icon} {title} ",
-    "max-length": 20,
+    "format": " {status_icon}  {artist} - {title}  {player_icon} ",
+    // "format-paused": " {status_icon} <i>{title} - {artist}</i> {player_icon} ",
+    // "format": " {status_icon} {dynamic} {player_icon} ",
+    "min-length": 25,
+    "max-length": 25,
+    "title-len": 12,
+    "artist-len": 6,
+    // "dynamic-len": 20,
+    "dynamic-order": [
+      "title",
+      "artist",
+      "album"
+    ],
+    // "ellipsis": "...",
     "player-icons": {
       "default": "",
       "spotify": "󰓇",
@@ -186,12 +196,34 @@
       "mpd": "󰎆"
     },
     "status-icons": {
-      "paused": "󰏤",
-      "playing": "󰐊",
+      "playing": "󰏤",
+      "paused": "󰐊",
       "stopped": "󰓛"
     },
     "on-click": "playerctl play-pause",
     "on-right-click": "playerctl next",
     "on-middle-click": "playerctl previous"
+  },
+  "privacy": {
+    "icon-spacing": 8,
+    "icon-size": 18,
+    "transition-duration": 250,
+    "modules": [
+      {
+        "type": "screenshare",
+        "tooltip": true,
+        "tooltip-icon-size": 24
+      },
+      // {
+      //   "type": "audio-out",
+      //   "tooltip": true,
+      //   "tooltip-icon-size": 24
+      // },
+      {
+        "type": "audio-in",
+        "tooltip": true,
+        "tooltip-icon-size": 24
+      }
+    ]
   }
 }

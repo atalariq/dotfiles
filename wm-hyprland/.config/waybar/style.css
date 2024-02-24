@@ -77,6 +77,7 @@ window#waybar {
 #window,
 #mpris,
 #mpd,
+#privacy,
 #workspaces {
   padding:0.25rem 0.7rem;
   margin: 1px 6px;
@@ -224,6 +225,7 @@ window#waybar {
 
 #mpris {
   color: #bb9af7;
+  font-size:14px;
 }
 
 #mpris.playing {
