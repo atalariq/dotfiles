@@ -14,10 +14,24 @@ return {
         focus = true,
         startinsert = true,
         filetype = {
-          c = 'cd "$dir" && gcc "$fileName" -o "$fileNameWithoutExt" && "$dir/$fileNameWithoutExt" && rm "$dir/$fileNameWithoutExt"',
-          -- cpp = 'cd "$dir" && g++ -Wall -Wextra -O2 "$fileName" -o "$fileNameWithoutExt" && "$dir/$fileNameWithoutExt" && rm "$dir/$fileNameWithoutExt"',
-          cpp = 'cd "$dir" && g++ -std=c++17 -Wall -Wextra -O2 "$fileName" -o "$fileNameWithoutExt" && "$dir/$fileNameWithoutExt" && rm "$dir/$fileNameWithoutExt"',
-          rust = 'cd "$dir" && rustc "$fileName" && "$dir/$fileNameWithoutExt" && rm "$dir/$fileNameWithoutExt"',
+          c = {
+            'cd $dir &&',
+            'mkdir -p $dir/bin &&',
+            'gcc "$fileName" -o "$dir/bin/$fileNameWithoutExt" &&',
+            '"$dir/bin/$fileNameWithoutExt"',
+          },
+          cpp = {
+            'cd "$dir" &&',
+            'mkdir -p $dir/bin &&',
+            'g++ -std=c++17 -Wall -Wextra -O2 "$fileName" -o "$dir/bin/$fileNameWithoutExt" &&',
+            '"$dir/bin/$fileNameWithoutExt"',
+          },
+          dart = {
+            'cd "$dir" &&',
+            'mkdir -p $dir/bin &&',
+            'dart compile exe "$fileName" -o "$dir/bin/$fileNameWithoutExt" &&',
+            '"$dir/bin/$fileNameWithoutExt"',
+          },
         },
       })
     end,
