@@ -8,7 +8,7 @@ set -gx VISUAL $EDITOR
 set -gx SUDO_EDITOR $EDITOR
 
 # Fish
-# set -g fish_greeting
+set -g fish_greeting
 set -U fish_emoji_width 2
 
 # Path
@@ -16,6 +16,7 @@ fish_add_path ~/bin
 fish_add_path ~/.local/bin
 fish_add_path ~/.cargo/bin
 fish_add_path ~/.local/share/fnm
+fish_add_path ~/.local/sdk/flutter/bin
 
 set -gx DENO_INSTALL "~/.deno"
 fish_add_path $DENO_INSTALL/bin

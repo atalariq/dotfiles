@@ -10,6 +10,10 @@ export LANG=$LANG
 export LC_ALL=$LANG
 # export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
 
+# =========================================== Driver
+export LIBVA_DRIVER_NAME=iHD
+export WEYLUS_VAAPI_DEVICE=/dev/dri/renderD129
+
 # ========================================== Directory
 # ------- XDG
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -94,6 +98,7 @@ TO_PATH "$HOME/Applications"
 TO_PATH "$HOME/bin"
 TO_PATH "$HOME/.local/bin"
 TO_PATH "$HOME/.local/script"
+TO_PATH "$HOME/.local/sdk/flutter"
 TO_PATH "$CARGO_HOME/bin"
 TO_PATH "$GOBIN"
 TO_PATH "$BUN_INSTALL/bin"
@@ -104,6 +109,7 @@ TO_PATH "$BUN_INSTALL/bin"
 
 # Misc
 export CHROME_PATH=/usr/bin/google-chrome-stable
+export CHROME_EXECUTABLE=/usr/bin/google-chrome-stable
 
 # API/TOKEN
 get_token() {
