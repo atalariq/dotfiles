@@ -5,12 +5,16 @@ return {
     dependencies = "nvim-lua/plenary.nvim",
     keys = {
       { "<leader>re", "<CMD>RunCode<CR>", options, desc = "Run and Execute" },
-      { "<leader>rf", "<CMD>RunFile<CR>", options, desc = "Run File" },
+      { "<leader>rf", "<CMD>RunFile tab<CR>", options, desc = "Run File (int tab)" },
       { "<leader>rp", "<CMD>RunProject<CR>", options, desc = "Run Project" },
       { "<leader>rc", "<CMD>RunClose<CR>", options, desc = "Run Close" },
     },
     config = function()
       require("code_runner").setup({
+        term = {
+          position = "vertical",
+          size = 60,
+        },
         focus = true,
         startinsert = true,
         filetype = {
@@ -23,7 +27,7 @@ return {
           cpp = {
             'cd "$dir" &&',
             'mkdir -p $dir/bin &&',
-            'g++ -std=c++17 -Wall -Wextra -O2 "$fileName" -o "$dir/bin/$fileNameWithoutExt" &&',
+            'g++ -Wall -Wextra -O2 "$fileName" -o "$dir/bin/$fileNameWithoutExt" &&',
             '"$dir/bin/$fileNameWithoutExt"',
           },
           dart = {
@@ -118,19 +122,6 @@ return {
       t["<PageDown>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "500" } }
       require("neoscroll.config").set_mappings(t)
     end,
-  },
-
-  -- yazi integrations
-  {
-    "DreamMaoMao/yazi.nvim",
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-      "nvim-lua/plenary.nvim",
-    },
-
-    keys = {
-      { "<leader>gy", "<cmd>Yazi<CR>", desc = "Toggle Yazi" },
-    },
   },
 
   -- template file

@@ -33,7 +33,7 @@ xset r rate 300 50 &                # Set repeat rate
 # gsettings set org.cinnamon.desktop.wm.preferences num-workspaces 4
 # gsettings set org.nemo.desktop show-desktop-icons true
 # gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true
-exec cinnamon-session
+# exec cinnamon-session
 
 # ========== GNOME
 # export XDG_SESSION_TYPE=x11

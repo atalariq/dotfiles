@@ -5,16 +5,16 @@
 
 
 # =============================== Themes
-# export GTK_USE_PORTAL=1
-# export GTK2_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-2.0/gtkrc-2.0"
-# export GTK3_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini"
-# export GTK4_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/settings.ini"
+export GTK_USE_PORTAL=1
+export GTK2_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-2.0/gtkrc-2.0"
+export GTK3_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini"
+export GTK4_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/settings.ini"
 
-# export QT_QPA_PLATFORMTHEME=qt5ct
-# export QT_AUTO_SCREEN_SCALE_FACTOR=1
-# export QT_SCALE_FACTOR=1
-# export QT_SCREEN_SCALE_FACTORS=1
-# export QT_FONT_DPI=96
+export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+export QT_SCALE_FACTOR=1
+export QT_SCREEN_SCALE_FACTORS=1
+export QT_FONT_DPI=96
 
 export _JAVA_AWT_WM_NONEREPARENTING=1
 

@@ -1,0 +1,476 @@
+#!/usr/bin/env bash
+# vim: ft=sh: sw=4: ts=4:
+# shellcheck disable=SC2091
+
+default_config() {
+    _XDG_="$(xdg-user-dir PICTURES)/Screenshots"
+    ASSET_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/script/shot"
+    SCREENSHOT_DIR="${_XDG_:-$HOME/Pictures/Screenshots}"
+    SAVED_NAME="$SCREENSHOT_DIR/$(date +%Y%m%d-%H%M%S)-shot.png"
+    TMP_DIR="/tmp"
+    TMP_FILE="$TMP_DIR/image"
+    IMG_EXT="png"
+    TMP_IMG="$TMP_FILE.$IMG_EXT"
+
+    DMENU="rofi -dmenu -i -p Screenshot -lines 6 -width 20"
+
+    sleep=3
+    quality=9
+    max_history=5
+
+    border_size=0
+    rounded_corner=0
+    shadow_size="80x5+0+0"
+
+    background_size=3
+    background_color="#ffffff"
+    color_fg="#ffffff"
+    color_bg="#1F2233"
+    color_profile="/usr/share/color/icc/colord/sRGB.icc"
+
+    font_size=12
+    font="Fura-Code-Regular-Nerd-Font-Complete"
+
+    add_author=false
+    author_position=("SouthEast" "+10+10")
+    author="@${USER}"
+
+    add_text=false
+    long_text="$(date '+%A, %d/%m/%Y')"
+    short_text="$(date '+%d/%m/%Y')"
+
+    add_titlebar=false
+    use_custom_titlebar=false
+    titlebar_only_active=true
+
+    close_icon="$ASSET_DIR/close.png"
+    min_icon="$ASSET_DIR/minimize.png"
+    max_icon="$ASSET_DIR/maximize.png"
+}
+
+default_config
+
+CONF=$HOME/.config/script/shot.conf
+# shellcheck source=/dev/null
+[ -f "$CONF" ] && source "$CONF"
+
+if [ ! -d "$SCREENSHOT_DIR" ]; then
+    mkdir -p "$SCREENSHOT_DIR"
+fi
+
+_clean() {
+    if [ -f $TMP_IMG ]; then
+        # /usr/bin/rm "$TMP_IMG"
+        /usr/bin/mv $TMP_IMG "${TMP_FILE}-$(date '+%H%M%S').${IMG_EXT}"
+
+        if [ "$(ls $TMP_DIR/*.${IMG_EXT}  >$TMP_DIR/total-image && wc -l <$TMP_DIR/total-image)" = "$max_history" ]; then
+            /usr/bin/rm "${TMP_DIR}/*.${IMG_EXT}"
+            /usr/bin/rm $TMP_DIR/total-image
+        fi
+    fi
+}
+
+# Check DE/WM
+_check_wm() {
+    # Identify environment
+    DE="${DESKTOP_STARTUP_ID}"
+    if [ -n "$DE" ] && [[ "$DE" = *"awesome"* ]] \
+        || [ -n "$CHECK_AWESOME_CLIENT" ] \
+        || awesome-client "print(true)"; then
+        echo "AWESOME"
+        return
+    fi
+    echo "NOT_AWESOME"
+}
+
+_parse() {
+    notify-send -t $((1000 * 3)) --app-name=screenshot "Shot" "Parsing Image"
+
+    IMG=$TMP_IMG
+    DIR=/tmp
+
+    width=$(identify -format "%w" $IMG)
+    height=$(identify -format "%h" $IMG)
+    if [ $add_text = true ]; then
+        if [ -n "$text" ]; then
+            _text=$text
+            [ "$width" -le 200 ] && _text="~"
+        else
+            _text="$long_text"
+            [ "$width" -le 200 ] && _text="$short_text"
+        fi
+    else
+        _text=""
+    fi
+
+    if [ "$add_titlebar" = true ] && [ "$use_custom_titlebar" = true ] && [ "$width" -ge 500 ] && [ "$height" -ge 150 ]; then
+        convert $IMG \
+            -font ${font} -pointsize 14 -gravity north \
+            -background ${color_bg} -fill ${color_fg} \
+            -splice 0x28 -annotate +0+7 "${_text}" \
+            $IMG
+
+        convert $IMG \
+            -gravity NorthWest -draw "image Over 13,7 0,0 '${close_icon}'" \
+            -gravity NorthWest -draw "image Over 33,7 0,0 '${min_icon}'" \
+            -gravity NorthWest -draw "image Over 53,7 0,0 '${max_icon}'" \
+            $IMG
+
+        # Set rounded corner
+        convert "$IMG" \( +clone -alpha extract -draw 'fill black polygon 0,0 0,'"${rounded_corner}"' '"${rounded_corner}"',0 fill white circle '"${rounded_corner}"','"${rounded_corner}"' '"${rounded_corner}"',0' \
+            \( +clone -flip \) -compose Multiply -composite \
+            \( +clone -flop \) -compose Multiply -composite \
+            \) -alpha off -compose CopyOpacity -composite -compose over "$IMG"
+    fi
+
+    if [ $border_size -ge 3 ]; then
+        # Generate image info
+        convert "$IMG" \
+            -format 'roundrectangle 1,1 %[fx:w+4],%[fx:h+4] '"${rounded_corner}"','"${rounded_corner}"'' \
+            info: >$DIR/_rounded_.mvg
+
+        # Generate rounding masked
+        convert "$IMG" -border ${border_size} -alpha transparent \
+            -background none -fill white -stroke none -strokewidth 0 \
+            -draw "@"$DIR/_rounded_.mvg $DIR/_rounded_mask_.png
+
+        # Generate rounding overlay
+        convert "$IMG" -border ${border_size} -alpha transparent \
+            -background none -fill none -stroke ${color_fg} -strokewidth ${border_size} \
+            -draw "@"$DIR/_rounded_.mvg $DIR/_rounded_overlay_.png
+
+        # Set rounded corner & border
+        convert "$IMG" -alpha set -bordercolor none -border ${border_size} \
+            $DIR/_rounded_mask_.png -compose DstIn -composite \
+            $DIR/_rounded_overlay_.png -compose Over -composite \
+            "$IMG"
+    else
+        # Set rounded corner
+        convert "$IMG" \
+            \( +clone -alpha extract -draw 'fill black polygon 0,0 0,'"${rounded_corner}"' '"${rounded_corner}"',0 fill white circle '"${rounded_corner}"','"${rounded_corner}"' '"${rounded_corner}"',0' \
+            \( +clone -flip \) -compose Multiply -composite \
+            \( +clone -flop \) -compose Multiply -composite \
+            \) \
+            -alpha off \
+            -compose CopyOpacity -composite -compose over \
+            "$IMG"
+    fi
+
+    # Set image shadow
+    convert $IMG \
+        \( +clone -background black \
+        -shadow ${shadow_size} \) +swap -background none \
+        -layers merge +repage $IMG
+
+    # Set image border
+    convert "$IMG" \
+        -bordercolor ${background_color} \
+        -border ${background_size} \
+        "$IMG"
+
+    # Set image author if enabled
+    if [[ $add_author == true ]]; then
+        echo -n " ${author} " | convert $IMG \
+            -gravity "${author_position[0]}" -pointsize ${font_size} -fill ${color_fg} \
+            -undercolor ${color_bg} -font ${font} \
+            -annotate "${author_position[1]}" @- $IMG &&
+            convert $IMG -gravity South -chop 0x$((background_size / 2)) $IMG
+
+        # Add top bg
+        convert $IMG -gravity North -background ${background_color} \
+            -splice 0x$((background_size / 2)) $IMG
+
+    fi
+
+    # Set image profile
+    convert $IMG -profile ${color_profile} $IMG
+
+}
+
+_notify() {
+    MSG=$1
+    FILE=$TMP_IMG
+
+    if [ "$(_check_wm)" = "AWESOME" ]; then
+        awesome-client "
+        -- IMPORTANT NOTE: THIS PART OF THE SCRIPT IS LUA!
+        local naughty = require('naughty')
+        local awful = require('awful')
+        local beautiful = require('beautiful')
+        local dpi = beautiful.xresources.apply_dpi
+
+        local file = '${FILE}'
+        local message = '${MSG}'
+
+        local notify_send = function(msg, action)
+            if type(action) ~= 'table' then
+                action = {}
+            end
+            naughty.notification ({
+                app_name = 'screenshot',
+                icon = file,
+                timeout = 5,
+                title = '<b>Shot</b>',
+                message = msg,
+                actions = action or nil,
+            })
+        end
+
+        local save_image = naughty.action {
+            name = 'Save',
+            icon_only = false,
+        }
+
+        local rename_image = naughty.action {
+            name = 'Rename',
+            icon_only = false,
+        }
+
+        local open_image = naughty.action {
+            name = 'Open',
+            icon_only = false,
+        }
+
+        local open_folder = naughty.action {
+            name = 'Folder',
+            icon_only = false,
+        }
+
+        local delete_image = naughty.action {
+            name = 'Delete',
+            icon_only = false,
+        }
+
+        local to_clipboard = naughty.action {
+            name = 'Clip',
+            icon_only = false,
+        }
+
+        local prompt_rename_image = function()
+            awful.prompt.run {
+                prompt       = 'New File Name: ',
+                textbox      = awful.screen.focused().promptbox.widget,
+                history_path = awful.util.get_cache_dir() .. '/history',
+                exe_callback = function(new_name)
+                    if not new_name or #new_name == 0 then return end
+                    local old_file_name = file
+                    local new_file_name = '${SCREENSHOT_DIR}/'..new_name..'.png'
+                    awful.spawn('mv '..file..' '..new_file_name, false)
+                    file = new_file_name
+
+                    awesome.emit_signal('notifbox::deleted')
+
+                    -- notify_send('Image Renamed From <b>'..old_file_name..'</b> To <b>'..file..'</b>', {})
+                    notify_send('Image Renamed To <b>'..file..'</b>',{ open_image, open_folder, to_clipboard, rename_image, delete_image })
+                end
+            }
+        end
+
+        delete_image:connect_signal('invoked', function()
+            awesome.emit_signal('notifbox::deleted')
+            awful.spawn('rm '..file, false)
+            notify_send(file..' Deleted', {})
+        end)
+
+        save_image:connect_signal('invoked', function()
+            awesome.emit_signal('notifbox::deleted')
+            oldfile = file
+            file = '${SAVED_NAME}'
+            awful.spawn('cp '..oldfile..' '..file, false)
+            notify_send(message, { open_image, open_folder, to_clipboard, rename_image, delete_image })
+        end)
+
+        open_image:connect_signal('invoked', function()
+            awful.spawn('feh ' .. file, false)
+        end)
+
+        open_folder:connect_signal('invoked', function()
+            awful.spawn('xdg-open ' .. '${SCREENSHOT_DIR}', false)
+        end)
+
+        to_clipboard:connect_signal('invoked', function()
+            awful.spawn('xclip -selection clipboard -i '..file..' -t image/png', false)
+        end)
+
+        rename_image:connect_signal('invoked', function()
+            prompt_rename_image()
+        end)
+
+        notify_send(message, { open_image, to_clipboard, save_image, delete_image })
+        "
+    elif [ "$(_check_wm)" = "NOT_AWESOME" ]; then
+        notify-send --app-name=screenshot -i $FILE "Shot" "${MSG}"
+    fi
+}
+
+_shot() {
+    _clean
+    if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        case $1 in
+        normal) grimshot output $TMP_IMG || exit 1 ;;
+        select) grimshot area $TMP_IMG || exit 1 ;;
+        active) grimshot active $TMP_IMG || exit 1 ;;
+        delay)
+            notify-send -t $((1000 * 1)) --app-name=screenshot "Shot" "Screenshot Taken in ${sleep}s ..."
+            sleep $sleep &&
+                grimshot output $TMP_IMG || exit 1
+            ;;
+        esac
+    else
+        case $1 in
+        normal)
+            maim -m $quality $TMP_IMG || exit 1
+            # scrot -o -q $((10*$quality)) -p $TMP_FILE || exit 1
+            ;;
+        select)
+            if [ $use_custom_titlebar = true ]; then
+                maim -u -m $quality -s $TMP_IMG || exit 1
+                # scrot -o -q $((10*$quality)) -s $TMP_FILE || exit 1
+            else
+                maim -u -m $quality -n 0 -s $TMP_IMG || exit 1
+                # scrot -o -q $((10*$quality)) -b -s $TMP_FILE || exit 1
+            fi
+            ;;
+        active)
+            if [ $use_custom_titlebar = true ]; then
+                # maim -u -m $quality -i $(xdotool getactivewindow) $TMP_IMG || exit 1
+                scrot -o -q $((10 * quality)) -u $TMP_IMG || exit 1
+            else
+                # maim -u -m $quality -n 0 -i $(xdotool getactivewindow) $TMP_IMG || exit 1
+                scrot -o -q $((10 * quality)) -u -b $TMP_IMG || exit 1
+            fi
+            ;;
+        delay)
+            notify-send -t $((1000 * 1)) --app-name=screenshot "Shot" "Screenshot Taken in ${sleep}s ..."
+            maim -m $quality -d $sleep $TMP_IMG || exit 1
+            # scrot -o -q $((10*$quality)) -d $sleep $TMP_IMG || exit 1
+            ;;
+        esac
+    fi
+
+    if [ $titlebar_only_active = true ] || [ $use_custom_titlebar = true ]; then
+        if [ "$1" = "active" ]; then
+            add_titlebar=true
+            text="$(xdotool getwindowname "$(xdotool getactivewindow)")"
+        elif [ "$1" = "select" ]; then
+            add_titlebar=true
+            text="$(xdotool getwindowname "$(xdotool getactivewindow)")"
+        else
+            add_titlebar=false
+        fi
+    fi
+}
+
+image_to_text() {
+    IMG=/tmp/image-ocr.png
+    TXT=/tmp/shot-ocr
+
+    notify-send -t $((1000 * 3)) --app-name=screenshot "Shot" "Select Text To Scan"
+    maim -u -m 10 -s $IMG || exit 1
+
+    # Get with `tesseract --list-langs`
+    LANG_LIST='''
+    [
+        ["Indonesia", "ind"],
+        ["English", "eng"]
+    ]
+    '''
+    MENU=$(echo "$LANG_LIST" | jq -r ".[][0]" | $DMENU)
+    LANG=$(echo "$LANG_LIST" | jq -r ".[] | select(.[0] == \"$MENU\") | .[1]")
+
+    if [ -n "$LANG" ]; then
+
+        notify-send -t $((1000 * 3)) --app-name=screenshot "Shot" "Parse Image to Text"
+
+        # - Add white border
+        # - Remove Transparancy
+        convert $IMG \
+            -bordercolor White -border 10x10 \
+            -alpha off \
+            $IMG
+
+        tesseract \
+            -l "$LANG" \
+            --dpi 300 \
+            $IMG \
+            $TXT > /dev/null 2>&1
+
+        # https://unix.stackexchange.com/questions/587616/how-to-remove-the-empty-lines-in-a-file-in-linux
+        # Delete blankline
+        sed -i '/^[[:space:]]*$/d' $TXT.txt
+
+        result=$(cat $TXT.txt)
+        notify-send -t $((1000 * 3)) --app-name=screenshot "Shot" "Text Copied To Clipboard"
+        echo "$result" | xclip -selection clipboard
+
+        echo "$result"
+    fi
+}
+
+scan_qr(){
+    tmp_file=$(mktemp -t maimscript-XXXXXX)
+    maim -m 10 -s "$tmp_file" || exit
+    scanresult=$(zbarimg --quiet --raw "$tmp_file" | tr -d "\n")
+
+    if [ -z "$scanresult" ]; then
+        notify-send "Shot" "No scan data found"
+    else
+        echo "$scanresult" | xclip -selection clipboard
+        convert "$tmp_file" -resize 75x75 "$tmp_file"
+        notify-send -i "$tmp_file" "Shot" "$scanresult\n(Copied To Clipboard)"
+    fi
+
+    rm "$tmp_file"
+}
+
+noparse() {
+    case $1 in
+    full) _shot normal && _notify "Screenshot Acquired" ;;
+    active) _shot active && _notify "Screenshot Acquired" ;;
+    select) _shot select && _notify "Screenshot Acquired" ;;
+    delay) _shot delay && _notify "Screenshot Acquired" ;;
+    esac
+}
+
+parse() {
+    case $1 in
+    full) _shot normal && _parse && _notify "Screenshot Acquired" ;;
+    active) _shot active && _parse && _notify "Screenshot Acquired" ;;
+    select) _shot select && _parse && _notify "Screenshot Acquired" ;;
+    delay) _shot delay && _parse && _notify "Screenshot Acquired" ;;
+    esac
+}
+
+interactive() {
+    OPTIONS='''
+    [
+        ["Active",                  "parse active"],
+        ["Delay",                   "parse delay"],
+        ["Fullscreen",              "parse full"],
+        ["Select",                  "parse select"],
+        ["Image to Text",           "image_to_text"],
+        ["Active(N)",               "noparse active"],
+        ["Fullscreen(N)",           "noparse full"],
+        ["Delay(N)",                "noparse delay"],
+        ["Select(N)",               "noparse select"],
+        ["Scan QR",                 "scan_qr"]
+    ]
+    '''
+    menu=$(echo "$OPTIONS" | jq -r ".[][0]" | $DMENU)
+    $(echo "$OPTIONS" | jq -r ".[] | select(.[0] == \"$menu\") | .[1]")
+}
+
+OPT=${1:-interactive}
+case $OPT in
+-a | active) parse active ;;
+-d | delay) parse delay ;;
+-f | full) parse full ;;
+-s | select) parse select ;;
+-A | active_noparse) noparse active ;;
+-D | delay_noparse) noparse delay ;;
+-F | full_noparse) noparse full ;;
+-S | select_noparse) noparse select ;;
+-i | interactive) interactive ;;
+-o | --ocr) image_to_text ;;
+-q | --qr) scan_qr ;;
+esac

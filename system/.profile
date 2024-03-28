@@ -42,7 +42,13 @@ export TERMINFO="${XDG_DATA_HOME:-$HOME/.local/share}/terminfo"
 # export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
 
 # ========================================== Apss
-export QT_QPA_PLATFORM="wayland;xcb"
+# export QT_QPA_PLATFORM=gnome
+# export QT_QPA_PLATFORM="wayland;xcb"
+export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME=qt6ct
+# export QT_STYLE_OVERRIDE=adwaita
+# export QT_WAYLAND_DECORATION=adwaita
+# export GTK_USE_PORTAL=1
 
 # -------- CLI
 export EDITOR="nvim"
