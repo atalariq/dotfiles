@@ -19,9 +19,14 @@ Place to backup my linux configurations
 
 Add `chaotic-aur` repository first: https://aur.chaotic.cx/
 
+Then install `yay` or `paru` or any AUR Wrapper!
+```bash
+sudo pacman -S yay
+```
+
 ### GNOME
 ```bash
-sudo pacman -S gnome gdm \
+yay -S gnome gdm \
   gnome-calculator gnome-calendar gnome-photos gnome-console \
   gnome-tweaks extension-manager-git \
   gnome-shell-extensions \
@@ -33,7 +38,10 @@ sudo pacman -S gnome gdm \
 
 ### Hyprland
 ```bash
-sudo pacman -S hyprland swww waybar \
+yay -S \
+  hyprland-git \
+  hypridle hyprlock \
+  swww waybar \
   hyprpicker-git grimblast-git \
   dunst polkit-gnome \
   wdisplays kanshi \
@@ -47,10 +55,10 @@ sudo pacman -S hyprland swww waybar \
 
 #### GUI
 ```bash
-sudo pacman -S \
+yay -S \
   google-chrome \
   obsidian anki \
-  evince koodo-reader-bin \
+  evince \
   libreoffice-still \
   mpv spotify \
   telegram-desktop element-desktop vesktop \
@@ -59,7 +67,7 @@ sudo pacman -S \
 
 #### CLI/TUI
 ```bash
-sudo pacman -S \
+yay -S \
   kitty \
   stow \
   neovim \
@@ -75,7 +83,7 @@ sudo pacman -S \
 
 #### Games
 ```bash
-sudo pacman -S \
+yay -S \
   itch-setup-bin \
   mcpelauncher-linux-git \
   osu-lazer
@@ -83,7 +91,7 @@ sudo pacman -S \
 
 #### Fonts
 ```bash
-sudo pacman -S \
+yay -S \
   adobe-source-han-sans-cn-fonts adobe-source-han-sans-jp-fonts adobe-source-han-sans-kr-fonts \
   inter-font noto-fonts noto-fonts-emoji \
   ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-common ttf-nerd-fonts-symbols-mono
@@ -91,7 +99,7 @@ sudo pacman -S \
 
 #### System
 ```bash
-sudo pacman -S \
+yay -S \
   android-tools android-udev \
   cups cups-filters cups-pk-helper gutenprint system-config-printer \
   pipewire pipewire-alsa wireplumber \

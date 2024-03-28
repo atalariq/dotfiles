@@ -11,5 +11,6 @@ stow --dir $SOURCE --target $TARGET -R system-archlinux
 stow --dir $SOURCE --target $TARGET -R misc-script
 stow --dir $SOURCE --target $TARGET -R misc-startpage
 stow --dir $SOURCE --target $TARGET -R wm-hyprland
+stow --dir $SOURCE --target $TARGET -R wm-gnome
 
 
