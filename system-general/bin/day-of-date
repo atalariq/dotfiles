@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#
+# Program:
+# Calculate the Day of the Week from Any Date
+#
+# Source:
+# https://artofmemory.com/blog/how-to-calculate-the-day-of-the-week/
+#
+
+# Formula:
+# - `(Date Number + Month Code + Year Code + Leap Year Code + Century Code) mod 7`
+# - Result:
+#   - 0 = Sunday
+#   - 1 = Monday
+#   - 2 = Tuesday
+#   - 3 = Wednesday
+#   - 4 = Thursday
+#   - 5 = Friday
+#   - 6 = Saturday
+# - Date Number    : date number of the month
+# - Month Code     : `033614625035`
+#   - January   = 0
+#   - February  = 3
+#   - March     = 3
+#   - April     = 6
+#   - May       = 1
+#   - June      = 4
+#   - July      = 6
+#   - August    = 2
+#   - September = 5
+#   - October   = 0
+#   - November  = 3
+#   - December  = 5
+# - Year Code      : `(YY + (YY div 4)) mod 7`
+# - Leap Year Code :
+#   - `isLeapYear ? 1 : 0`
+#   - Greogorian : `(YYYY mod 4 && !(YYYY mod 100)) || (YYYY mod 400)`
+#   - Julian     : `YYYY mod 4`
+# - Century Code   :
+#   - Greogorian : `4206420`
+#     - 1700s = 4
+#     - 1800s = 2
+#     - 1900s = 0
+#     - 2000s = 6
+#     - 2100s = 4
+#     - 2200s = 2
+#     - 2300s = 0
+#   - Julian     : `(18 - (YYYY div 100)) mod 7`
+
+
+# User input:
+# 1. Date
+# 2. Month
+# 3. Year
+
+echo "You Suck!"
+

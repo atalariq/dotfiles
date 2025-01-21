@@ -1,0 +1,63 @@
+#!/bin/sh
+#
+# @file mpvc-autostart
+# @description mpvc auto pause/resume audio based on device presence
+# @author gmt4 <gmt4 at github.com> (c) Copyright 2022 GPLv2+
+# @url github.com/gmt4/mpvc
+#
+
+PROGNAME=${0##*/}
+PROGVERSION="v1.5"
+PROGAUTHOR=gmt4
+PROGURL="https://github.com/gmt4/mpvc"
+
+set -euf
+
+mpvc_pingcheck() { ping -w 5 -c 5 $@ | awk 'NR == 2 && /time=/ { sub(":.*time=",": time="); print }'; }
+mpvc_btcheck()   { hcitool scan | awk "/$@/ {print}"; }
+
+# monitor presence of your phone (eg LAN IP/BT): if device is present resume audio, otherwise, pause audio.
+mpvc_autoscan()
+{
+    [ $# -le 0 ] && exit
+    target="$1"
+    CHECK=${CHECK:-mpvc_pingcheck}
+    PERIOD=${PERIOD:-300}
+    NCHECK=${NCHECK:-3}
+    MPVC_HOURMIN=${MPVC_HOURMIN:-4}
+    MPVC_HOURMAX=${MPVC_HOURMAX:-20}
+    ncheck=0
+
+    echo "# $PROGNAME $@ CHECK=$CHECK PERIOD=$PERIOD NCHECK=$NCHECK"
+    while sleep ${PERIOD}
+    do
+        hour=$(date +%_H)
+        pause=$(mpvc -q get pause || true)
+        check=$($CHECK $target)
+        echo "# $(date -Imin) PERIOD=$PERIOD NCHECK=$NCHECK pause=$pause c=${#check} n=${ncheck} $check" # $@
+        if [ "$hour" -ge ${MPVC_HOURMIN} -a "$hour" -lt ${MPVC_HOURMAX} ]
+        then
+            ncheck=$(( ( $ncheck $(if [ -n "$check" ]; then echo +; else echo -; fi) 1 ) % ( $NCHECK + 1 ) ))
+            case "$ncheck" in
+            $NCHECK|2|1) mpvc -q resume;; # +n pings up: resume
+            -$NCHECK)    mpvc -q pause ;; # -n pings down: pause
+            esac
+        fi
+    done
+}
+
+usage()
+{
+    echo "usage: $PROGNAME args # @version $PROGVERSION (c) $PROGAUTHOR $PROGURL"
+    echo "example: $PROGNAME 192.168.0.2 # your tablet/phone LAN IP";
+    exit;
+}
+
+main()
+{
+    [ $# -lt 1 ] && usage
+
+    mpvc_autoscan "$@"
+}
+
+main "$@"

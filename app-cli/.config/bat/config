@@ -5,7 +5,9 @@
 # Specify desired highlighting theme (e.g. "TwoDark"). Run `bat --list-themes`
 # for a list of all available themes
 #--theme="gruvbox"
---theme="base16"
+# --theme="base16"
+# --theme="Catppuccin Mocha"
+# --theme="Catppuccin Latte"
 
 # Enable this to use italic text on the terminal. This is not supported on all
 # terminal emulators (like tmux, by default):
@@ -25,5 +27,5 @@
 #--map-syntax "*.ino:C++"
 #--map-syntax ".ignore:Git Ignore"
 
---style="plain"
---pager 'less -rf'
+# --style="plain"
+# --pager 'less -rf'

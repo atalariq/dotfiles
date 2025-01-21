@@ -1,0 +1,34 @@
+#!/bin/bash
+
+OPT=${1}
+case $OPT in
+  dark)
+    # pywal
+    wal --vte --theme catppuccin-mocha
+
+    # neovim theme
+    nvim --remote --server /run/user/1000/nvim* --remote-send ":set background=dark<CR>"
+    nvim --remote --server /run/user/1000/nvim* --remote-send ":colorscheme catppuccin-mocha<CR>"
+    
+    # gnome brightness
+    gdbus call --session --dest org.gnome.SettingsDaemon.Power \
+      --object-path /org/gnome/SettingsDaemon/Power \
+      --method org.freedesktop.DBus.Properties.Set \
+      org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 30>"
+    ;;
+  light)
+    # pywal
+    # wal --vte -l --theme catppuccin-latte
+    wal --vte -l --theme gruvbox
+
+    # neovim theme
+    nvim --remote --server /run/user/1000/nvim* --remote-send ":set background=light<CR>"
+    nvim --remote --server /run/user/1000/nvim* --remote-send ":colorscheme gruvbox<CR>"
+
+    # gnome brightness
+    gdbus call --session --dest org.gnome.SettingsDaemon.Power \
+      --object-path /org/gnome/SettingsDaemon/Power \
+      --method org.freedesktop.DBus.Properties.Set \
+      org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 20>"
+    ;;
+esac

@@ -8,25 +8,7 @@ set -gx VISUAL $EDITOR
 set -gx SUDO_EDITOR $EDITOR
 
 # Fish
-set -g fish_greeting
-set -U fish_emoji_width 2
-
-# Path
-fish_add_path ~/bin
-fish_add_path ~/.local/bin
-fish_add_path ~/.cargo/bin
-fish_add_path ~/.local/share/fnm
-fish_add_path ~/.local/sdk/flutter/bin
-
-set -gx DENO_INSTALL "~/.deno"
-fish_add_path $DENO_INSTALL/bin
-
-# Go
-set -Ux GOPATH ~/.go
-fish_add_path $GOPATH/bin
-
-set -Ux BUN_INSTALL ~/.bun
-fish_add_path $BUN_INSTALL/bin
+set -U fish_greeting
 
 # Commands to run in interactive sessions can go here
 if status is-interactive
@@ -36,12 +18,11 @@ if status is-interactive
     # Start zoxide (https://github.com/ajeetdsouza/zoxide)
     zoxide init fish | source
 
-    # Start fnm (https://github.com/Schniz/fnm)
-    fnm env --use-on-cd | source
-
     # Bindings
     bind \en down-or-search
     bind \ep up-or-search
-
 end
 
+
+# Created by `pipx` on 2024-10-11 12:57:14
+set PATH $PATH /home/atalariq/.local/bin
