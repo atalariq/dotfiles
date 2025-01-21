@@ -1,0 +1,360 @@
+#!/bin/sh
+#
+# @file mpvc-fzf
+# @description mpvc fzf, mpv terminal user interface
+# @author gmt4 <gmt4 at github.com> (c) Copyright 2022 GPLv2+
+# @url github.com/gmt4/mpvc
+#
+
+PROGNAME=${0##*/}
+PROGDIR=${0%/*}
+PROGVERSION="v1.5"
+PROGAUTHOR=gmt4
+PROGURL="https://github.com/gmt4/mpvc"
+
+set -euf
+
+quiet()  { "$@" > /dev/null 2>&1; }
+mpvcfzf_warn() { echo "$@" >&2; }
+mpvcfzf_awk0() { awk '{print $NF}'; }
+mpvcfzf_awk1() { awk '{print $1}'; }
+mpvc() { "$PROGDIR/mpvc" "$@" || mpvc "$@"; }
+
+# Set defaults
+mpvcfzf_defaults()
+{
+    XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-"$HOME/.config"}
+    MPVC_CONFIG="${MPVC_CONFIG:-$XDG_CONFIG_HOME/mpvc/mpvc.conf}"
+    MPVC_YTDL_ARCHIVE=${MPVC_YTDL_ARCHIVE:-}
+    MPVC_YTDL_OUTPUT=${MPVC_YTDL_OUTPUT:-}
+    MPVC_TERM=${MPVC_TERM:-xterm}
+}
+
+mpvcfzf_config()
+{
+    mpvcfzf_defaults
+    # if present load user config
+    if [ -r "$MPVC_CONFIG" ];
+    then
+        . "$MPVC_CONFIG"
+    fi
+    if ! quiet command -v fzf; then
+        mpvcfzf_warn "$PROGNAME: Warning: No fzf, Install to get fuzzy media search & play support!"
+        sleep 1
+    fi
+}
+
+mpvcfzf_preview()
+{
+    MPVC_FZF_BIND_HELP="C-x:list C-v:yt-dlp C-\\:local C-s:chapter C-t:add C-o:play C-r:reload C-spc:toggle"
+    #--bind='ctrl-d:execute-silent(mpvc seek -20 &)'
+
+    # fzf keys: ctrl + [dorstxv\]
+    fzf \
+        --ansi --reverse --no-sort \
+        --multi \
+        \
+        --header="$PROGNAME help: $MPVC_FZF_BIND_HELP" \
+        --bind='ctrl-space:execute-silent(mpvc toggle &)' \
+        --bind='ctrl-t:execute-silent(mpvc add {+1} &)' \
+        --bind='ctrl-s:execute(mpvc-fzf -c)' \
+        --bind='ctrl-x:execute(mpvc-fzf -f {q})' \
+        --bind='ctrl-v:execute(mpvc-fzf -p {q})' \
+        --bind='ctrl-\:execute(mpvc-fzf -l)' \
+        \
+        --preview-window='up:5' \
+        --preview="mpvc" \
+        "$@"
+}
+
+mpvcfzf_isearch()
+{
+    url_host="${url_host:-yewtu.be}"
+    url_sort="sort=relevance" # relevance views date
+    url_query="q=$(for f in $@; do printf "%s+" "$f"; done)"
+    url_search="https://${url_host}/search?$url_query&$url_sort"
+
+    echo "$url_search"
+    curl -fsSL -A 'Mozilla/5.0' "$url_search&page=1" "$url_search&page=2" |
+    awk '
+        /^.*<p dir="auto">/ {
+            gsub("^.*<p dir=\"auto\">",""); gsub("</p>.*$",""); vtitle=$0
+        }
+        /<p class="video-data" dir="auto">/ {
+            gsub("^ *<p class=\"video-data\" dir=\"auto\">",""); gsub(" views",""); gsub("</p>",""); shared=$0
+        }
+        /^ *<p class="length">/ {
+            gsub("^ *<p class=\"length\">",""); gsub("</p>",""); vlength=$0
+        }
+        /^ *<a title="Audio mode/ {
+            gsub("^ *<a title=\"Audio mode\" href=\"",""); gsub("\">","");
+            gsub("/watch\\?v=", "https://yewtu.be/"); gsub("&listen=1","");
+            printf "%s %4s %7s %s\n", $0, shared, vlength, vtitle
+        }
+
+        END {
+            if (NR == 0)
+            {
+                print "Error: No results found, maybe yewtu.be is down, try switching to a different instance with:"
+                print "       url_host=invidious.projectsegfau.lt mpvc-fzf"
+            }
+        }
+    '
+}
+
+mpvcfzf_nextvideo()
+{
+    id="${1##https://yewtu.be/}"
+    output=$(curl -fsSL -A '' "https://yewtu.be/watch?v=$id")
+    next_video=$(echo "$output" | awk '/next_video/ {gsub("[\",]",""); print $2}')
+    next_url="https://yewtu.be/$next_video"
+    echo "$next_url"
+}
+
+mpvcfzf_icache_ytdlro() { mpvc getr ytdl-raw-options; }
+mpvcfzf_icache_output() { mpvcfzf_icache_ytdlro | jq -r ".data.output"; }
+mpvcfzf_icache_output_dir() { eval echo $( dirname $(mpvcfzf_icache_output) ); }
+mpvcfzf_icache_archive() { mpvcfzf_icache_ytdlro | jq -r ".data.download-archive"; }
+
+mpvcfzf_icache()
+{
+    # check for media present in local cache
+    if [ -n "$MPVC_YTDL_ARCHIVE" -a -n "$MPVC_YTDL_OUTPUT" ]; then
+        ytdl_archive="$MPVC_YTDL_ARCHIVE"
+        ytdl_output="$MPVC_YTDL_OUTPUT"
+        ytdl_dir="$MPVC_YTDL_OUTPUT"
+    else
+        quiet mpvc get ytdl-raw-options || cat
+        ytdl_json=$(mpvc getr ytdl-raw-options)
+        ytdl_archive=$(echo $ytdl_json | jq -r '.data."download-archive"')
+        ytdl_output=$(echo $ytdl_json | jq -r ".data.output")
+        ytdl_archive=$(eval echo $ytdl_archive)
+        ytdl_dir=$(dirname $ytdl_output)
+        ytdl_dir=$(eval echo $ytdl_dir)
+    fi
+    if [ ! -n "$ytdl_output" -o ! -r "$ytdl_archive" -o ! -n "$ytdl_output" ]; then
+        mpvcfzf_warn "$PROGNAME: Error cache not enabled: undefined ytdl-raw-options"
+        if cat; then return; fi
+    fi
+
+    while read -r line
+    do
+        url=$(echo "$line" | awk '/https:/ { gsub("watch\\?v=",""); print $1 }')
+        vid=$(basename "$url")
+        file=$(find $ytdl_dir/ 2>/dev/null | awk "/$vid/ { print; exit }")
+        if [ -n "$url" -a -e "$file" ]; then # quiet grep -q "$vid" $ytdl_archive
+            echo "$file"
+        else
+            echo "$line"
+        fi
+    done
+}
+
+mpvcfzf_fetch()
+{
+    if [ $# -lt 1 ]; then mpvcfzf_usage; fi
+
+    ytdl_opts=""
+    ytdlp=$(command -v youtube-dl || command -v yt-dlp)
+    if [ ! -x "$ytdlp" ]; then
+        mpvcfzf_warn "$PROGNAME: Warning: No yt-dlp, Install to get ytdl support!"
+    fi
+
+    mpvc -q --mpv
+
+    ytdl_json=$(mpvc getr ytdl-raw-options)
+    if [ -z "$ytdl_json" ]; then
+        mpvcfzf_warn "$PROGNAME: Error ytdl-raw-options not set. Check docs/mpv.conf"
+        return
+    fi
+    for option in $(echo "$ytdl_json" | jq -r ".data | keys | .[]")
+    do
+        value=$(echo "$ytdl_json" | jq -r ".data.\"$option\"")
+        if [ -n "$value" ]
+        then
+            ytdl_opts="$ytdl_opts --$option=$value"
+        else
+            ytdl_opts="$ytdl_opts --$option"
+        fi
+    done
+    "$ytdlp" $ytdl_opts ${YTDL_OPTS:-} "$@"
+}
+
+mpvcfzf_fetch_remove()
+{
+    if [ -z "$1" ]; then
+        mpvcfzf_warn "$PROGNAME: Error missing ytdl-video-id to remove"
+        return
+    fi
+    ytdl_id="$1"
+
+    ytdl_json=$(mpvc getr ytdl-raw-options)
+    ytdl_archive=$(echo $ytdl_json | jq -r '.data."download-archive"')
+    ytdl_output=$(echo $ytdl_json | jq -r ".data.output")
+    ytdl_archive=$(eval echo $ytdl_archive)
+    ytdl_dir=$(dirname $ytdl_output)
+    ytdl_dir=$(eval echo $ytdl_dir)
+
+    if [ -z "$ytdl_json" -o ! -r "$ytdl_archive" -o ! -n "$ytdl_output" ]; then
+        mpvcfzf_warn "$PROGNAME: Error cache not enabled: undefined ytdl-raw-options"
+        return
+    fi
+
+    rm -i "$(find "$ytdl_dir" | grep "$ytdl_id")"
+    sed -i "/$ytdl_id/ s|^|#|" "$ytdl_archive"
+}
+
+mpvcfzf_iplay()
+{
+    mpvcfzf_isearch "$1" |
+        mpvcfzf_preview --prompt="(youtube) " |
+            mpvcfzf_awk1
+}
+
+mpvcfzf_local()
+{
+    find . -type f,d | sort |
+        mpvcfzf_preview --prompt="(local) " |
+            mpvc load
+}
+
+mpvcfzf_playlist()
+{
+    len=$(mpvc gets playlist-count)
+    ( if [ -z "$len" ]; then echo; else mpvc fullplaylist; fi) |
+        mpvcfzf_preview --prompt="(playlist) " \
+        --bind='ctrl-o:execute-silent(mpvc play {n} &)' \
+        --bind='ctrl-r:reload(mpvc fullplaylist)'
+}
+
+mpvcfzf_chapterlist()
+{
+    len=$(mpvc gets chapter-list/count)
+    ( if [ -z "$len" ]; then echo; else mpvc chapter-list-full; fi) |
+        mpvcfzf_preview --prompt="(chapter) " \
+        --bind='ctrl-o:execute-silent(mpvc set chapter {n} &)' \
+        --bind='ctrl-r:reload(mpvc mpvc chapter-list-full)'
+}
+
+mpvcfzf_stashlist()
+{
+    mpvc stash list | mpvcfzf_awk0 |
+        mpvcfzf_preview --prompt="(stash) " \
+        --bind='ctrl-o:execute-silent(mpvc stash apply {+} &)' \
+        --bind='ctrl-r:reload(mpvc stash list | mpvc-fzf -0)'
+}
+
+mpvcfzf_ddg_play()
+{
+    mpvcfzf_ddg "$@" |
+        mpvcfzf_preview --prompt="(ddg) " |
+            mpvcfzf_awk1 |
+                mpvc load
+}
+
+mpvcfzf_ddg()
+{
+    url_search="https://duckduckgo.com/html?q=$*&iax=videos"
+
+    echo "$url_search"
+    curl -fsSL -A 'Mozilla/5.0' "$url_search" |
+        awk  '
+            function urldecode(url)
+            {
+                for (y=0; y < 127; y++)
+                {
+                    if (y != 37)
+                        gsub(sprintf("%%%02x|%%%02X", y, y), y==38 ? "\\&" : sprintf("%c", y), url);
+                    gsub(/%25/, "%", url);
+                }
+                return url
+            }
+
+            /result__a/ {
+                gsub("<a rel=\"nofollow\" class=\"result__a\" href=\"//duckduckgo.com/l/\\?uddg=", "");
+                gsub("&amp", "\\&");
+                gsub("rut=[0-9a-f]+","");
+                gsub("\">", " ");
+                gsub("</a>","");
+
+                gsub("%3A",":"); gsub("%2F","/"); gsub("%3F","?"); gsub("%3D","=");
+                gsub("^ *","");
+                #print urldecode($0)
+                print
+            }'
+}
+
+mpvcfzf_urlbrowse()
+{
+    url=${1:-https://localhost:8443/ytdl-archive/}
+
+    curl -k -fsSL "$url" |
+        awk '/<a href=".*">.*<\/a>/ { h=$0;sub("^.*href=\"","",h);sub("\".*$","",h);print h }' |
+        mpvcfzf_preview |
+        awk -v url="$url" '{ print url$0 }'
+}
+
+mpvcfzf_version()
+{
+    echo "usage: $PROGNAME -[optflags] args # @version $PROGVERSION (c) $PROGAUTHOR $PROGURL"
+}
+
+optflags="01ab:cCd:fFg:G:hk:K:n:s:p:P:o:Or:lxv"
+mpvcfzf_usage()
+{
+    echo "usage: $PROGNAME -[$optflags] args # @version $PROGVERSION (c) $PROGAUTHOR $PROGURL"
+    echo "  -b : Browse the provided ytdl-archive URL with fzf (fzf*)"
+    echo "  -c : Start fzf to manage the current mpv chapterlist (fzf*)"
+    echo "  -d : Set the WD to the media directory given as argument"
+    echo "  -f : Start fzf to manage the current mpv playist (fzf*)"
+    echo "  -g : Fetch the given YT URL, and store locally (fzf*)"
+    echo "  -G : Search on Invidious, fetch, and store locally (fzf*)"
+    echo "  -k : Search & play DuckDuckGo videos (fzf*)"
+    echo "  -K : Search DuckDuckGo videos (fzf*)"
+    echo "  -l : Search & play local media (fzf*)"
+    echo "  -s : Search on Invidious (fzf*)"
+    echo "  -p : Search & play media found using Invidious (fzf*)"
+    echo "  -x : Starts $PROGNAME in a new $MPVC_TERM (config \$MPVC_TERM) [combine -x with $optflags]"
+    echo "*tips: If unsure about where to begin, start with: $PROGNAME -p 'kupla mirage'"
+    exit;
+}
+
+main()
+{
+    mpvcfzf_config
+    if [ $# -lt 1 ]; then mpvcfzf_usage; fi
+
+    while getopts "$optflags" flag;
+    do
+        case "$flag" in
+        0) shift; mpvcfzf_awk0;;
+        1) shift; mpvcfzf_awk1;;
+
+        a) mpvcfzf_stashlist ;;
+        b) mpvcfzf_urlbrowse "$OPTARG" ;;
+        c) mpvcfzf_chapterlist ;;
+        C) shift; mpvcfzf_icache;;
+        d) MPVC_DIR="$OPTARG"; cd "$MPVC_DIR" || return;;
+        f) mpvcfzf_playlist ;;
+        F) shift; mpvcfzf_preview "$@" ;;
+        g) mpvcfzf_fetch "$OPTARG";;
+        G) mpvcfzf_fetch $(mpvcfzf_iplay "$OPTARG") ;;
+        k) mpvcfzf_ddg_play "$OPTARG";;
+        K) mpvcfzf_ddg "$OPTARG";;
+        h) mpvcfzf_usage ;;
+        l) mpvcfzf_local ;;
+        n) mpvcfzf_nextvideo "$OPTARG" ;;
+        o) mpvcfzf_isearch "$OPTARG" | awk 'NR==2 {print}' ;;
+        O) mpvcfzf_icache_output_dir ;;
+        r) mpvcfzf_fetch_remove "$OPTARG" ;;
+        p) mpvcfzf_iplay "$OPTARG" | mpvc load ;;
+        P) mpvcfzf_iplay "$OPTARG" | mpvc loadc ;;
+        s) mpvcfzf_isearch "$OPTARG";;
+        x) shift; if quiet command -v $MPVC_TERM; then $MPVC_TERM -e "$0" "$@"; fi; exit;;
+        v) mpvcfzf_version ;;
+        *) mpvcfzf_usage ;;
+        esac
+    done
+}
+
+main "$@"

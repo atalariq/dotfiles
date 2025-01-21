@@ -30,8 +30,20 @@ function nvim-set-default
 end
 
 # --------------------------------------------------------------------------------------
-abbr nvims nvim-switcher
-abbr nvimsd nvim-set-default
+
+function nvim-fzf
+    set file (fzf --reverse --preview 'bat --style=numbers --color=always --line-range :500 {}')
+
+    if [ -z $file ]
+        echo "Nothing selected"
+        return
+    end
+    nvim "$file"
+end
+
 # --------------------------------------------------------------------------------------
 abbr e "NVIM_APPNAME=$NVIM_APPNAME nvim"
-abbr edit "NVIM_APPNAME=$NVIM_APPNAME nvim"
+abbr ns nvim-switcher
+abbr nsd nvim-set-default
+abbr nf nvim-fzf
+abbr ef nvim-fzf

@@ -21,22 +21,11 @@ abbr lt "exa --icons --group-directories-first -T"
 abbr tree "exa --icons --group-directories-first -T"
 
 # neofetch
+abbr f "neofetch --config none"
 abbr fetch "neofetch --config none"
 
-# fzf/skim
+# fzf
 abbr fzfp "fzf --reverse --preview 'bat --style=numbers --color=always --line-range :500 {}'"
-
-# ============== file manager {{{
-
-### nnn
-# abbr n nnncd
-# abbr fm nnn
-
-### yazi
-abbr y yazi
-abbr fm yazi
-
-# }}}
 
 # git {{{
 abbr g git

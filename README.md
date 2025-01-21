@@ -1,6 +1,9 @@
 # dotfiles
 Place to backup my linux configurations
 
+> DISCLAIMER!
+> 
+> This README is old, so many information is not relevant anymore. DWYOR!
 
 ## Info
 

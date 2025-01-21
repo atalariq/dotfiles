@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Stop mpd and mpd-mpris using systemctl
+systemctl --user stop mpd.service mpd-mpris.service

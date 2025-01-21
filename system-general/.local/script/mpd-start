@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Start mpd and mpd-mpris using systemctl
+systemctl --user start mpd.service mpd-mpris.service
