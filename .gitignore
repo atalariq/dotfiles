@@ -5,3 +5,5 @@ state.*
 watch_laters/*
 lyrics/*
 playlist/*
+app-cli/.config/nvim-LazyVim/lazy-lock.json
+app-cli/.config/fish/fish_variables

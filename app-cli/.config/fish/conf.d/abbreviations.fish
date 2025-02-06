@@ -13,12 +13,12 @@ abbr trm "gio trash"
 abbr trs "gio trash --restore"
 
 # exa/eza
-abbr ll "exa --icons --group-directories-first -lgh"
-abbr lla "exa --icons --group-directories-first -algh"
-abbr ls "exa --icons --group-directories-first"
-abbr lsa "exa --icons --group-directories-first -a"
-abbr lt "exa --icons --group-directories-first -T"
-abbr tree "exa --icons --group-directories-first -T"
+abbr ll "eza --icons --group-directories-first -lgh"
+abbr lla "eza --icons --group-directories-first -algh"
+abbr ls "eza --icons --group-directories-first"
+abbr lsa "eza --icons --group-directories-first -a"
+abbr lt "eza --icons --group-directories-first -T"
+abbr tree "eza --icons --group-directories-first -T"
 
 # neofetch
 abbr f "neofetch --config none"
@@ -30,18 +30,15 @@ abbr fzfp "fzf --reverse --preview 'bat --style=numbers --color=always --line-ra
 # git {{{
 abbr g git
 abbr ga "git add"
-abbr gb "git branch"
-abbr gc "git config"
 abbr gcl "git clone --depth 1"
 abbr gcm "git commit -m"
 abbr gco "git checkout"
 abbr gcb "git checkout -b"
 abbr gl "git pull"
 abbr gp "git push"
-abbr gr "git remove"
 abbr gs "git status"
 
-abbr lg lazygit
+abbr lg "lazygit"
 # }}}
 
 # systemctl {{{
