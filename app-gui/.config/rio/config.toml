@@ -49,7 +49,7 @@ padding-y = [8, 8]
 # Default is `1.0`
 #
 # Example:
-line-height = 1.25
+# line-height = 1.25
 
 # Startup directory
 #
@@ -59,7 +59,7 @@ line-height = 1.25
 # This configuration only has effect if use-fork is disabled.
 #
 # Example:
-working-dir = "/home/atalariq/"
+# working-dir = "/home/atalariq/"
 
 # Environment variables
 #
