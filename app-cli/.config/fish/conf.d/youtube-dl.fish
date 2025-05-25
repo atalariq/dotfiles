@@ -5,13 +5,14 @@ abbr yt "$YT_DL"
 # List all Format
 abbr ytf "$YT_DL --cookies-from-browser brave --list-formats"
 
-# Subtitle
-abbr yts "$YT_DL --convert-subs vtt --write-auto-subs --skip-download"
-
 # Video
-abbr ytv "$YT_DL --output '%(title)s by %(uploader)s.%(ext)s' --no-playlist --embed-metadata --xattrs --embed-thumbnail --embed-chapters --write-auto-subs --embed-subs -f 'ba+bv'"
-abbr ytp "$YT_DL -o '%(playlist_index)s %(title)s.%(ext)s' --ignore-errors --continue --no-overwrites --download-archive 0-LIST.txt --yes-playlist --embed-metadata --xattrs --embed-thumbnail  --embed-chapters --write-auto-subs --embed-subs -f 'ba+bv'"
+set -l VIDEO_FLAG "--ignore-errors --continue --no-overwrites --embed-metadata --xattrs --embed-chapters --write-auto-subs --embed-subs --merge-output-format mkv -f \"bestvideo[vcodec^=av01][ext=mp4][height<=1080]+bestaudio[acodec^=opus]/bestvideo[vcodec^=vp9][ext=mp4][height<=1080]+bestaudio[acodec^=opus]/best\""
+
+abbr ytv "$YT_DL --output '%(title)s by %(uploader)s.%(ext)s' --no-playlist $VIDEO_FLAG"
+abbr ytp "$YT_DL -o '%(playlist_index)s %(title)s.%(ext)s' --download-archive 0-LIST.txt --yes-playlist $VIDEO_FLAG"
 
 # Music
-abbr ytm "$YT_DL -o '%(title)s.%(ext)s' --no-playlist --embed-metadata --embed-thumbnail --xattrs --extract-audio --audio-quality 0 --audio-format opus"
-abbr ytmp "$YT_DL -o '%(title)s.%(ext)s' --ignore-errors --continue --no-overwrites --download-archive 0-LIST.txt --yes-playlist --embed-metadata --embed-thumbnail --xattrs --extract-audio --audio-quality 0 --audio-format opus"
+set -l MUSIC_FLAG "--ignore-errors --continue --no-overwrites --embed-metadata --embed-thumbnail --xattrs --extract-audio --audio-format best --audio-quality 0 -f bestaudio"
+
+abbr ytm "$YT_DL -o '%(title)s.%(ext)s' --no-playlist $MUSIC_FLAG"
+abbr ytmp "$YT_DL -o '%(title)s.%(ext)s' --download-archive 0-LIST.txt --yes-playlist $MUSIC_FLAG"

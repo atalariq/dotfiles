@@ -20,4 +20,4 @@
 # --embed-chapters
 
 # Subtitle Settings
-# --sub-langs "en.*,id"
+# --sub-langs "en,id"

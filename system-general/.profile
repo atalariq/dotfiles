@@ -17,7 +17,7 @@ export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
 export EDITOR="nvim"
 export VISUAL=$EDITOR
 export SUDO_EDITOR=$EDITOR
-export SUDO_PROMPT="$(tput bold setab 1 setaf 0)(sudo)$(tput sgr0) $(tput setaf 6)password for$(tput sgr0) $(tput setaf 3)%p$(tput sgr0): "
+# export SUDO_PROMPT="$(tput bold setab 1 setaf 0)(sudo)$(tput sgr0) $(tput setaf 6)password for$(tput sgr0) $(tput setaf 3)%p$(tput sgr0): "
 
 # ================================ PATH {{{
 TO_PATH() {

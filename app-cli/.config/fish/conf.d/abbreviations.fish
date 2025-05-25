@@ -1,16 +1,18 @@
-# abbreviations.fish
-
-# base
+# basic
 abbr c clear
 abbr cls clear
 abbr se sudoedit
 
 # trash
-abbr rmm rm
+abbr rmm "rm -rv"
 abbr rm "gio trash"
 abbr trl "gio trash --list"
 abbr trm "gio trash"
 abbr trs "gio trash --restore"
+
+# Source: https://www.baeldung.com/linux/delete-empty-files-dirs
+abbr rm-empty-files "find . -type f -empty -print -delete"
+abbr rm-empty-folders "find . -type d -empty -print -delete"
 
 # exa/eza
 abbr ll "eza --icons --group-directories-first -lgh"
