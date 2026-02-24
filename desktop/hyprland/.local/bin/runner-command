@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cmd="$(rofi  -location 2 -dmenu -p 'Command' -l 0)"
+command=${cmd%% *}
+
+if command -v $command >/dev/null 2>&1; then
+    sh -c "$cmd"
+else
+    notify-send "Run" "'$command' command is not in \$PATH!"
+fi

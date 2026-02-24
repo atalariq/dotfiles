@@ -1,0 +1,23 @@
+# vim: ft=conf commentstring=#%s :
+
+#--------------------------------------
+# Faster Download with aria2
+--downloader aria2c
+
+# # Argument handle by config (see ~/.config/aria2/aria2.conf)
+# --downloader-args "-c -j 3 -x 3 -s 3 -k 1M"
+
+#--------------------------------------
+# Set Filename
+--output "%(title)s.%(ext)s"
+# --restrict-filenames
+
+# Embed Thumbnail, Metadata, Subtitle, etc.
+# --embed-thumbnail
+# --embed-metadata
+# --xattrs
+# --embed-subs
+# --embed-chapters
+
+# Subtitle Settings
+# --sub-langs "en,id"

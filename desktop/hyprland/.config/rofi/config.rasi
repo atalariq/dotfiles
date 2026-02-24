@@ -1,0 +1,33 @@
+configuration {
+    font:                      "Inter Medium 10";
+    show-icons:                true;
+    icon-theme:             "Papirus";
+    cycle:                     true;
+    hide-scrollbar:            true;
+    scroll-method:             1;
+    sidebar-mode:              false;
+    disable-history:           false;
+    max-history-size:          12;
+
+    sort:                      true;
+    sorting-method:            "fzf";
+    matching:                  "fuzzy";
+
+    modi:                      "drun,window";
+    combi-modi:                "window,drun";
+    terminal:                  "kitty";
+
+    columns:                   1;
+    lines:                     15;
+    width:                     40;
+    bw:                        1;
+    padding:                   3;
+    line-margin:               2;
+    line-padding:              1;
+
+    kb-remove-word-back: "Control+Alt+h,Control+BackSpace,Alt+BackSpace";
+    kb-row-up: "Up,Control+p,Alt-k";
+    kb-row-down: "Down,Control+n,Alt-j";
+
+}
+@import "~/.cache/wal/colors-rofi"

@@ -1,0 +1,104 @@
+#!/bin/sh
+#
+# @file mpvc-chapter
+# @description mpvc chapter auxiliar cmds (see mpvc chapter-list instead)
+# @author gmt4 <gmt4 at github.com> (c) Copyright 2022 GPLv2+
+# @url github.com/gmt4/mpvc
+#
+
+PROGNAME=${0##*/}
+PROGVERSION="v1.5"
+PROGAUTHOR=gmt4
+PROGURL="https://github.com/gmt4/mpvc"
+
+set -euf
+
+# See https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+mpvc_chapter_file()
+{
+    chaptersdir="$HOME/.config/mpvc/chapters/"
+    chaptersfile="$chaptersdir/$(mpvc get path | sed 's/\//-/g; s/ /_/g; s/[&]//')"
+    mkdir -p "$chaptersdir"
+    echo "$chaptersfile"
+}
+
+# generate a ffmpeg metadata file with chapters
+# loadable with: mpvc set chapters-file chapters.txt
+mpvc_chapter_add()
+{
+    chaptersfile=$(mpvc_chapter_file)
+
+    path=$(mpvc get path)
+    timepos=$(mpvc get time-pos)
+    percentpos=$(mpvc get percent-pos)
+    mediatitle=$(mpvc get media-title)
+
+    if [ ! -s "$chaptersfile" ]
+    then
+        cat > "$chaptersfile" <<EOF
+;FFMETADATA1
+title=$mediatitle
+;path=$path
+
+#percent-pos=0
+[CHAPTER]
+TIMEBASE=1/1
+START= 0
+END= $timepos
+title= 0 $@
+EOF
+
+    fi
+
+    start_time=$(awk 'BEGIN{s=0} /^END= [0-9]+/ {s=$2} END{print s}' "$chaptersfile")
+    end_time=$timepos
+    chapter=$(awk 'BEGIN{s=0} /^title= [0-9]+/ {s=$2} END{print ++s}' "$chaptersfile")
+
+    if [ "$#" -gt 0 ]
+    then
+        cat >>"$chaptersfile" <<EOF
+
+#percent-pos=$percentpos
+[CHAPTER]
+TIMEBASE=1/1
+START= $start_time
+END= $end_time
+title= $chapter $@
+EOF
+    fi
+
+    #cat "$chaptersfile"
+}
+
+mpvc_chapter_load()
+{
+    track=$(mpvc get playlist-pos)
+    timepos=$(mpvc get time-pos)
+    mpvc set chapters-file "$(mpvc_chapter_file)"
+    mpvc play "$track"
+    mpvc delay set time-pos "$timepos"
+}
+
+usage()
+{
+    echo "usage: $PROGNAME args # @version $PROGVERSION (c) $PROGAUTHOR $PROGURL"
+    echo "  file : Show current ffmetadata chapter-file"
+    echo "  load : Load current ffmetadata chapter-file"
+    echo "  add  : Add new chapter to current ffmetadata chapter-file"
+    exit;
+}
+
+main()
+{
+    if [ $# -lt 1 ]; then usage; fi
+
+    case "$1" in
+    file)   shift; mpvc_chapter_file "$@" ;;
+    load)   shift; mpvc_chapter_load "$@" ;;
+    add)    shift; mpvc_chapter_add "$@" ;;
+    help)   shift; usage "$@" ;;
+    *)      shift; usage "$@" ;;
+    esac
+}
+
+main "$@"

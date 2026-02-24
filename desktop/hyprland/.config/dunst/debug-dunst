@@ -1,0 +1,12 @@
+#!/bin/sh
+
+CONFIG_FILES="$HOME/.config/dunst/dunstrc"
+
+killall dunst
+trap "killall dunst" EXIT
+
+while true; do
+  dunst --config $CONFIG_FILES >/dev/null 2>&1 &
+  inotifywait -e create,modify $CONFIG_FILES
+  killall dunst
+done

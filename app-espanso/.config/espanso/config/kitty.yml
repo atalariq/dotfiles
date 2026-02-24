@@ -1,4 +1,0 @@
-filter_class: "kitty"
-paste_shortcut: "SHIFT+INSERT"
-backend: "Clipboard"
-apply_patch: false

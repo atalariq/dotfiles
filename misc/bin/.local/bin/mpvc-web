@@ -1,0 +1,442 @@
+#!/usr/bin/env sh
+#
+# @file mpvc-web
+# @description mpvc web, A hack to remotely control mpvc from web/http
+# @author gmt4 <gmt4 at github.com> (c) Copyright 2022 GPLv2+
+# @url github.com/gmt4/mpvc
+#
+
+# REMEMBER This is a hack, DISCLAIMER * Use at Your Own Risk *
+# A security hole in itself, with many open man-holes, evident ones are marked with XXX
+#
+# The sole reason for its existence is to mimic mpvc-tui when is not available,
+# like, controlling a remotely running an mpv, accessing from a client without a CLI,
+# like a laptop, tablet, or phone.
+
+PROGNAME=${0##*/}
+PROGVERSION="v1.5"
+PROGAUTHOR=gmt4
+PROGURL="https://github.com/gmt4/mpvc"
+PROGINFO="A hack to remotely control mpvc from web # DISCLAIMER * Use at Your Own Risk *"
+
+set -euf
+
+mpvc_web_defaults()
+{
+    MPVC=$(command -v mpvc)
+
+    MPVC_WEB_HOST=${MPVC_WEB_HOST:-localhost}
+    MPVC_WEB_PORT=${MPVC_WEB_PORT:-8000}
+    MPVC_WEB_ROOT=${MPVC_WEB_ROOT:-/tmp/mpvc-web/root}
+    MPVC_WEB_HOSTNAME=$(hostname)
+    MPVC_WEB_SSL_PORT=${MPVC_WEB_SSL_PORT:-8443}
+    MPVC_WEB_SSL_PEM=$MPVC_WEB_ROOT/../stunnel.pem
+    MPVC_WEB_SSL_CFG=$MPVC_WEB_ROOT/../stunnel.cfg
+    MPVC_WEB_SSL_PID=$MPVC_WEB_ROOT/../stunnel.pid
+    MPVC_WEB_SSL_ENABLE=${MPVC_WEB_SSL_ENABLE:-}
+    MPVC_WEB_SSL_VERIFY=${MPVC_WEB_SSL_VERIFY:-0}
+    MPVC_WEB_ARCHIVE_ENABLE=${MPVC_WEB_ARCHIVE_ENABLE:-}
+
+    MPVC_CGI="$MPVC_WEB_ROOT/cgi-bin/mpvc"
+}
+
+mpvc_web_config()
+{
+    mpvc_web_defaults
+
+    if ! command -v python3 >/dev/null; then
+        echo "$PROGNAME: Error: No python3 found, install to continue."
+        exit
+    fi
+    if ! command -v mpvc >/dev/null; then
+        echo "$PROGNAME: Error: No mpvc found, install to continue."
+        exit
+    fi
+    if ! command -v stunnel >/dev/null; then
+        echo "$PROGNAME: Warning: No stunnel found, install to support SSL."
+    fi
+}
+
+mpvc_web_style()
+{
+    echo 'body { filter: invert(0.7); }'
+}
+
+mpvc_web_index()
+{
+    cat <<EOF
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="gmt4 mpvc-web" />
+    <meta name="author" content="gmt4 <gmt4 at github.com> (c) Copyright 2022" />
+    <meta name="description" content="mpvc-web, a mpvc-tui for the web" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+    <meta http-equiv="Content-Type" content="text/html">
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+
+    $(if [ -n "${MPVC_WEB_REFRESH:-}" ]; then echo "<meta http-equiv=refresh content=$MPVC_WEB_REFRESH>"; fi)
+    <link rel="IconFile" href="apple-touch-icon.svg" sizes="64x64">
+    <link rel="apple-touch-icon" href="apple-touch-icon.svg">
+    <title>$PROGNAME @ $MPVC_WEB_HOSTNAME 🎧</title>
+    </head>
+    <style type="text/css" media="all">
+    @media (prefers-color-scheme: light) {
+        :root { --body-bg: #fff; --body-color: #111; --pre-bg:#eee; --link-color:#00f; }
+    }
+    @media (prefers-color-scheme: dark) {
+       :root { --body-bg: #222; --body-color: #eee; --pre-bg:#333; --link-color:#07f; }
+    }
+    body { background: var(--body-bg); color: var(--body-color); font-family: monospace; }
+    code { background: var(--pre-bg); }
+    pre  { background: var(--pre-bg); }
+    a    { color: var(--link-color); padding: 0.05rem 0.05rem; }
+    </style>
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript">
+        $(mpvc_web_index_js)
+    </script>
+
+    <body>
+        [
+            <a href="." name="mpvc-web">$PROGNAME</a>
+            <a href="#status">#status</a>
+            <a href="#playlist">#playlist</a>
+            <a href="#prompt">#prompt</a>
+            <!-- $([ -n "$MPVC_WEB_ARCHIVE_ENABLE" ] && echo '<a href="ytdl-archive" >archive</a>'; ) -->
+        ]
+        <hr>
+        <ul style="padding: 0em 1em;">
+        <li>
+        <!-- enable this optionally: only for dev/testing -->
+        <form action="/" method="get" >
+            mpvc cli
+            <input type="text" id="cli" name="cli" autocomplete="on" placeholder="mpvc status ${MPVC_WEB_DEV:-(off)}" title="mpvc cli" onkeydown="if (event.keyCode == 13) { this.form.submit(); return false; }" style="height:0.8rem">
+        </form>
+        <li>
+            <form action="/" method="get">
+            mpvc stash
+            $(mpvc stash list | awk '
+                BEGIN   { printf "<select name=cli id=cli-select onchange=this.form.submit() style=\"width:11rem; height:1.2rem\" >"}
+                NR == 1 { printf "<option value="">Please choose a stash</option>" }
+                NR > 1  { printf "<option value=\"mpvc stash apply "$NF"\">"$NF"</option>" }
+                END     { printf "</select>"}' )
+            </form>
+        </li>
+        </li>
+        <li>
+            mpvc
+            <a href="?cmd=mpvc status">status</a>
+            <a href="?cmd=mpvc toggle">toggle</a>
+            <a href="?cmd=mpvc mpv">mpv</a>
+            <a href="?cmd=mpvc kill">kill</a>
+            <a href="?cmd=mpvc clear">clear</a>
+        </li>
+        <li>
+            mpvc
+            <a href="?cmd=mpvc play">play</a>
+            <a href="?cmd=mpvc start 0">start</a>
+            <a href="?cmd=mpvc start $">end</a>
+            <a href="?cmd=mpvc playrand">rand</a>
+            <a href="?cmd=mpvc prev">prev</a>
+            <a href="?cmd=mpvc next">next</a>
+        </li>
+        <li>
+            mpvc
+            <a href="?cmd=mpvc repeat">repeat</a>
+            <a href="?cmd=mpvc single">single</a>
+            <a href="?cmd=mpvc replay">replay</a>
+            <a href="?cmd=mpvc cmd ab-loop">ab-loop</a>
+        </li>
+        <li>
+            mpvc
+            <a href="?cmd=mpvc playlist-shuffle">playlist</a>
+            <a href="?cmd=mpvc shuffle">shuffle</a>
+            <a href="?cmd=mpvc unshuffle">unshuffle</a>
+        </li>
+        <li>
+            mpvc vid
+            <a href="?cmd=mpvc togglev">video</a>
+            <a href="?cmd=mpvc aspect">aspect</a>
+            <a href="?cmd=mpvc togglew">win</a>
+            <a href="?cmd=mpvc togglef">fs</a>
+            <a href="?cmd=mpvc togglei">idle</a>
+        </li>
+        <li>
+            mpvc ch
+            <a href="?cmd=mpvc cplayrand">crand</a>
+            <a href="?cmd=mpvc creplay">creplay</a>
+            <a href="?cmd=mpvc cprev">cprev</a>
+            <a href="?cmd=mpvc cnext">cnext</a>
+        </li>
+        <li>
+            mpvc vol
+            <a href="?cmd=mpvc vol -20">-20</a>
+            <a href="?cmd=mpvc vol -10">-10</a>
+            <a href="?cmd=mpvc vol -5">-5</a>
+            <a href="?cmd=mpvc vol 0">0</a>
+            <a href="?cmd=mpvc vol +5">+5</a>
+            <a href="?cmd=mpvc vol +10">+10</a>
+            <a href="?cmd=mpvc vol +20">+20</a>
+        </li>
+        <li>
+            mpvc seek
+            <a href="?cmd=mpvc seek -120">-120</a>
+            <a href="?cmd=mpvc seek -60">-60</a>
+            <a href="?cmd=mpvc seek -25">-25</a>
+            <a href="?cmd=mpvc seek +25">+25</a>
+            <a href="?cmd=mpvc seek +60">+60</a>
+            <a href="?cmd=mpvc seek +120">+120</a>
+        </li>
+        <li>
+        mpvc theme
+            <a href="#" title="theme 2" onclick="document.body.style.WebkitFilter='invert(0.2)';">th2</a>
+            <a href="#" title="theme 4" onclick="document.body.style.WebkitFilter='invert(0.4)';">th4</a>
+            <a href="#" title="theme 8" onclick="document.body.style.WebkitFilter='invert(0.8)';">th8</a>
+            <a href="#" title="toggle" onclick="toggleColorScheme()">toggle</a>
+            <a href="." title="reset">rst</a>
+        </li>
+        </ul>
+        [ <a href="#mpvc-web-status" name="mpvc-web-status">Status</a> ] <hr>
+        <iframe name="mpvc-status" width="100%" height="100%" frameborder="0" src="/cgi-bin/mpvc?status" allowtransparency="true" ></iframe>
+        [
+          <a href="#mpvc-web-playlist" name="mpvc-web-playlist">Playlist</a>
+          <a href="#mpvc-web-fullplaylist" name="mpvc-web-fullplaylist">full</a>
+          <a href="#mpvc-web-rawplaylist" name="mpvc-web-rawplaylist">raw</a>
+          <a href="#mpvc-web-chapter-list-full" name="mpvc-web-chapter-list-full">chapters</a>
+          <a href="javascript:window.location.reload()" >load</a>
+        ] <hr>
+        <div style="display:flex">
+        <iframe name="mpvc-playlist" width="100%" frameborder="0" src="/cgi-bin/mpvc?playlist" allowtransparency="true" style="margin:auto" ></iframe>
+        <script>
+        var pl = document.getElementsByName('mpvc-playlist')[0];
+        switch (window.location.hash) {
+        case '#mpvc-web-playlist':           { pl.src='/cgi-bin/mpvc?playlist'; break; }
+        case '#mpvc-web-fullplaylist':       { pl.src='/cgi-bin/mpvc?fullplaylist'; break; }
+        case '#mpvc-web-rawplaylist':        { pl.src='/cgi-bin/mpvc?rawplaylist'; break; }
+        case '#mpvc-web-chapter-list-full':  { pl.src='/cgi-bin/mpvc?chapter-list-full'; break; }
+        }
+        </script>
+        </div>
+        [ <a href="#mpvc-web-prompt" name="mpvc-web-prompt">Prompt</a> ] <hr>
+        🎧 <a href="$PROGURL">$PROGNAME</a> $PROGVERSION, mpvc-tui for the web
+    </body>
+</html>
+EOF
+}
+
+mpvc_web_index_js()
+{
+    cat <<EOF
+function toggleColorScheme(mode="dark")
+{
+    var i = 0;
+    var mode = window.localStorage.getItem("prefers-color-scheme");
+    mode = (mode != "light") ? "light" : "dark";
+    window.localStorage.setItem("prefers-color-scheme", mode);
+
+    for (i = document.styleSheets[0].rules.length - 1; i >= 0; i--)
+    {
+        rule = document.styleSheets[0].rules[i]
+        if (!("media" in rule))
+            continue;
+        rule = document.styleSheets[0].rules[i].media;
+        if (! rule.mediaText.includes("prefers-color-scheme"))
+            continue;
+        switch (mode) {
+        case "light":
+            rule.appendMedium("original-prefers-color-scheme");
+            if (rule.mediaText.includes("light")) rule.deleteMedium("(prefers-color-scheme: light)");
+            if (rule.mediaText.includes("dark")) rule.deleteMedium("(prefers-color-scheme: dark)");
+            break;
+        case "dark":
+            rule.appendMedium("(prefers-color-scheme: light)");
+            rule.appendMedium("(prefers-color-scheme: dark)");
+            if (rule.mediaText.includes("original")) rule.deleteMedium("original-prefers-color-scheme");
+            break;
+        default:
+            rule.appendMedium("(prefers-color-scheme: dark)");
+            if (rule.mediaText.includes("light")) rule.deleteMedium("(prefers-color-scheme: light)");
+            if (rule.mediaText.includes("original")) rule.deleteMedium("original-prefers-color-scheme");
+        }
+        break;
+    }
+}
+EOF
+}
+
+mpvc_web_cgi()
+{
+    cat <<EOF
+#!/bin/sh
+set -euf
+mpvc_strip_escapes(){ sed '/\x1b\[7m/ { s|\x1b\[7m||; s| |+|; }; s|\x1b\[0m||;'; }
+mpvc() { $MPVC "\$@"; }
+mpvc_out() { echo "Content-Type: text/plain"; echo; $MPVC "\$@"; }
+main()
+{
+    if [ -n "\${USER:-}" ]; then
+        env -i PATH="/usr/bin:/bin" HOME="\$HOME" TERM="\$TERM" QUERY_STRING="\${QUERY_STRING:-}" "\$0" "\$@"; exit;
+    fi
+    case "\${QUERY_STRING:-}" in
+        status)           mpvc_out status;;
+        playlist)         mpvc_out playlist | mpvc_strip_escapes ;;
+        fullplaylist)     mpvc_out fullplaylist | mpvc_strip_escapes ;;
+        rawplaylist)      mpvc_out saven | mpvc_strip_escapes ;;
+        chapter-list)      mpvc_out chapter-list | mpvc_strip_escapes ;;
+        chapter-list-full) mpvc_out chapter-list-full | mpvc_strip_escapes ;;
+        *)            mpvc "\$@" ;;
+    esac
+}
+main "\$@"
+EOF
+}
+
+mpvc_web_favicon()
+{
+    cat <<EOF
+<svg viewBox="0 0 192 80" xmlns="http://www.w3.org/2000/svg" > <text x="0" y="30" font-size="45px" >🎧</text> </svg> <!-- mpvc -->
+EOF
+}
+
+mpvc_web_stunnel_cfg()
+{
+    cat <<EOF
+# stunnel.cfg for $PROGNAME $PROGVERSION $PROGURL
+sslVersion = all
+options = NO_SSLv2
+options = NO_SSLv3
+
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+pid=$MPVC_WEB_SSL_PID
+
+[mpvc-web]
+accept = $MPVC_WEB_HOST:$MPVC_WEB_SSL_PORT
+connect = $MPVC_WEB_HOST:$MPVC_WEB_PORT
+
+cert = ${MPVC_WEB_SSL_PEM}
+key  = ${MPVC_WEB_SSL_PEM}
+cafile = ${MPVC_WEB_SSL_PEM}
+verify=$MPVC_WEB_SSL_VERIFY
+TIMEOUTclose = 0
+EOF
+}
+
+mpvc_web()
+{
+    mpvc_web_config
+    echo "# $PROGNAME $PROGVERSION running (beta version: might contain bugs!) SSL=${MPVC_WEB_SSL_ENABLE} $MPVC_WEB_HOST:$MPVC_WEB_SSL_PORT"
+
+    (
+        # setup http webroot
+        echo "# $PROGNAME Setup $MPVC_WEB_ROOT"
+        mkdir -p "$MPVC_WEB_ROOT" || return
+        mkdir -p "$MPVC_WEB_ROOT/cgi-bin/" || return
+        cd "$MPVC_WEB_ROOT" || return
+        chmod u+w -R "${MPVC_WEB_ROOT%/*}"
+
+        mpvc_web_index > "$MPVC_WEB_ROOT/index.html"
+        mpvc_web_favicon > "$MPVC_WEB_ROOT/apple-touch-icon.svg"
+        [ ! -e "$MPVC_WEB_ROOT/style.css" ] && mpvc_web_style > "$MPVC_WEB_ROOT/style.css"
+        mpvc_web_cgi > "$MPVC_CGI"
+        chmod u+x "$MPVC_CGI"
+
+        # setup https stunnel if requested
+        if [ -n "${MPVC_WEB_SSL_ENABLE}" ]; then
+            echo "# $PROGNAME Setup $MPVC_WEB_SSL_CFG"
+            mpvc_web_stunnel_cfg > "$MPVC_WEB_SSL_CFG"
+            if [ ! -e "$MPVC_WEB_SSL_PEM" ]; then
+                MPVC_WEB_SSL_SUBJ="/C=CN/ST=ST/O=$PROGNAME/CN=$PROGNAME-$MPVC_WEB_HOSTNAME"
+                openssl req -new -x509 -days 365 -nodes -out "$MPVC_WEB_SSL_PEM" -keyout "$MPVC_WEB_SSL_PEM" -subj "$MPVC_WEB_SSL_SUBJ"
+                openssl pkcs12 -export -passout "pass:" -in "$MPVC_WEB_SSL_PEM" -out "$MPVC_WEB_SSL_PEM.p12"
+            fi
+            if [ -e "$MPVC_WEB_SSL_PID" ]; then
+                kill "$(cat "$MPVC_WEB_SSL_PID")" || true
+            fi
+            stunnel "$MPVC_WEB_SSL_CFG"
+        fi
+
+        # setup streamable mpvc archive if requested
+        if [ -n "${MPVC_WEB_ARCHIVE_ENABLE}" ]; then
+            echo "# $PROGNAME Setup $MPVC_WEB_ROOT/ytdl-archive/"
+            ln -f -s $HOME/.config/mpvc/ytdl-archive "$MPVC_WEB_ROOT/"
+        fi
+
+        chmod a-w -R "$MPVC_WEB_ROOT/"
+
+        # XXX handle cli commands, rewrite this mess
+        python3 -u -m http.server --cgi --bind "$MPVC_WEB_HOST" "$MPVC_WEB_PORT" "$@" 2>&1 |
+            awk -v mpvc="$MPVC_CGI" \
+        '
+        /GET \/\?cmd=mpvc%20mpv/          { system(mpvc" -q mpv") }
+        /GET \/\?cmd=mpvc%20clear/        { system(mpvc" -q clear") }
+        /GET \/\?cmd=mpvc%20kill/         { system(mpvc" -q kill") }
+
+        /GET \/\?cmd=mpvc%20toggle/       { system(mpvc" -q toggle") }
+        /GET \/\?cmd=mpvc%20play/         { system(mpvc" -q play") }
+        /GET \/\?cmd=mpvc%20start%200/    { system(mpvc" -q start 0") }
+        /GET \/\?cmd=mpvc%20start%20$/    { system(mpvc" -q start $") }
+        /GET \/\?cmd=mpvc%20stop/         { system(mpvc" -q stop") }
+        /GET \/\?cmd=mpvc%20prev/         { system(mpvc" -q prev") }
+        /GET \/\?cmd=mpvc%20next/         { system(mpvc" -q next") }
+        /GET \/\?cmd=mpvc%20playrand/     { system(mpvc" -q playrand") }
+
+        /GET \/\?cmd=mpvc%20shuffle/      { system(mpvc" -q shuffle") }
+        /GET \/\?cmd=mpvc%20unshuffle/    { system(mpvc" -q unshuffle") }
+
+        /GET \/\?cmd=mpvc%20vol%20[+-]?[0-9]+/ { gsub("%20", " "); system(mpvc" -q vol "$(NF-3)); }
+        /GET \/\?cmd=mpvc%20seek%20[+-]?[0-9]+/ { gsub("%20", " "); system(mpvc" -q seek "$(NF-3)); }
+
+        /GET \/\?cmd=mpvc%20repeat/       { system(mpvc" -q repeat") }
+        /GET \/\?cmd=mpvc%20single/       { system(mpvc" -q single") }
+        /GET \/\?cmd=mpvc%20replay/       { system(mpvc" -q replay") }
+
+        /GET \/\?cmd=mpvc%20togglev/      { system(mpvc" -q togglev") }
+        /GET \/\?cmd=mpvc%20aspect/       { system(mpvc" -q aspect") }
+        /GET \/\?cmd=mpvc%20togglew/      { system(mpvc" -q togglew") }
+        /GET \/\?cmd=mpvc%20togglef/      { system(mpvc" -q togglef") }
+        /GET \/\?cmd=mpvc%20togglei/      { system(mpvc" -q togglei") }
+
+        /GET \/\?cmd=mpvc%20cstart/       { system(mpvc" -q cplay 0") }
+        /GET \/\?cmd=mpvc%20creplay/      { system(mpvc" -q chapter-replay") }
+        /GET \/\?cmd=mpvc%20cprev/        { system(mpvc" -q chapter-prev") }
+        /GET \/\?cmd=mpvc%20cnext/        { system(mpvc" -q chapter-next") }
+        /GET \/\?cmd=mpvc%20cplayrand/    { system(mpvc" -q cplayrand") }
+
+        /GET \/\?cli=mpvc/                {
+            r=$0;
+            gsub("HTTP.*$", "", r);
+            gsub("^.*GET \\/\\?cli=mpvc\\+", mpvc" ", r);
+
+            if (ENVIRON["MPVC_WEB_DEV"] && match(r, "^"mpvc))
+            {
+                gsub("^("mpvc") [^a-zA-Z0-9 ]*", mpvc" ", r);
+                gsub("\\+", " ", r);
+                system(r); # XXX
+            }
+        }
+
+        { print $0 }
+        '
+    )
+}
+
+usage()
+{
+    echo "usage: $PROGNAME args # @version $PROGVERSION (c) $PROGAUTHOR $PROGURL"
+    exit
+}
+
+main()
+{
+    [ $# -lt 0 ] && usage
+
+    mpvc_web "$@"
+}
+
+main "$@"

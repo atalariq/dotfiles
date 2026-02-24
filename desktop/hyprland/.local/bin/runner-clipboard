@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Wayland
+# Requirements:
+# - cliphist
+# - wl-clipboard
+# - rofi or wofi
+
+
+# cliphist list | wofi --dmenu | cliphist decode | wl-copy
+cliphist list | rofi -dmenu | cliphist decode | wl-copy

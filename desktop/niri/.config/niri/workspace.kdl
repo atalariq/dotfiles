@@ -1,0 +1,33 @@
+workspace "code"    // 1
+workspace "web"     // 2
+workspace "work"    // 3
+workspace "fun"     // 4
+
+// ===== Spawn to specific workspace on startup
+window-rule {
+  match app-id="kitty"
+  match app-id="dev.zed.Zed"
+
+  open-on-workspace "code"
+}
+window-rule {
+  match app-id="brave-browser"
+  match app-id="vesktop"
+
+  open-on-workspace "web"
+}
+window-rule {
+  match app-id="obsidian"
+  match app-id="anki"
+  match app-id="zotero"
+
+  open-on-workspace "work"
+}
+
+window-rule {
+  match app-id="net.lutris.Lutris"
+  match app-id="steam"
+
+  open-on-workspace "fun"
+}
+

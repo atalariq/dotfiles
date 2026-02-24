@@ -1,0 +1,36 @@
+# vim: ft=toml
+
+[user]
+email = atalariq.dev@outlook.com
+name = Atalariq Barra Hadinugraha
+username = atalariq
+signingkey = 82653D343C6C81D2
+
+[core]
+editor = nvim
+pager = delta
+
+[init]
+defaultBranch = main
+
+[interactive]
+diffFilter = delta --color-only --features=interactive
+
+[delta]
+line-numbers = true
+syntax-theme = base16
+side-by-side = false
+file-modified-label = modified:
+
+[pull]
+rebase = false
+ff = only
+
+[http]
+postBuffer = 524288000
+
+[commit]
+gpgsign = true
+
+[tag]
+gpgSign = true

@@ -1,0 +1,117 @@
+// Window rules let you adjust behavior for individual windows.
+// Find more information on the wiki:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules
+
+window-rule {
+  match is-active=false
+  opacity 0.96
+}
+
+window-rule {
+  geometry-corner-radius 12
+  clip-to-geometry true
+}
+
+
+// ------------- XDG Portal
+window-rule {
+  match app-id=r#"^xdg-desktop-portal$"#
+  match app-id=r#"^xdg-desktop-portal-gtk$"#
+
+  open-floating true
+}
+
+// ------------------ GNOME Apps
+window-rule {
+  match app-id=r#"^org\.gnome\."#
+  draw-border-with-background false
+  geometry-corner-radius 12
+  clip-to-geometry true
+}
+
+// ----------------- Controller
+window-rule {
+  match app-id=r#"^gnome-control-center$"#
+  match app-id=r#"^pavucontrol$"#
+  match app-id=r#"^nm-connection-editor$"#
+
+  default-column-width { proportion 0.5; }
+  open-floating false
+}
+
+// ---------- Floating apps
+window-rule {
+  match app-id=r#"^gnome-calculator$"#
+  match app-id=r#"^galculator$"#
+  match app-id=r#"^blueman-manager$"#
+  match app-id=r#"^steam$"#
+  match title=r#"^Open File$"#
+  match title=r#"^Select a File$"#
+  match title=r#"^Choose wallpaper$ "#
+  match title=r#"^Open Folder$"#
+  match title=r#"^Save As$"#
+  match title=r#"^Library$"#
+  match app-id="zoom"
+
+  open-floating true
+}
+
+// https://github.com/niri-wm/niri/wiki/Application-Issues#steam
+// Steam notifications don't run through the standard notification daemon
+// and show up as floating windows in the center of the screen.
+window-rule {
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+
+// ----------- Terminal
+window-rule {
+  match app-id="kitty"
+
+  // scroll-factor 0.5     // Base: 0.25
+  draw-border-with-background false
+}
+
+// ----------- Browser
+window-rule {
+  match app-id="brave-browser"
+  match app-id="google-chrome"
+
+  open-maximized true
+}
+
+// Picture in Picture
+window-rule {
+  match app-id="firefox" title="^Picture-in-Picture$"
+  match app-id="brave" title="^Picture in picture$"
+  match app-id="google-chrome" title="^Picture in picture$"
+
+  open-floating true
+  default-column-width { fixed 480; }
+  default-window-height { fixed 270; }
+  default-floating-position x=16 y=96 relative-to="top-right"
+}
+
+// ----------- Obsidian
+window-rule {
+  match app-id="obsidian"
+  match app-id="zotero"
+  match app-id="anki"
+
+  open-maximized true
+}
+
+// ------------------ 
+// Block out mako notifications from screencasts.
+layer-rule {
+  match namespace="^notifications$"
+  block-out-from "screencast"
+}
+
+// Block out password managers from screencasts.
+window-rule {
+  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  match app-id=r#"^org\.gnome\.World\.Secrets$"#
+
+  block-out-from "screencast"
+}

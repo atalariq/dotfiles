@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+cleanup() {
+    rm /tmp/mpd_cover.jpg 2>/dev/null
+    pkill -P $$ 2>/dev/null
+    pkill cover_art.sh
+}
+
+pkill -P $$ 2>/dev/null
+trap cleanup EXIT 2>/dev/null
+
+if [ -f ~/.config/ncmpcpp/album-art/config ]; then
+    ncmpcpp --config ~/.config/ncmpcpp/album-art/config
+else
+    ncmpcpp
+fi
+cleanup
