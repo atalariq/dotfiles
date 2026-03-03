@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Default path, bisa di-override dengan argumen pertama
+SSD_PATH="${1:-/run/media/atalariq/AtalariqSSD}"
+
+# Safety check: Pastikan SSD benar-benar ter-mount sebelum rsync jalan
+# Biar nggak menuhin root partition kalau SSD lupa dicolok
+if [ ! -d "$SSD_PATH" ]; then
+  echo "❌ Error: SSD target tidak ditemukan di: $SSD_PATH"
+  echo "   Pastikan SSD sudah dimount!"
+  exit 1
+fi
+
+echo "🚀 Memulai backup ke: $SSD_PATH"
+
+# echo "📂 Mirror: Music, Media"
+# rsync --archive --human-readable --partial --info=stats1,progress2 --modify-window=1 \
+#   --update \
+#   --delete \
+#   ~/Music ~/Media \
+#   "$SSD_PATH"
+
+rsync --archive --human-readable --partial --info=stats1,progress2 --modify-window=1 \
+  --update \
+  ~/Music ~/Media \
+  ~/Pictures ~/Videos \
+  "$SSD_PATH"
+
+echo "✅ Backup Selesai!"

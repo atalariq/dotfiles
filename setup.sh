@@ -8,7 +8,7 @@ LAB_APPS=("bat" "fish" "nvim" "yazi")
 
 PERSONAL_APPS=("${LAB_APPS[@]}" "aria2" "espanso" "glow" "htop" "lazygit" "kitty" "mpd" "mpv" "yt-dlp")
 PERSONAL_DESKTOP=("niri")
-PERSONAL_MISC=("bin" "fonts" "startpage")
+PERSONAL_MISC=("fonts" "scripts" "startpage")
 PERSONAL_SYSTEM="archlinux" # archlinux|mac
 
 stow_folder() {
