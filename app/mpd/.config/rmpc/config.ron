@@ -13,7 +13,9 @@
     wrap_navigation: false,
     enable_mouse: true,
     enable_config_hot_reload: true,
-    enable_lyrics_hot_reload: false,
+    lyrics_dir: "~/Music",
+    enable_lyrics_index: true,
+    enable_lyrics_hot_reload: true,
     status_update_interval_ms: 1000,
     rewind_to_start_sec: None,
     keep_state_on_song_change: true,
@@ -139,12 +141,12 @@
                             direction: Vertical,
                             panes: [
                                 (
-                                    size: "3",
-                                    pane: Pane(Lyrics)
+                                    size: "60%",
+                                    pane: Pane(AlbumArt)
                                 ),
                                 (
-                                    size: "100%",
-                                    pane: Pane(AlbumArt)
+                                    size: "40%",
+                                    pane: Pane(Lyrics)
                                 ),
                             ],
                         ),
