@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# fyi | notify-send
+notify(){
+  fyi -i '/usr/share/icons/Papirus/64x64/devices/camera-photo.svg' -t 2000 -u low "$@"
+}
+
+case ${1:-area} in
+  screen)
+    # Screenshot current view
+    grim - | wl-copy && \
+      notify "Shot 📸" "Copied to Clipboard"
+    ;;
+  area)
+    # Select a region and screenshoot it:
+    grim -g "$(slurp -b ffffff33 -c FFFF00)" - | wl-copy && \
+      notify "Shot (Area) 📸" "Copied to Clipboard"
+    ;;
+  active)
+    # screenshoot current focused client/window
+    # grim -g "$(mmsg -x | awk '{a[NR]=$3} END {printf "%s,%s %sx%s\n", a[1], a[2], a[3], a[4]}')" - | wl-copy
+    # or
+    grim -g "$(mmsg -x | awk '{print $3}' | xargs printf "%s,%s %sx%s\n")" - | wl-copy && \
+      notify "Shot (Active) 📸" "Copied to Clipboard"
+    ;;
+  annotate)
+    file="$HOME/Pictures/Screenshots/satty-$(date '+%Y%m%d-%H:%M:%S').png"
+    grim -g "$(slurp -o -r -c '#ff0000ff')" -t ppm - | \
+      satty --filename - --fullscreen --output-filename "$file" && \
+      notify "Shot (Annotated) 📸" "Saved to $file"
+    ;;
+  ocr)
+    # OCR
+    grim -g "$(slurp)" - | tesseract -l ind+eng stdin stdout | wl-copy && \
+      notify  "Shot (OCR) 📸" "Result copied to clipboard"
+    ;;
+  record)
+    shift
+    case ${1:-stop} in
+      start)
+        # Start screen recording
+        pidof -q gpu-screen-recorder && \
+          notify "Recording Screen" && \
+          sleep 0.5 && \
+          exit 0
+
+        video="$HOME/Videos/Recordings/$(date +"Video_%Y-%m-%d_%H-%M-%S.mp4")"
+        gpu-screen-recorder -w screen -f 60 -a default_output -o "$video"
+        ;;
+      stop)
+        # Stop screen recording
+        killall -SIGINT gpu-screen-recorder && \
+          sleep 0.5 && \
+          notify  "GPU Screen Recorder" "Recording saved"
+        ;;
+    esac
+    ;;
+esac
+
