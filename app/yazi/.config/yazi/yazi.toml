@@ -3,5 +3,79 @@
 "$schema" = "https://yazi-rs.github.io/schemas/yazi.json"
 
 [mgr]
-ratio          = [ 1, 4, 3 ]
-sort_by        = "natural"
+ratio = [1, 4, 3]
+sort_by = "natural"
+show_hidden = false
+show_symlink = false
+scrolloff = 5
+mouse_events = ["click", "scroll"]
+title_format = "yazi"
+
+[preview]
+wrap = "no"
+tab_size = 2
+image_delay = 0
+image_quality = 70
+
+[tasks]
+micro_workers = 8
+macro_workers = 8
+bizarre_retry = 3
+image_alloc = 1073741824     # 1073741824 Bytes = 1024MB = 1GB
+image_bound = [10000, 10000]
+suppress_preload = false
+
+# [opener]
+# extract = [
+#   { run = 'ouch d -y %*', desc = "Extract here with ouch", for = "windows" },
+#   { run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
+# ]
+
+[plugin]
+prepend_previewers = [
+  { mime = "application/dvb.ait", run = "mediainfo" },
+  { mime = "application/eps", run = "mediainfo" },
+  { mime = "application/illustrator", run = "mediainfo" },
+  { mime = "application/ms-*", run = "office" },
+  { mime = "application/msword", run = "office" },
+  { mime = "application/oasis.opendocument.*", run = "office" },
+  { mime = "application/openxmlformats-officedocument.*", run = "office" },
+  { mime = "application/postscript", run = "mediainfo" },
+  { mime = "application/subrip", run = "mediainfo" },
+  { mime = "application/vnd.adobe.illustrator", run = "mediainfo" },
+  { mime = "application/{*zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}", run = "ouch" },
+  { mime = "audio/*", run = "exifaudio" },
+  { mime = "image/x-eps", run = "mediainfo" },
+  { mime = "{audio,video,image}/*", run = "mediainfo" },
+  { mime = "{audio,video,image}/*", run = "mediainfo" },
+  { mime = 'application/sqlite3', run = 'preview-sqlite' },
+  { url = "*.docx", run = "office" },
+  { url = "*.{ai,eps,ait}", run = "mediainfo" },
+  { url = '*.sqlite3', run = 'preview-sqlite' },
+  { url = '*.typ', run = 'preview-typst' },
+
+]
+prepend_preloaders = [
+  { mime = "application/dvb.ait", run = "mediainfo" },
+  { mime = "application/eps", run = "mediainfo" },
+  { mime = "application/illustrator", run = "mediainfo" },
+  { mime = "application/ms-*", run = "office" },
+  { mime = "application/msword", run = "office" },
+  { mime = "application/oasis.opendocument.*", run = "office" },
+  { mime = "application/openxmlformats-officedocument.*", run = "office" },
+  { mime = "application/postscript", run = "mediainfo" },
+  { mime = "application/subrip", run = "mediainfo" },
+  { mime = "application/vnd.adobe.illustrator", run = "mediainfo" },
+  { mime = "image/x-eps", run = "mediainfo" },
+  { url = "*.docx", run = "office" },
+  { url = "*.{ai,eps,ait}", run = "mediainfo" },
+  { url = '*.typ', run = 'preview-typst' },
+]
+prepend_spotters = [
+  { mime = 'audio/mpegurl', run = 'code' },
+  { mime = "audio/*", run = "spot-audio" },
+  { mime = "image/*", run = "spot-image" },
+  { mime = "video/*", run = "spot-video" },
+  { url = "*", run = "spot" },
+  { url = "*/", run = "spot" },
+]
