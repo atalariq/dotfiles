@@ -1,0 +1,266 @@
+# A TOML linter such as https://taplo.tamasfe.dev/ can use this schema to validate your config.
+# If you encounter any issues, please make an issue at https://github.com/yazi-rs/schemas.
+"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+
+[mgr]
+prepend_keymap = [
+  { on = "!", for  = "unix", run  = 'shell "$SHELL" --block', desc = "Open $SHELL here" },
+  { on = "q", run = "close", desc = "Exit the process" },
+	{ on = "<A-q>", run = "close",              desc = "Close the current tab, or quit if it's last" },
+
+	# Operation
+	{ on = "s",         run = "search --via=fd",             desc = "Search files by name via fd" },
+	{ on = "S",         run = "search --via=rg",             desc = "Search files by content via ripgrep" },
+	{ on = "<C-s>",     run = "escape --search",             desc = "Cancel the ongoing search" },
+	{ on = "Z",         run = "plugin fzf",                  desc = "Jump to a file/directory via fzf" },
+	{ on = "z",         run = "plugin zoxide",               desc = "Jump to a directory via zoxide" },
+
+	# Filter/Find
+	{ on = "f", run = "filter --smart", desc = "Filter files" },
+	{ on = "/", run = "find --smart",            desc = "Find next file" },
+	{ on = "?", run = "find --previous --smart", desc = "Find previous file" },
+	{ on = "n", run = "find_arrow",              desc = "Next found" },
+	{ on = "N", run = "find_arrow --previous",   desc = "Previous found" },
+
+	# Goto
+	{ on = "~",          run = "cd ~" },
+	{ on = [ "g", "h" ], run = "cd ~" },
+	{ on = [ "g", "c" ], run = "cd ~/.config" },
+	{ on = [ "g", "C" ], run = "cd ~/Repos/dotfiles" },
+	{ on = [ "g", "d" ], run = "cd ~/Downloads" },
+	{ on = [ "g", "G" ], run = "cd ~/Grimoire" },
+	{ on = [ "g", "k" ], run = "cd ~/Kuliah" },
+	{ on = [ "g", "R" ], run = "cd ~/Repos" },
+  { on = [ "g", "r" ], run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"', desc = "Go to git root folder" },
+
+  # Plugin
+  { on = "L", run  = "plugin bypass" },
+  { on = "H", run  = "plugin bypass reverse" },
+	{ on = "O", run = "plugin open-with-cmd"},
+	{ on = "<Enter>",    run = "open --interactive"},
+	{ on = "<S-Enter>",  run = "plugin open-with-cmd -- block"},
+  { on = [ "g", "D" ], run = "shell -- ripdrag --and-exit --basename --resizable --all %h", desc = "Drag file" },
+  { on = [ "g", "m" ], run  = "plugin mount", desc = "Mount devices"},
+  { on = [ "g", "p" ], run = "plugin save-clipboard-to-file", desc = "Paste clipboard content to file and hover after created" },
+  { on = [ "g", "M" ], run = "plugin mediainfo -- toggle-metadata", desc = "Toggle media preview metadata" },
+  { on = [ "c", "m" ], run  = "plugin chmod", desc = "Chmod on selected files"},
+
+]
+
+[tasks]
+
+keymap = [
+	{ on = "<Esc>", run = "close", desc = "Close task manager" },
+	{ on = "<C-[>", run = "close", desc = "Close task manager" },
+	{ on = "<C-c>", run = "close", desc = "Close task manager" },
+	{ on = "w",     run = "close", desc = "Close task manager" },
+	{ on = "q",     run = "close", desc = "Close task manager" },
+
+	{ on = "k", run = "arrow prev", desc = "Previous task" },
+	{ on = "j", run = "arrow next", desc = "Next task" },
+
+	{ on = "<Up>",   run = "arrow prev", desc = "Previous task" },
+	{ on = "<Down>", run = "arrow next", desc = "Next task" },
+
+	{ on = "<Enter>", run = "inspect", desc = "Inspect the task" },
+	{ on = "x",       run = "cancel",  desc = "Cancel the task" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[spot]
+
+keymap = [
+	{ on = "<Esc>", run = "close", desc = "Close the spot" },
+	{ on = "<C-[>", run = "close", desc = "Close the spot" },
+	{ on = "<C-c>", run = "close", desc = "Close the spot" },
+	{ on = "<Tab>", run = "close", desc = "Close the spot" },
+
+	{ on = "k", run = "arrow prev", desc = "Previous line" },
+	{ on = "j", run = "arrow next", desc = "Next line" },
+	{ on = "h", run = "swipe prev", desc = "Swipe to previous file" },
+	{ on = "l", run = "swipe next", desc = "Swipe to next file" },
+
+	{ on = "<Up>",    run = "arrow prev", desc = "Previous line" },
+	{ on = "<Down>",  run = "arrow next", desc = "Next line" },
+	{ on = "<Left>",  run = "swipe prev", desc = "Swipe to previous file" },
+	{ on = "<Right>", run = "swipe next", desc = "Swipe to next file" },
+
+	# Copy
+	{ on = [ "c", "c" ], run = "copy cell", desc = "Copy selected cell" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[pick]
+
+keymap = [
+	{ on = "<Esc>",   run = "close",          desc = "Cancel pick" },
+	{ on = "<C-[>",   run = "close",          desc = "Cancel pick" },
+	{ on = "<C-c>",   run = "close",          desc = "Cancel pick" },
+	{ on = "<Enter>", run = "close --submit", desc = "Submit the pick" },
+
+	{ on = "k", run = "arrow prev", desc = "Previous option" },
+	{ on = "j", run = "arrow next", desc = "Next option" },
+
+	{ on = "<Up>",   run = "arrow prev", desc = "Previous option" },
+	{ on = "<Down>", run = "arrow next", desc = "Next option" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[input]
+
+keymap = [
+	{ on = "<C-c>",   run = "close",          desc = "Cancel input" },
+	{ on = "<Enter>", run = "close --submit", desc = "Submit input" },
+	{ on = "<Esc>",   run = "escape",         desc = "Back to normal mode, or cancel input" },
+	{ on = "<C-[>",   run = "escape",         desc = "Back to normal mode, or cancel input" },
+
+	# Mode
+	{ on = "i", run = "insert",                          desc = "Enter insert mode" },
+	{ on = "I", run = [ "move first-char", "insert" ],   desc = "Move to the BOL, and enter insert mode" },
+	{ on = "a", run = "insert --append",                 desc = "Enter append mode" },
+	{ on = "A", run = [ "move eol", "insert --append" ], desc = "Move to the EOL, and enter append mode" },
+	{ on = "v", run = "visual",                          desc = "Enter visual mode" },
+	{ on = "r", run = "replace",                         desc = "Replace a single character" },
+
+	# Selection
+	{ on = "V",     run = [ "move bol", "visual", "move eol" ], desc = "Select from BOL to EOL" },
+	{ on = "<C-A>", run = [ "move eol", "visual", "move bol" ], desc = "Select from EOL to BOL" },
+	{ on = "<C-E>", run = [ "move bol", "visual", "move eol" ], desc = "Select from BOL to EOL" },
+
+	# Character-wise movement
+	{ on = "h",       run = "move -1", desc = "Move back a character" },
+	{ on = "l",       run = "move 1",  desc = "Move forward a character" },
+	{ on = "<Left>",  run = "move -1", desc = "Move back a character" },
+	{ on = "<Right>", run = "move 1",  desc = "Move forward a character" },
+	{ on = "<C-b>",   run = "move -1", desc = "Move back a character" },
+	{ on = "<C-f>",   run = "move 1",  desc = "Move forward a character" },
+
+	# Word-wise movement
+	{ on = "b",         run = "backward",                    desc = "Move back to the start of the current or previous word" },
+	{ on = "B",         run = "backward --far",              desc = "Move back to the start of the current or previous WORD" },
+	{ on = "w",         run = "forward",                     desc = "Move forward to the start of the next word" },
+	{ on = "W",         run = "forward --far",               desc = "Move forward to the start of the next WORD" },
+	{ on = "e",         run = "forward --end-of-word",       desc = "Move forward to the end of the current or next word" },
+	{ on = "E",         run = "forward --far --end-of-word", desc = "Move forward to the end of the current or next WORD" },
+	{ on = "<A-b>",     run = "backward",                    desc = "Move back to the start of the current or previous word" },
+	{ on = "<A-f>",     run = "forward --end-of-word",       desc = "Move forward to the end of the current or next word" },
+	{ on = "<C-Left>",  run = "backward",                    desc = "Move back to the start of the current or previous word" },
+	{ on = "<C-Right>", run = "forward --end-of-word",       desc = "Move forward to the end of the current or next word" },
+
+	# Line-wise movement
+	{ on = "0",      run = "move bol",        desc = "Move to the BOL" },
+	{ on = "$",      run = "move eol",        desc = "Move to the EOL" },
+	{ on = "_",      run = "move first-char", desc = "Move to the first non-whitespace character" },
+	{ on = "^",      run = "move first-char", desc = "Move to the first non-whitespace character" },
+	{ on = "<C-a>",  run = "move bol",        desc = "Move to the BOL" },
+	{ on = "<C-e>",  run = "move eol",        desc = "Move to the EOL" },
+	{ on = "<Home>", run = "move bol",        desc = "Move to the BOL" },
+	{ on = "<End>",  run = "move eol",        desc = "Move to the EOL" },
+
+	# Delete
+	{ on = "<Backspace>", run = "backspace",         desc = "Delete the character before the cursor" },
+	{ on = "<Delete>",    run = "backspace --under", desc = "Delete the character under the cursor" },
+	{ on = "<C-h>",       run = "backspace",         desc = "Delete the character before the cursor" },
+	{ on = "<C-d>",       run = "backspace --under", desc = "Delete the character under the cursor" },
+
+	# Kill
+	{ on = "<C-u>",         run = "kill bol",      desc = "Kill backwards to the BOL" },
+	{ on = "<C-k>",         run = "kill eol",      desc = "Kill forwards to the EOL" },
+	{ on = "<C-w>",         run = "kill backward", desc = "Kill backwards to the start of the current word" },
+	{ on = "<A-d>",         run = "kill forward",  desc = "Kill forwards to the end of the current word" },
+	{ on = "<C-Backspace>", run = "kill backward", desc = "Kill backwards to the start of the current word" },
+	{ on = "<C-Delete>",    run = "kill forward",  desc = "Kill forwards to the end of the current word" },
+
+	# Cut/Yank/Paste
+	{ on = "d", run = "delete --cut",                                      desc = "Cut selected characters" },
+	{ on = "D", run = [ "delete --cut", "move eol" ],                      desc = "Cut until EOL" },
+	{ on = "c", run = "delete --cut --insert",                             desc = "Cut selected characters, and enter insert mode" },
+	{ on = "C", run = [ "delete --cut --insert", "move eol" ],             desc = "Cut until EOL, and enter insert mode" },
+	{ on = "s", run = [ "delete --cut --insert", "move 1" ],               desc = "Cut current character, and enter insert mode" },
+	{ on = "S", run = [ "move bol", "delete --cut --insert", "move eol" ], desc = "Cut from BOL until EOL, and enter insert mode" },
+	{ on = "x", run = [ "delete --cut", "move 1 --in-operating" ],         desc = "Cut current character" },
+	{ on = "y", run = "yank",                                              desc = "Copy selected characters" },
+	{ on = "p", run = "paste",                                             desc = "Paste copied characters after the cursor" },
+	{ on = "P", run = "paste --before",                                    desc = "Paste copied characters before the cursor" },
+
+	# Undo/Redo/Casefy
+	{ on = "u",     run = [ "undo", "casefy lower" ], desc = "Undo, or lowercase if in visual mode" },
+	{ on = "U",     run = "casefy upper",             desc = "Uppercase" },
+	{ on = "<C-r>", run = "redo",                     desc = "Redo the last operation" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[confirm]
+
+keymap = [
+	{ on = "<Esc>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<C-[>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<C-c>",   run = "close",          desc = "Cancel the confirm" },
+	{ on = "<Enter>", run = "close --submit", desc = "Submit the confirm" },
+
+	{ on = "n", run = "close",          desc = "Cancel the confirm" },
+	{ on = "y", run = "close --submit", desc = "Submit the confirm" },
+
+	{ on = "k", run = "arrow prev", desc = "Previous line" },
+	{ on = "j", run = "arrow next", desc = "Next line" },
+
+	{ on = "<Up>",   run = "arrow prev", desc = "Previous line" },
+	{ on = "<Down>", run = "arrow next", desc = "Next line" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[cmp]
+
+keymap = [
+	{ on = "<C-c>",   run = "close",                                      desc = "Cancel completion" },
+	{ on = "<Tab>",   run = "close --submit",                             desc = "Submit the completion" },
+	{ on = "<Enter>", run = [ "close --submit", "input:close --submit" ], desc = "Complete and submit the input" },
+
+	{ on = "<A-k>", run = "arrow prev", desc = "Previous item" },
+	{ on = "<A-j>", run = "arrow next", desc = "Next item" },
+
+	{ on = "<Up>",   run = "arrow prev", desc = "Previous item" },
+	{ on = "<Down>", run = "arrow next", desc = "Next item" },
+
+	{ on = "<C-p>", run = "arrow prev", desc = "Previous item" },
+	{ on = "<C-n>", run = "arrow next", desc = "Next item" },
+
+	# Help
+	{ on = "~",    run = "help", desc = "Open help" },
+	{ on = "<F1>", run = "help", desc = "Open help" },
+]
+
+[help]
+
+keymap = [
+	{ on = "<Esc>", run = "escape", desc = "Clear the filter, or hide the help" },
+	{ on = "<C-[>", run = "escape", desc = "Clear the filter, or hide the help" },
+	{ on = "<C-c>", run = "close",  desc = "Hide the help" },
+	{ on = "<A-q>", run = "close",  desc = "Hide the help" },
+	{ on = "q", run = "close",  desc = "Hide the help" },
+
+	# Navigation
+	{ on = "k", run = "arrow prev", desc = "Previous line" },
+	{ on = "j", run = "arrow next", desc = "Next line" },
+
+	{ on = "<Up>",   run = "arrow prev", desc = "Previous line" },
+	{ on = "<Down>", run = "arrow next", desc = "Next line" },
+
+	# Filtering
+	{ on = "f", run = "filter", desc = "Filter help items" },
+]

@@ -1,0 +1,82 @@
+[[plugin.deps]]
+use = "boydaihungst/mediainfo"
+rev = "6fbed8d"
+hash = "57ae6b43c477e117802f176683b78e74"
+
+[[plugin.deps]]
+use = "Sonico98/exifaudio"
+rev = "4506f9d"
+hash = "4761fffb60a12d37096c34a356380cdf"
+
+[[plugin.deps]]
+use = "macydnah/office"
+rev = "41ebef8"
+hash = "5805affd3ae8adcb3c72b6997d21c0a6"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:preview-typst"
+rev = "1d28640"
+hash = "b30c20172c5f7d552342fdc14a11f92a"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:preview-sqlite"
+rev = "1d28640"
+hash = "e21bd1066bfd09c92fd0201cffec287f"
+
+[[plugin.deps]]
+use = "ndtoan96/ouch"
+rev = "406ce6c"
+hash = "f5afc904d5106ee368c8aa2ded43bd74"
+
+[[plugin.deps]]
+use = "Rolv-Apneseth/starship"
+rev = "eca1861"
+hash = "e519d894e94ded741e06aae4d4775981"
+
+[[plugin.deps]]
+use = "boydaihungst/save-clipboard-to-file"
+rev = "4f034ac"
+hash = "4bdfecaa643db1cc28ccba799463d5b8"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "1962818"
+hash = "f0c8c378184d5f8abd1b095a443d336d"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:mount"
+rev = "1962818"
+hash = "91937a4a9b779eabc6983e258befdfe9"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:spot"
+rev = "1d28640"
+hash = "854227f2312a6287c7872726e74f8de3"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:spot-image"
+rev = "1d28640"
+hash = "afa0c98d3cab4a594ce5aae7ea92a81a"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:spot-audio"
+rev = "1d28640"
+hash = "5f55cfa8993d3cb94ed217ffabda9366"
+
+[[plugin.deps]]
+use = "AminurAlam/yazi-plugins:spot-video"
+rev = "1d28640"
+hash = "3e437d65ebb31ac1ce2e1a20c93f3357"
+
+[[plugin.deps]]
+use = "Rolv-Apneseth/bypass"
+rev = "c1e5fcf"
+hash = "208e77480824f62558a5b037c8569d61"
+
+[[plugin.deps]]
+use = "Ape/open-with-cmd"
+rev = "e3d430f"
+hash = "d29c1ffa99099181faf8c01d1f59aa4c"
+
+[flavor]
+deps = []
