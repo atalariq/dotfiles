@@ -3,7 +3,20 @@ return {
   branch = "stable",
   lazy = false,
   keys = {
-    { "<leader>F", "<Cmd>Fyler kind=float<Cr>", desc = "Open Fyler View" },
+    {
+      "<leader>E",
+      function()
+        require("fyler").open({ dir = vim.fn.getcwd(), kind = "float" })
+      end,
+      desc = "Fyler (cwd)",
+    },
+    {
+      "<leader>fE",
+      function()
+        require("fyler").open({ dir = LazyVim.root(), kind = "float" })
+      end,
+      desc = "Fyler (Root Dir)",
+    },
   },
   opts = {
     integrations = {
@@ -12,8 +25,8 @@ return {
     views = {
       finder = {
         close_on_select = true,
-        confirm_simple = true,
-        default_explorer = false,
+        confirm_simple = false,
+        default_explorer = true,
         delete_to_trash = true,
         mappings = {
           ["q"] = "CloseView",
@@ -28,6 +41,14 @@ return {
           ["."] = "GotoNode",
           ["#"] = "CollapseAll",
           ["<BS>"] = "CollapseNode",
+          ["gd"] = function(self)
+            local current_node = self:cursor_node_entry()
+            if not current_node then
+              return
+            end
+            local path = current_node.path
+            vim.cmd("!ripdrag --and-exit --basename --resizable --all  '" .. path .. "'")
+          end,
         },
       },
     },
