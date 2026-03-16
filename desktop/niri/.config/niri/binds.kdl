@@ -8,9 +8,9 @@ binds {
   Mod+Return hotkey-overlay-title="Terminal (kitty)" {
     spawn "~/.config/niri/script/run-or-raise" "kitty" "kitty";
   }
-  // Mod+F hotkey-overlay-title="Files" {
-  //   spawn "~/.config/niri/script/run-or-raise" "nautilus" "nautilus";
-  // }
+  Mod+F hotkey-overlay-title="Files" {
+    spawn "~/.config/niri/script/run-or-raise" "nautilus" "nautilus";
+  }
   Mod+W hotkey-overlay-title="Browser" {
     spawn "~/.config/niri/script/run-or-raise" "brave-browser" "brave";
   }
@@ -169,5 +169,5 @@ binds {
 
   // === System Controls ===
   // Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
-  // Mod+Shift+P { power-off-monitors; } 
+  // Mod+Shift+P { power-off-monitors; }
 }

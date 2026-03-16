@@ -1,5 +1,5 @@
 // ===== Autostart =====
-spawn-at-startup "qs" "-c" "noctalia-shell" "--no-duplicate"
+spawn-sh-at-startup "qs -c noctalia-shell"
 spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
 // spawn-at-startup "vicinae" "server"
