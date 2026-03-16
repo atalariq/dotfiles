@@ -6,9 +6,27 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 LAB_APPS=("bat" "fish" "nvim" "yazi")
 
-PERSONAL_APPS=("${LAB_APPS[@]}" "aria2" "espanso" "glow" "htop" "lazygit" "kitty" "mpd" "mpv" "yt-dlp")
-PERSONAL_DESKTOP=("niri")
-PERSONAL_MISC=("fonts" "scripts" "startpage")
+PERSONAL_APPS=(
+  "kitty" "fish" "nvim" "yazi"
+  "ai" "zed" "zellij"
+  "mpd" "mpv" "imv"
+  "aria2" "surge" "yt-dlp"
+  "htop" "lazygit"
+  "tldr" "scholar"
+  "bitwarden"
+  # "espanso" "glow"
+)
+PERSONAL_DESKTOP=(
+  "mango" "noctalia"
+  # "niri" "noctalia"
+  # "hyprland"
+  # "wal"
+)
+PERSONAL_MISC=(
+  "fonts"
+  "scripts"
+  # "startpage"
+)
 PERSONAL_SYSTEM="archlinux" # archlinux|mac
 
 stow_folder() {
