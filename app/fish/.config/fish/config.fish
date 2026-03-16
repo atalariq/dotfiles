@@ -25,13 +25,10 @@ if status is-interactive
     # fnm, blazing fast node version manager alternative
     # (https://github.com/Schniz/fnm)
     if command -q fnm
-        fnm env --use-on-cd --shell fish | source
+        fnm env --use-on-cd --version-file-strategy=recursive --shell fish | source
     end
 
     # Bindings
     bind \en down-or-search
     bind \ep up-or-search
 end
-
-# Created by `pipx` on 2024-10-11 12:57:14
-set PATH $PATH /home/atalariq/.local/bin

@@ -1,9 +1,9 @@
-# basic
+#? basic
 abbr c clear
 abbr cls clear
 abbr se sudoedit
 
-# trash
+#? rm/trash
 abbr rmm "rm -rv"
 abbr rm "gio trash"
 abbr trl "gio trash --list"
@@ -14,7 +14,7 @@ abbr trs "gio trash --restore"
 abbr rm-empty-files "find . -type f -empty -print -delete"
 abbr rm-empty-folders "find . -type d -empty -print -delete"
 
-# exa/eza
+#? exa/eza
 # abbr ll "eza --icons --group-directories-first -lgh"
 # abbr lla "eza --icons --group-directories-first -algh"
 # abbr ls "eza --icons --group-directories-first"
@@ -22,10 +22,7 @@ abbr rm-empty-folders "find . -type d -empty -print -delete"
 # abbr lt "eza --icons --group-directories-first -T"
 # abbr tree "eza --icons --group-directories-first -T"
 
-# fzf
-abbr fzfp "fzf --reverse --preview 'bat --style=numbers --color=always --line-range :500 {}'"
-
-# git {{{
+#? git {{{
 abbr g git
 abbr ga "git add"
 abbr gcl "git clone --depth 1"
@@ -39,7 +36,7 @@ abbr gs "git status"
 abbr lg lazygit
 # }}}
 
-# systemctl {{{
+#? systemctl {{{
 abbr scr "sudo systemctl restart"
 abbr sce "sudo systemctl enable"
 abbr scd "sudo systemctl disable"

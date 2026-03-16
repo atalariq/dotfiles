@@ -45,7 +45,7 @@ complete -c fnm -n "__fish_fnm_needs_command" -f -a "env" -d 'Print and set up r
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "completions" -d 'Print shell completions to stdout'
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "alias" -d 'Alias a version to a common name'
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "unalias" -d 'Remove an alias definition'
-complete -c fnm -n "__fish_fnm_needs_command" -f -a "default" -d 'Set a version as the default version'
+complete -c fnm -n "__fish_fnm_needs_command" -f -a "default" -d 'Set a version as the default version or get the current default version'
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "current" -d 'Print the current Node.js version'
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "exec" -d 'Run a command within fnm context'
 complete -c fnm -n "__fish_fnm_needs_command" -f -a "uninstall" -d 'Uninstall a Node.js version'
@@ -100,6 +100,7 @@ complete -c fnm -n "__fish_fnm_using_subcommand install" -l version-file-strateg
 complete -c fnm -n "__fish_fnm_using_subcommand install" -l resolve-engines -d 'Resolve `engines.node` field in `package.json` whenever a `.node-version` or `.nvmrc` file is not present. This feature is enabled by default. To disable it, provide `--resolve-engines=false`.' -r -f -a "{true\t'',false\t''}"
 complete -c fnm -n "__fish_fnm_using_subcommand install" -l lts -d 'Install latest LTS'
 complete -c fnm -n "__fish_fnm_using_subcommand install" -l latest -d 'Install latest version'
+complete -c fnm -n "__fish_fnm_using_subcommand install" -l use -d 'Use the installed version immediately after installation'
 complete -c fnm -n "__fish_fnm_using_subcommand install" -l corepack-enabled -d 'Enable corepack support for each new installation. This will make fnm call `corepack enable` on every Node.js installation. For more information about corepack see <https://nodejs.org/api/corepack.html>'
 complete -c fnm -n "__fish_fnm_using_subcommand install" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c fnm -n "__fish_fnm_using_subcommand i" -l progress -d 'Show an interactive progress bar for the download status' -r -f -a "{auto\t'',never\t'',always\t''}"
@@ -111,6 +112,7 @@ complete -c fnm -n "__fish_fnm_using_subcommand i" -l version-file-strategy -d '
 complete -c fnm -n "__fish_fnm_using_subcommand i" -l resolve-engines -d 'Resolve `engines.node` field in `package.json` whenever a `.node-version` or `.nvmrc` file is not present. This feature is enabled by default. To disable it, provide `--resolve-engines=false`.' -r -f -a "{true\t'',false\t''}"
 complete -c fnm -n "__fish_fnm_using_subcommand i" -l lts -d 'Install latest LTS'
 complete -c fnm -n "__fish_fnm_using_subcommand i" -l latest -d 'Install latest version'
+complete -c fnm -n "__fish_fnm_using_subcommand i" -l use -d 'Use the installed version immediately after installation'
 complete -c fnm -n "__fish_fnm_using_subcommand i" -l corepack-enabled -d 'Enable corepack support for each new installation. This will make fnm call `corepack enable` on every Node.js installation. For more information about corepack see <https://nodejs.org/api/corepack.html>'
 complete -c fnm -n "__fish_fnm_using_subcommand i" -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c fnm -n "__fish_fnm_using_subcommand use" -l node-dist-mirror -d '<https://nodejs.org/dist/> mirror' -r
@@ -210,7 +212,7 @@ complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcom
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "completions" -d 'Print shell completions to stdout'
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "alias" -d 'Alias a version to a common name'
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "unalias" -d 'Remove an alias definition'
-complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "default" -d 'Set a version as the default version'
+complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "default" -d 'Set a version as the default version or get the current default version'
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "current" -d 'Print the current Node.js version'
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "exec" -d 'Run a command within fnm context'
 complete -c fnm -n "__fish_fnm_using_subcommand help; and not __fish_seen_subcommand_from list-remote list install use env completions alias unalias default current exec uninstall help" -f -a "uninstall" -d 'Uninstall a Node.js version'
