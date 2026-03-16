@@ -6,8 +6,9 @@
 if [[ -z $DISPLAY && $(tty) == /dev/tty1 && $XDG_SESSION_TYPE == tty ]]; then
   export XDG_SESSION_TYPE=wayland
   export QT_QPA_PLATFORMTHEME=qt6ct
-  # [ -f "$HOME/.xprofile" ] && source $HOME/.xprofile
-  exec niri-session
+
+  # exec niri-session
+  exec mango
 elif [[ -z $DISPLAY && $(tty) == /dev/tty2 && $XDG_SESSION_TYPE == tty ]]; then
   exec start-cosmic
 fi
