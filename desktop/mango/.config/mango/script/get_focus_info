@@ -1,0 +1,11 @@
+#!/bin/sh
+
+FULL=$(mmsg -g -c)
+APPID=$(echo "$FULL" | grep appid | cut -d' ' -f 3-)
+TITLE=$(echo "$FULL" | grep title | cut -d' ' -f 3- )
+
+MSG="appid:${APPID},title:${TITLE}"
+
+fyi "Info" "$MSG"
+
+echo "$MSG" | wl-copy

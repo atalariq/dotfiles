@@ -1,0 +1,314 @@
+#!/usr/bin/env bash
+# shot.sh - Screenshot & screen recorder for wlroots-based Wayland compositors
+# Dependencies: grim, slurp, wl-copy, wl-paste, notify-send (libnotify), imagemagick,
+#               mmsg, tesseract, satty, gpu-screen-recorder, ripdrag, cliphist
+
+# ─── CONFIG ────────────────────────────────────────────────────────────────────
+
+readonly SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+readonly RECORDING_DIR="$HOME/Videos/Recordings"
+readonly ICON='/usr/share/icons/Papirus/64x64/devices/camera-photo.svg'
+
+# Decoration
+readonly BG_COLOR='#ffffff'
+readonly BG_PADDING=20
+readonly BORDER_SIZE=1
+readonly CORNER_RADIUS=8
+readonly SHADOW_ARGS='60x15+0+12'
+readonly SHADOW_COLOR='#00000055'
+readonly COLOR_PROFILE='/usr/share/color/icc/colord/sRGB.icc'
+
+# ─── HELPERS ───────────────────────────────────────────────────────────────────
+
+notify() {
+  local title="$1"; shift
+  notify-send -i "$ICON" -t 2000 -u low "$title" "$@"
+}
+
+ensure_dirs() {
+  mkdir -p "$SCREENSHOT_DIR" "$RECORDING_DIR"
+}
+
+make_filename() {
+  local prefix="${1:-shot}" ext="${2:-png}"
+  printf '%s/%s-%s.%s\n' "$SCREENSHOT_DIR" "$prefix" "$(date '+%Y%m%d-%H%M%S')" "$ext"
+}
+
+# ─── DECORATION ────────────────────────────────────────────────────────────────
+
+decorate() {
+  local img="$1"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  local mvg="$tmp_dir/rounded.mvg"
+  local mask="$tmp_dir/mask.png"
+  local overlay="$tmp_dir/overlay.png"
+
+  # Round corners + border
+  convert "$img" \
+    -format "roundrectangle 1,1 %[fx:w+4],%[fx:h+4] ${CORNER_RADIUS},${CORNER_RADIUS}" \
+    info: > "$mvg"
+
+  convert "$img" -border "$BORDER_SIZE" -alpha transparent \
+    -background none -fill white -stroke none -strokewidth 0 \
+    -draw "@${mvg}" "$mask"
+
+  convert "$img" -border "$BORDER_SIZE" -alpha transparent \
+    -background none -fill none \
+    -stroke white -strokewidth "$BORDER_SIZE" \
+    -draw "@${mvg}" "$overlay"
+
+  convert "$img" -alpha set -bordercolor none -border "$BORDER_SIZE" \
+    "$mask"    -compose DstIn  -composite \
+    "$overlay" -compose Over   -composite \
+    "$img"
+
+  # Drop shadow
+  convert "$img" \
+    \( +clone -background "$SHADOW_COLOR" -shadow "$SHADOW_ARGS" \) \
+    +swap -background none -layers merge +repage \
+    "$img"
+
+  # White margin
+  convert "$img" \
+    -bordercolor "$BG_COLOR" \
+    -border "$BG_PADDING" \
+    "$img"
+
+  # Color profile
+  [[ -f "$COLOR_PROFILE" ]] && \
+    convert "$img" -profile "$COLOR_PROFILE" "$img"
+
+  rm -rf "$tmp_dir"
+}
+
+# ─── CLIPHIST ──────────────────────────────────────────────────────────────────
+
+# Deletes the latest cliphist entry (the raw screenshot), then pushes
+# the new file so history stays clean with only the final version.
+cliphist_replace() {
+  local file="$1"
+  cliphist list | head -1 | cliphist delete
+  wl-copy < "$file"
+}
+
+# ─── FINALIZE ──────────────────────────────────────────────────────────────────
+# Immediately copies raw screenshot to clipboard (non-blocking), then
+# spawns a background subshell to handle the action notification.
+
+_notify_saved() {
+  local file="$1"
+  local dir; dir="$(dirname "$file")"
+
+  local action
+  action=$(notify-send \
+    --icon "$file" \
+    --action="open=🖼️  Open Image" \
+    --action="folder=📂  Open Folder" \
+    --transient \
+    --wait \
+    "Saved 💾" "$file")
+
+  case "$action" in
+    open)   xdg-open "$file" ;;
+    # folder) xdg-open "$dir"  ;;
+    folder) kitty --app-id files -e yazi "$dir" ;;
+  esac
+}
+
+_finalize_decorated() {
+  local tmp="$1"
+  local action
+
+  action=$(notify-send \
+    --icon "$tmp" \
+    --action="save=💾  Save" \
+    --action="drag=🖱️  Quick Drag" \
+    --transient \
+    --wait \
+    "Decorated 🎨" "What do you want to do with it?")
+
+  case "$action" in
+    save)
+      local out; out="$(make_filename 'shot')"
+      mv "$tmp" "$out"
+      cliphist_replace "$out"
+      _notify_saved "$out"
+      ;;
+    drag)
+      ripdrag --and-exit --all "$tmp" &
+      disown
+      exit 0
+      ;;
+  esac
+
+  rm -f "$tmp"
+}
+
+finalize() {
+  local tmp="$1"
+
+  wl-copy < "$tmp"
+
+  (
+    local action
+    action=$(notify-send \
+      --icon "$tmp" \
+      --action="save=💾  Save" \
+      --action="decorate=🎨  Decorate" \
+      --action="drag=🖱️  Quick Drag" \
+      --transient \
+      --wait \
+      "Shot 📸" "Copied to clipboard")
+
+    case "$action" in
+      save)
+        local out; out="$(make_filename 'shot')"
+        cp "$tmp" "$out"
+        cliphist_replace "$out"
+        _notify_saved "$out"
+        ;;
+      decorate)
+        local out; out="$(make_filename 'shot')"
+        cp "$tmp" "$out"
+        decorate "$out"
+        cliphist_replace "$out"    # clipboard sekarang versi terdekorasi
+        _finalize_decorated "$out" # prompt tahap kedua
+        exit 0                     # cleanup sudah dihandle di dalam helper
+        ;;
+      drag)
+        ripdrag --and-exit --all "$tmp" &
+        disown
+        exit 0
+        ;;
+    esac
+
+    rm -f "$tmp"
+  ) &
+}
+
+# ─── SCREENSHOT MODES ──────────────────────────────────────────────────────────
+
+shot_screen() {
+  local tmp; tmp="$(mktemp --suffix=.png)"
+  grim "$tmp" || { rm -f "$tmp"; exit 1; }
+  finalize "$tmp"
+}
+
+shot_area() {
+  local tmp; tmp="$(mktemp --suffix=.png)"
+  local geometry
+  geometry="$(slurp -b ffffff33 -c FFFF00)" || { rm -f "$tmp"; exit 1; }
+  grim -g "$geometry" "$tmp" || { rm -f "$tmp"; exit 1; }
+  finalize "$tmp"
+}
+
+shot_active() {
+  local tmp; tmp="$(mktemp --suffix=.png)"
+  local geometry
+  geometry="$(mmsg -x | awk '{print $3}' | xargs printf "%s,%s %sx%s\n")" || {
+    rm -f "$tmp"; exit 1
+  }
+  grim -g "$geometry" "$tmp" || { rm -f "$tmp"; exit 1; }
+  finalize "$tmp"
+}
+
+shot_annotate() {
+  local out; out="$(make_filename 'annotated')"
+  grim -g "$(slurp -o -r -c '#ff0000ff')" -t ppm - \
+    | satty --filename - --fullscreen --output-filename "$out"
+  if [[ -f "$out" ]]; then
+    wl-copy < "$out"
+    notify "Annotated 📸" "Saved → $out"
+  fi
+}
+
+shot_ocr() {
+  grim -g "$(slurp)" - \
+    | tesseract -l ind+eng stdin stdout \
+    | wl-copy && \
+    notify "OCR 📸" "Result copied to clipboard"
+}
+
+save_from_clipboard() {
+  ensure_dirs
+  local out; out="$(make_filename 'clip')"
+  if wl-paste --type image/png > "$out" 2>/dev/null; then
+    notify "Saved from Clipboard 💾" "$out"
+  else
+    notify "Save Failed ❌" "Clipboard doesn't contain an image"
+    rm -f "$out"
+  fi
+}
+
+# ─── SCREEN RECORDER ───────────────────────────────────────────────────────────
+
+record() {
+  local sub="${1:-status}"
+
+  case "$sub" in
+    start)
+      if pidof -q gpu-screen-recorder; then
+        notify "Already Recording 🔴" "Use 'shot record stop' to stop"
+        exit 0
+      fi
+      ensure_dirs
+      local video; video="$RECORDING_DIR/rec-$(date +'%Y%m%d-%H%M%S').mp4"
+      notify "Recording Started 🔴" "$video"
+      gpu-screen-recorder -w screen -f 60 -a default_output -o "$video" \
+        >> "$RECORDING_DIR/.gsr.log" 2>&1 &
+      echo $! > /tmp/.gsr.pid
+      disown
+      ;;
+    stop)
+      if [[ -f /tmp/.gsr.pid ]]; then
+        kill -SIGINT "$(cat /tmp/.gsr.pid)" 2>/dev/null
+        rm -f /tmp/.gsr.pid
+      else
+        killall -SIGINT gpu-screen-recorder 2>/dev/null
+      fi
+      sleep 0.8
+      notify "Recording Stopped ⏹" "Saved to $RECORDING_DIR"
+      ;;
+    status)
+      if pidof -q gpu-screen-recorder; then
+        notify "Recording Active 🔴" "PID: $(pidof gpu-screen-recorder)"
+      else
+        notify "Not Recording ⬜" "Use 'shot record start'"
+      fi
+      ;;
+    toggle)
+      if pidof -q gpu-screen-recorder; then
+        record stop
+      else
+        record start
+      fi
+      ;;
+    *)
+      printf 'Usage: shot record {start|stop|status|toggle}\n' >&2
+      exit 1
+      ;;
+  esac
+}
+
+# ─── ENTRY POINT ───────────────────────────────────────────────────────────────
+
+main() {
+  ensure_dirs
+
+  case "${1:-area}" in
+    screen)    shot_screen    ;;
+    area)      shot_area      ;;
+    active)    shot_active    ;;
+    annotate)  shot_annotate  ;;
+    ocr)       shot_ocr       ;;
+    save-clip) save_from_clipboard ;;
+    record)    shift; record "$@" ;;
+    *)
+      printf 'Usage: shot {screen|area|active|annotate|ocr|save-clip|record}\n' >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
