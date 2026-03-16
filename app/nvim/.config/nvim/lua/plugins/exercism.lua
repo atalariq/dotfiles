@@ -12,7 +12,7 @@ return {
     "2kabhishek/termim.nvim", -- optional, better UX for running tests
   },
   opts = {
-    exercism_workspace = "~/Exercism",
+    exercism_workspace = "~/Dev/Exercism",
     default_language = "go",
     add_default_keybindings = false,
   },

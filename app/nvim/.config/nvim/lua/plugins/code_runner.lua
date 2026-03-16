@@ -33,8 +33,33 @@ return {
             '"$dir/bin/$fileNameWithoutExt"',
           },
           rust = { "cd $dir &&", "rustc $fileName &&", "$dir/$fileNameWithoutExt" },
+          java = function()
+            local root = vim.fn.getcwd()
+            local file = vim.fn.expand("%:p")
+            local classname = vim.fn.expand("%:t:r")
+
+            local package = ""
+            for line in io.lines(file) do
+              local p = line:match("^%s*package%s+([%w%.]+)%s*;")
+              if p then
+                package = p
+                break
+              end
+            end
+
+            local fqcn = classname
+            if package ~= "" then
+              fqcn = package .. "." .. classname
+            end
+
+            return table.concat({
+              "cd " .. root .. " &&",
+              "mkdir -p bin &&",
+              'javac -d bin $(find src -name "*.java") &&',
+              "java -cp bin " .. fqcn,
+            }, " ")
+          end,
           python = "python '$file'",
-          java = "java '$file'",
         },
       })
     end,

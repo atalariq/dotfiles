@@ -23,9 +23,8 @@ inoremap("<C-s>", "<Esc><Esc><Cmd>update<cr>", { desc = "Save File" })
 vnoremap("<C-s>", "<Esc><Esc><Cmd>update<cr>", { desc = "Save File" })
 
 -- Source file
--- nnoremap("<leader>fs", "<CMD>source % | echo 'Source current file!'<CR>", { desc = "File: source current" })
-
-nnoremap("<Leader>cd", "<Cmd>cd %:h<CR>", { desc = "Change directory" })
+nnoremap("<leader>fs", "<CMD>source % | echo 'Source current file!'<CR>", { desc = "File: source current" })
+nnoremap("<Leader>cd", "<Cmd>lcd %:p:h<CR>", { desc = "Change directory" })
 
 -- }}}
 
@@ -33,7 +32,6 @@ nnoremap("<Leader>cd", "<Cmd>cd %:h<CR>", { desc = "Change directory" })
 nnoremap("/", "ms/", { desc = "Keeps jumplist after forward searching" })
 nnoremap("?", "ms?", { desc = "Keeps jumplist after backward searching" })
 nnoremap("<Esc><Esc>", "<CMD>nohl<CR>", { desc = "Toggle search highlight" })
-nnoremap("<M-n>", "<CMD>nohl<CR>", { desc = "Toggle search highlight" })
 
 -- }}}
 
@@ -42,11 +40,6 @@ nnoremap("<C-k>", "<C-w><C-k>", { desc = "Go to the top window" })
 nnoremap("<C-j>", "<C-w><C-j>", { desc = "Go to the bottom window" })
 nnoremap("<C-l>", "<C-w><C-l>", { desc = "Go to the right window" })
 nnoremap("<C-h>", "<C-w><C-h>", { desc = "Go to the left window" })
-
--- nnoremap("<A-k>", "<Cmd>resize +3<CR>", { desc = "Resize window up" })
--- nnoremap("<A-j>", "<Cmd>resize -3<CR>", { desc = "Resize window down" })
--- nnoremap("<A-l>", "<Cmd>vertical resize +3<CR>", { desc = "Resize window left" })
--- nnoremap("<A-h>", "<Cmd>vertical resize -3<CR>", { desc = "Resize window right" })
 -- }}}
 
 -- Buffer {{{
