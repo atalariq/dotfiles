@@ -1,0 +1,21 @@
+collections:
+  notes:
+    path: /home/atalariq/Grimoire/Notes
+    pattern: "**/*.md"
+    context:
+      "": Personal notes and ideas, my digital garden
+  study:
+    path: /home/atalariq/Kuliah/01_Notes
+    pattern: "**/*.md"
+    context:
+      "": College notes
+  papers:
+    path: /home/atalariq/Documents/Papers
+    pattern: "**/*.md"
+    context:
+      "": Saved articles/papers/journals
+  meetings:
+    path: /home/atalariq/Documents/Meetings
+    pattern: "**/*.md"
+    context:
+      "": Meeting transcripts and notes

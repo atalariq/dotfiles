@@ -1,0 +1,209 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openrouter/deepseek/deepseek-v3.2",
+  "default_agent": "plan",
+  "agent": {
+    "build": { "model": "openrouter/minimax/minimax-m2.5" },
+    "plan": { "model": "openrouter/deepseek/deepseek-v3.2" },
+    "research": { "model": "google/gemini-2.5-pro" }
+  },
+  "provider": {
+    "openrouter": {
+      "models": {
+        "deepseek/deepseek-v3.2": { "name": "DeepSeek V3.2  [Plan/Research]" },
+        "deepseek/deepseek-v3.2-speciale": { "name": "DeepSeek Speciale  [Math/Reason]" },
+        "minimax/minimax-m2.5": { "name": "MiniMax M2.5  [Build/Debug]" },
+        "moonshotai/kimi-k2.5": { "name": "Kimi K2.5  [Visual/Research]" },
+        "z-ai/glm-4.7": { "name": "GLM-4.7  [Agentic]" },
+        "z-ai/glm-5": { "name": "GLM-5  [Agentic]" },
+      },
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "apiKey": "{env:OPENROUTER_API_KEY}",
+        "baseURL": "https://openrouter.ai/api/v1"
+      }
+    },
+    "google": {
+      "models": {
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": false,
+              "thinkingBudget": 4096
+            }
+          }
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": true,
+              "thinkingBudget": 8192
+            }
+          }
+        },
+        "gemini-3-flash-preview": {
+          "name": "Gemini 3 Flash  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": false,
+              "thinkingLevel": "medium"
+            }
+          }
+        },
+        "gemini-3-pro-preview": {
+          "name": "Gemini 3 Pro  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": true,
+              "thinkingLevel": "high"
+            }
+          }
+        },
+        "gemini-3.1-flash-preview": {
+          "name": "Gemini 3.1 Flash  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": false,
+              "thinkingLevel": "medium"
+            }
+          }
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro  [Free/Student Plan]",
+          "options": {
+            "thinkingConfig": {
+              "includeThoughts": true,
+              "thinkingLevel": "high"
+            }
+          }
+        }
+      }
+    }
+  },
+  "mcp": {
+    "anki": {
+      "command": ["npx", "-y", "anki-mcp-server"],
+      "enabled": false,
+      "type": "local"
+    },
+    "arxiv": {
+      "command": [
+        "uv",
+        "tool",
+        "run",
+        "arxiv_mcp_server",
+        "--storage-path",
+        "/home/atalariq/Documents/Papers"
+      ],
+      "enabled": false,
+      "type": "local"
+    },
+    "brave-search": {
+      "command": [
+        "docker",
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "{env:BRAVE_API_KEY}",
+        "docker.io/mcp/brave-search"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "context7": {
+      "enabled": true,
+      "headers": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" },
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "exa": {
+      "enabled": true,
+      "headers": {
+        "X-API-Key": "{env:EXA_API_KEY}"
+      },
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "fetch": {
+      "command": ["uvx", "mcp-server-fetch"],
+      "enabled": true,
+      "type": "local"
+    },
+    "filesystem": {
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/atalariq/Grimoire",
+        "/home/atalariq/Templates",
+        "/home/atalariq/Repos/Works"
+      ],
+      "enabled": false,
+      "type": "local"
+    },
+    "freshcontext": {
+      "command": [
+        "npx",
+        "-y",
+        "mcp-remote",
+        "https://freshcontext-mcp.gimmanuel73.workers.dev/mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
+    "github": {
+      "enabled": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "oauth": false,
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "icm": {
+      "command": ["/usr/local/bin/icm", "serve"],
+      "enabled": true,
+      "type": "local"
+    },
+    "pkg-version": {
+      "command": ["npx", "-y", "package-version-mcp"],
+      "enabled": false,
+      "type": "local"
+    },
+    "playwright": {
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": false,
+      "type": "local"
+    },
+    "qmd": {
+      "type": "local",
+      "command": ["qmd", "mcp"],
+      "enabled": true
+    },
+    "typst": {
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "ghcr.io/johannesbrandenburger/typst-mcp:latest"
+      ],
+      "enabled": false,
+      "type": "local"
+    },
+    "youtube-transcript": {
+      "command": ["npx", "-y", "@kimtaeyoon83/mcp-server-youtube-transcript"],
+      "enabled": false,
+      "type": "local"
+    }
+  },
+  "plugin": [
+    "opencode-gemini-auth@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "@mohak34/opencode-notifier@latest",
+    "@franlol/opencode-md-table-formatter@latest"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "experimental": {
+    "modelSteering": true,
+    "plan": true
+  },
+  "general": {
+    "defaultApprovalMode": "plan",
+    "enableAutoUpdate": false,
+    "enableNotifications": true,
+    "enablePromptCompletion": true,
+    "preferredEditor": "neovim",
+    "previewFeatures": true,
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "warningAcknowledged": true
+    },
+    "vimMode": false
+  },
+  "mcpServers": {
+    "icm": {
+      "args": [
+        "serve"
+      ],
+      "command": "/usr/local/bin/icm",
+      "env": {}
+    }
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "tools": {
+    "shell": {
+      "showColor": true
+    }
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false
+    },
+    "hideTips": false,
+    "inlineThinkingMode": "full",
+    "loadingPhrases": "all",
+    "showCitations": true,
+    "showModelInfoInChat": true
+  }
+}
