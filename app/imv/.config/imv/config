@@ -1,0 +1,65 @@
+# ~/.config/imv/config
+# imv - keyboard-driven image viewer
+# Run with: imv-wayland (or imv if symlinked correctly)
+[options]
+background               = 111111
+fullscreen               = false
+title_text               = [imv] $filename ($width x $height) [$imv_current/$imv_count] $scale%
+scaling_mode             = full
+upscaling_method         = linear
+initial_pan              = 50 50
+overlay                  = false
+overlay_font             = JetBrainsMono Nerd Font:11
+overlay_text             = '$imv_current_file  [$imv_current_index/$imv_file_count]  $imv_width×$imv_height  $imv_scale'
+overlay_text_color       = ffffff
+overlay_background_color = aa0000
+loop_input               = true
+
+[binds]
+# Quit
+q              = quit
+
+# Navigation - vi style
+h              = prev
+l              = next
+<Left>         = prev
+<Right>        = next
+<Home>         = goto 0
+<End>          = goto -1
+
+# Zoom
+0              = zoom actual
++              = zoom  10
+-              = zoom -10
+
+# Pan (arrow keys when zoomed)
+<Shift+H>      = pan -50 0
+<Shift+L>      = pan  50 0
+<Shift+K>      = pan 0 -50
+<Shift+J>      = pan 0  50
+c              = center
+
+# Rotate & flip
+<Less>         = rotate -90
+<Greater>      = rotate  90
+<Shift+V>      = flip 'vertical'
+<Shift+F>      = flip 'horizontal'
+
+# Fullscreen
+<F11>          = fullscreen
+<Return>       = fullscreen
+
+# Overlay (info)
+i              = overlay
+
+# Delete (move to trash via gio)
+<Delete>       = exec gio trash "$imv_current_file" && echo "Trashed: $imv_current_file"
+
+# Copy image to clipboard
+<Ctrl+C>       = exec wl-copy < "$imv_current_file"
+
+# Copy path to clipboard
+<Ctrl+Shift+C> = exec printf '%s' "$imv_current_file" | wl-copy
+
+# Open in satty for annotation
+a              = exec satty --filename "$imv_current_file" &
