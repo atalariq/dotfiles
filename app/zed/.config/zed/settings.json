@@ -1,0 +1,61 @@
+{
+  "agent_servers": {
+    "OpenCode": {
+      "args": [
+        "acp"
+      ],
+      "command": "opencode"
+    }
+  },
+  "buffer_font_family": "Fira Code",
+  "buffer_font_size": 16.0,
+  "buffer_font_weight": 500.0,
+  "context_servers": {
+    "icm": {
+      "command": {
+        "args": [
+          "serve"
+        ],
+        "env": {},
+        "path": "/usr/local/bin/icm"
+      },
+      "settings": {}
+    }
+  },
+  "disable_ai": false,
+  "document_folding_ranges": "on",
+  "document_symbols": "on",
+  "git": {
+    "inline_blame": {
+      "show_commit_summary": true
+    }
+  },
+  "icon_theme": "Material Icon Theme",
+  "prettier": {
+    "allowed": true
+  },
+  "project_panel": {
+    "hide_gitignore": true,
+    "hide_hidden": false,
+    "hide_root": false
+  },
+  "search": {
+    "regex": true,
+    "whole_word": true
+  },
+  "semantic_tokens": "combined",
+  "terminal": {
+    "toolbar": {
+      "breadcrumbs": true
+    }
+  },
+  "theme": {
+    "dark": "Noctalia Dark",
+    "light": "Noctalia Light",
+    "mode": "system"
+  },
+  "ui_font_family": "Inter",
+  "ui_font_size": 16,
+  "ui_font_weight": 500.0,
+  "use_smartcase_search": true
+}
