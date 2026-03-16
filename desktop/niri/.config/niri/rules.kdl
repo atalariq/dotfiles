@@ -64,12 +64,29 @@ window-rule {
     default-floating-position x=10 y=10 relative-to="bottom-right"
 }
 
+// ripdrag - drag-n-drop utils
+window-rule {
+  match app-id="it.catboy.ripdrag"
+
+  open-floating true
+  default-column-width { fixed 360; }
+  default-window-height { fixed 270; }
+  default-floating-position x=12 y=12 relative-to="bottom-right"
+}
+
 // ----------- Terminal
 window-rule {
   match app-id="kitty"
 
   // scroll-factor 0.5     // Base: 0.25
   draw-border-with-background false
+}
+
+window-rule {
+  match app-id="jetbrains-idea"
+
+  open-maximized true
+  open-floating true
 }
 
 // ----------- Browser
@@ -101,7 +118,7 @@ window-rule {
   open-maximized true
 }
 
-// ------------------ 
+// ------------------
 // Block out mako notifications from screencasts.
 layer-rule {
   match namespace="^notifications$"
