@@ -10,7 +10,8 @@ if [[ -z $DISPLAY && $(tty) == /dev/tty1 && $XDG_SESSION_TYPE == tty ]]; then
   # exec niri-session
   exec mango
 elif [[ -z $DISPLAY && $(tty) == /dev/tty2 && $XDG_SESSION_TYPE == tty ]]; then
-  exec start-cosmic
+  export XDG_SESSION_TYPE=wayland
+  exec dbus-run-session -- gnome-shell --display-server --wayland
 fi
 
 

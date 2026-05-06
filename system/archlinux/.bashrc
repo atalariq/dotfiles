@@ -1,6 +1,19 @@
+# OPENSPEC:START
+# OpenSpec shell completions configuration
+if [ -d "/home/atalariq/.local/share/bash-completion/completions" ]; then
+  for f in "/home/atalariq/.local/share/bash-completion/completions"/*; do
+    [ -f "$f" ] && . "$f"
+  done
+fi
+# OPENSPEC:END
+
 # If not running interactively, don't do anything
 case $- in
-*i*) ;;
+*i*)
+  # if command -v "fish" >/dev/null 2>&1; then
+  #   exec fish
+  # fi
+  ;;
 *) return ;;
 esac
 
