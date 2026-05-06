@@ -1,0 +1,77 @@
+{
+  "actions": {
+    "widget-settings": "Widget beállítások"
+  },
+  "settings": {
+    "byteThresholdActive": {
+      "desc": "Állítsa be az aktivitási küszöbértéket bájt/másodpercben (B/s).",
+      "label": "Aktív küszöbérték mutatása"
+    },
+    "colorRx": {
+      "desc": "Állítsa be a letöltés (RX) ikon színét, ha az meghaladja a küszöbértéket.",
+      "label": "RX Aktív"
+    },
+    "colorSilent": {
+      "desc": "Állítsa be az ikon színét, ha a forgalom a küszöbérték alatt van.",
+      "label": "RX/TX inaktív"
+    },
+    "colorText": {
+      "desc": "Állítsa be az RX és TX értékekhez használt szövegszínt.",
+      "label": "Szöveg"
+    },
+    "colorTx": {
+      "desc": "Állítsa be a feltöltés (TX) ikon színét, ha a küszöbérték felett van.",
+      "label": "TX Aktív"
+    },
+    "contentMargin": {
+      "desc": "Vízszetes padding a widget tartalma mindkét oldalán.",
+      "label": "Tartalom margó"
+    },
+    "customFontBold": {
+      "desc": "Sebességértékek vastag betűvel.",
+      "label": "Vastag"
+    },
+    "customFontFamily": {
+      "desc": "Válasszon betűtípust a sebességértékekhez.",
+      "label": "Betűtípus",
+      "placeholder": "Betűtípus kiválasztása",
+      "searchPlaceholder": "Betűtípusok keresése…"
+    },
+    "customFontItalic": {
+      "desc": "Sebességértékek dőlt betűvel.",
+      "label": "Dőlt"
+    },
+    "fontSizeModifier": {
+      "desc": "A szövegméret skálázása az alapértelmezett mérethez képest.",
+      "label": "Betűméret módosító"
+    },
+    "horizontalLayout": {
+      "desc": "TX és RX értékek egymás mellett, nem egymás alatt.",
+      "label": "Vízszintes elrendezés"
+    },
+    "iconSizeModifier": {
+      "desc": "Az ikonméret skálázása az alapértelmezett mérethez képest.",
+      "label": "Ikonméret módosító"
+    },
+    "iconType": {
+      "desc": "Válaszd ki az TX/RX indikátorokhoz használt ikonkészletet.",
+      "label": "Ikon típusa"
+    },
+    "showNumbers": {
+      "desc": "A pillanatnyi RX/TX sebességek megjelenítése számként.",
+      "label": "Értékek megjelenítése"
+    },
+    "spacingInbetween": {
+      "desc": "Állítsa be a RX/TX elemek közötti távolságot.",
+      "label": "Függőleges térköz"
+    },
+    "useCustomColors": {
+      "desc": "Egyéni színek engedélyezése a téma alapértelmezett színei helyett.",
+      "label": "Egyéni színek"
+    },
+    "useCustomFont": {
+      "desc": "Az alapértelmezett betűtípus felülírása a sebességértékekhez.",
+      "label": "Egyéni betűtípus"
+    }
+  }
+}

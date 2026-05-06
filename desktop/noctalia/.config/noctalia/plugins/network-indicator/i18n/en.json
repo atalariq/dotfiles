@@ -1,0 +1,77 @@
+{
+  "actions": {
+    "widget-settings": "Widget settings"
+  },
+  "settings": {
+    "byteThresholdActive": {
+      "desc": "Set the activity threshold in bytes per second (B/s).",
+      "label": "Show Active Threshold"
+    },
+    "colorRx": {
+      "desc": "Set the download (RX) icon color when above the threshold.",
+      "label": "RX Active"
+    },
+    "colorSilent": {
+      "desc": "Set the icon color when traffic is below the threshold.",
+      "label": "RX/TX Inactive"
+    },
+    "colorText": {
+      "desc": "Set the text color used for both RX and TX values.",
+      "label": "Text"
+    },
+    "colorTx": {
+      "desc": "Set the upload (TX) icon color when above the threshold.",
+      "label": "TX Active"
+    },
+    "contentMargin": {
+      "desc": "Horizontal padding on both sides of the widget content.",
+      "label": "Content Margin"
+    },
+    "customFontBold": {
+      "desc": "Render speed values in bold.",
+      "label": "Bold"
+    },
+    "customFontFamily": {
+      "desc": "Choose a font for the speed values.",
+      "label": "Font",
+      "placeholder": "Select a font",
+      "searchPlaceholder": "Search fonts…"
+    },
+    "customFontItalic": {
+      "desc": "Render speed values in italic.",
+      "label": "Italic"
+    },
+    "fontSizeModifier": {
+      "desc": "Scale the text size relative to the default.",
+      "label": "Font Size Modifier"
+    },
+    "horizontalLayout": {
+      "desc": "Place TX and RX values side by side instead of stacked.",
+      "label": "Horizontal Layout"
+    },
+    "iconSizeModifier": {
+      "desc": "Scale the icon size relative to the default.",
+      "label": "Icon Size Modifier"
+    },
+    "iconType": {
+      "desc": "Choose the icon style used for the TX/RX indicators.",
+      "label": "Icon Type"
+    },
+    "showNumbers": {
+      "desc": "Display the current RX/TX speeds as numbers.",
+      "label": "Show Values"
+    },
+    "spacingInbetween": {
+      "desc": "Adjust the spacing between RX/TX elements.",
+      "label": "Vertical Spacing"
+    },
+    "useCustomColors": {
+      "desc": "Enable custom colors instead of theme defaults.",
+      "label": "Custom Colors"
+    },
+    "useCustomFont": {
+      "desc": "Override the default font for speed values.",
+      "label": "Custom Font"
+    }
+  }
+}
