@@ -9,6 +9,5 @@ export VISUAL=$EDITOR
 export SUDO_EDITOR=$EDITOR
 export SUDO_PROMPT="$(tput bold setaf 1)(sudo)$(tput sgr0) $(tput setaf 6)password for$(tput sgr0) $(tput bold setaf 3)%p$(tput sgr0): "
 
-export LESS='-RQS'
-# export MANPAGER="less -R"
+export PAGER="bat --paging=always"
 export MANPAGER="nvim +Man!"

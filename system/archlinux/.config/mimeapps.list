@@ -21,3 +21,4 @@ image/heif=imv.desktop
 image/avif=imv.desktop
 image/bmp=imv.desktop
 image/tiff=imv.desktop
+x-scheme-handler/webcal=brave-browser.desktop
