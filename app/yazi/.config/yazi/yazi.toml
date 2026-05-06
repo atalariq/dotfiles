@@ -52,7 +52,7 @@ prepend_previewers = [
   { url = "*.docx", run = "office" },
   { url = "*.{ai,eps,ait}", run = "mediainfo" },
   { url = '*.sqlite3', run = 'preview-sqlite' },
-  { url = '*.typ', run = 'preview-typst' },
+  # { url = '*.typ', run = 'preview-typst' },
 
 ]
 prepend_preloaders = [
@@ -69,7 +69,7 @@ prepend_preloaders = [
   { mime = "image/x-eps", run = "mediainfo" },
   { url = "*.docx", run = "office" },
   { url = "*.{ai,eps,ait}", run = "mediainfo" },
-  { url = '*.typ', run = 'preview-typst' },
+  # { url = '*.typ', run = 'preview-typst' },
 ]
 prepend_spotters = [
   { mime = 'audio/mpegurl', run = 'code' },

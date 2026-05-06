@@ -11,16 +11,12 @@ alias c clear
 alias h history
 alias j "jobs -l"
 
-alias grep "grep --color auto"
-alias egrep "egrep --color auto"
-alias fgrep "fgrep --color auto"
-
 alias mkdir "mkdir -pv"
 alias mount "mount |column -t"
 
-alias mv "mv -i"
-alias cp "cp -i"
-alias ln "ln -i"
+# alias mv "mv -i"
+# alias cp "cp -i"
+# alias ln "ln -i"
 
 alias chown "chown --preserve-root"
 alias chmod "chmod --preserve-root"

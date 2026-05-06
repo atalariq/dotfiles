@@ -47,7 +47,7 @@ return {
               return
             end
             local path = current_node.path
-            vim.cmd("!ripdrag --and-exit --basename --resizable --all  '" .. path .. "'")
+            vim.cmd("!ripdrag --and-exit --basename --no-click --all --resizeable '" .. path .. "'")
           end,
         },
       },

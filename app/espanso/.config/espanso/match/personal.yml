@@ -6,4 +6,3 @@ matches:
 
   - triggers: ['//mail', '//email']
     replace: 'atalariq26@gmail.com'
-

@@ -3,10 +3,10 @@ return {
   event = "VeryLazy",
   opts = {
     default = {
-      relative_to_current_file = false,
+      relative_to_current_file = true,
       dir_path = "assets",
       prompt_for_file_name = true,
-      show_dir_path_in_prompt = false,
+      show_dir_path_in_prompt = true,
     },
     filetypes = {
       typst = {
