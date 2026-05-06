@@ -8,3 +8,12 @@ watch_laters/*
 lyrics/*
 playlist/*
 bin/
+
+# Backup and temp files
+*.bak
+*.bak.*
+*_backup.*
+*.orig
+*.pacnew
+*.pacsave
+*~
