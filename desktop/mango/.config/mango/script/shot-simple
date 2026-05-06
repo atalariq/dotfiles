@@ -2,7 +2,7 @@
 
 # fyi | notify-send
 notify(){
-  fyi -i '/usr/share/icons/Papirus/64x64/devices/camera-photo.svg' -t 2000 -u low "$@"
+  notify-send -i '/usr/share/icons/Papirus/64x64/devices/camera-photo.svg' -t 2000 -u low "$@"
 }
 
 case ${1:-area} in

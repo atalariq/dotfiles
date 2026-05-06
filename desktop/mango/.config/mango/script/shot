@@ -136,7 +136,7 @@ _finalize_decorated() {
       _notify_saved "$out"
       ;;
     drag)
-      ripdrag --and-exit --all "$tmp" &
+      ripdrag --and-exit --basename --no-click --resizeable "$tmp" &
       disown
       exit 0
       ;;
