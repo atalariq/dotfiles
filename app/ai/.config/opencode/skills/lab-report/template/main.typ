@@ -1,1 +1,0 @@
-/home/atalariq/Kuliah/00_Meta/template/report-typst/main.typ
