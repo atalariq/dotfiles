@@ -10,11 +10,20 @@ set -gx LC_PAPER en_GB.UTF-8
 # Disable Greeting
 set -U fish_greeting
 
+# set -gx PAGER "bat --paging=always"
+set -gx PAGER less
+set -gx LESS "-RK"
+
 # Commands to run in interactive sessions can go here
 if status is-interactive
     # Use starship as Shell Prompt (https://starship.rs/)
     if command -q starship
         starship init fish | source
+    end
+
+    # Start atuin (https://github.com/atuinsh/atuin)
+    if command -q atuin
+        atuin init fish | source
     end
 
     # Start zoxide (https://github.com/ajeetdsouza/zoxide)

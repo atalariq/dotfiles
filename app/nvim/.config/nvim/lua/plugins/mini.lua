@@ -10,16 +10,29 @@ return {
     version = "*",
     opts = {
       modes = { insert = true, command = false, terminal = false },
-      skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
-      skip_ts = { "string" },
-      skip_unbalanced = true,
-      markdown = true,
+      mappings = {
+        ["("] = { action = "open", pair = "()", neigh_pattern = "^[^\\]" },
+        ["["] = { action = "open", pair = "[]", neigh_pattern = "^[^\\]" },
+        ["{"] = { action = "open", pair = "{}", neigh_pattern = "^[^\\]" },
+
+        [")"] = { action = "close", pair = "()", neigh_pattern = "^[^\\]" },
+        ["]"] = { action = "close", pair = "[]", neigh_pattern = "^[^\\]" },
+        ["}"] = { action = "close", pair = "{}", neigh_pattern = "^[^\\]" },
+
+        ['"'] = { action = "closeopen", pair = '""', neigh_pattern = "^[^\\]", register = { cr = false } },
+        ["'"] = { action = "closeopen", pair = "''", neigh_pattern = "^[^%a\\]", register = { cr = false } },
+        ["`"] = { action = "closeopen", pair = "``", neigh_pattern = "^[^\\]", register = { cr = false } },
+      },
     },
   },
   {
     "nvim-mini/mini.surround",
     version = "*",
     opts = {
+      highlight_duration = 500,
+      n_lines = 20,
+      respect_selection_type = true,
+      search_method = 'cover_or_nearest',
       mappings = {
         add = "gsa", -- Add surrounding in Normal and Visual modes
         delete = "gsd", -- Delete surrounding
@@ -28,6 +41,8 @@ return {
         highlight = "gsh", -- Highlight surrounding
         replace = "gsr", -- Replace surrounding
         update_n_lines = "gsn", -- Update `n_lines`
+        suffix_last = "l", -- Suffix to search with "prev" method
+        suffix_next = "n", -- Suffix to search with "next" method
       },
     },
   },
@@ -39,11 +54,11 @@ return {
         start = "ga",
         start_with_preview = "gA",
       },
-      options = {
-        split_pattern = "",
-        justify_side = "left",
-        merge_delimiter = "",
-      },
+      -- options = {
+      --   split_pattern = "",
+      --   justify_side = "left",
+      --   merge_delimiter = "",
+      -- },
       silent = false,
     },
   },

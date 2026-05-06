@@ -1,8 +1,6 @@
 local options = { noremap = true, silent = false }
-local cp_dir = "$(HOME)/Repos/cp"
+local cp_dir = "$HOME/Repos/cp"
 
--- Requirements:
--- - https://github.com/xeluxee/competitest.nvim
 -- - https://github.com/jmerle/competitive-companion
 return {
   "xeluxee/competitest.nvim",
@@ -21,6 +19,63 @@ return {
   },
   opts = {
     local_config_file_name = ".competitest.lua",
+    testcases_directory = "./test",
+    compile_directory = "./bin",
+    running_directory = "./bin",
+
+    save_current_file = true,
+    save_all_files = false,
+    multiple_testing = -1,
+    maximum_time = 5000,
+    output_compare_method = "squish",
+    view_output_diff = false,
+
+    -- references:
+    -- * https://codeforces.com/blog/entry/64218
+    -- * https://codeforces.com/blog/entry/79024
+    -- * https://bytes.usc.edu/cs104/wiki/gcc
+    compile_command = {
+      cpp = {
+        exec = "g++", --[[ clang++ | g++ ]]
+        args = {
+          "-std=c++20",
+          "-O2",
+          "-Wall",
+          "-Wextra",
+          "-Wshadow",
+          "-Wconversion",
+          "-Wfloat-equal",
+          "-Wduplicated-cond",
+          "-Wlogical-op",
+          "-fsanitize=undefined,address",
+          "../$(FNAME)",
+          "-o",
+          "$(FNOEXT)",
+        },
+      },
+    },
+    run_command = { cpp = { exec = "./$(FNOEXT)" } },
+
+    testcases_auto_detect_storage = true,
+    testcases_use_single_file = false,
+    testcases_single_file_format = "$(FNOEXT).testcases",
+
+    companion_port = 27121,
+    receive_print_message = true,
+    open_received_problems = true,
+    open_received_contests = true,
+
+    received_problems_prompt_path = true,
+    received_contests_prompt_directory = true,
+    received_contests_prompt_extension = true,
+
+    received_files_extension = "cpp",
+    received_contests_directory = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)",
+    received_problems_path = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)/$(PROBLEM).$(FEXT)",
+    received_contests_problems_path = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)/$(PROBLEM).$(FEXT)",
+    template_file = cp_dir .. "/template/competitest/template.$(FEXT)",
+    evaluate_template_modifiers = true,
+    date_format = "%c",
 
     floating_border = "rounded",
     floating_border_highlight = "FloatBorder",
@@ -100,61 +155,5 @@ return {
         { 3, { { 1, "eo" }, { 1, "se" } } },
       },
     },
-
-    save_current_file = true,
-    save_all_files = false,
-    multiple_testing = -1,
-    maximum_time = 5000,
-    output_compare_method = "squish",
-    view_output_diff = false,
-
-    testcases_directory = "./test",
-    testcases_use_single_file = true,
-    testcases_auto_detect_storage = true,
-    testcases_single_file_format = "$(FNOEXT).testcases",
-
-    compile_directory = "./bin",
-    running_directory = "./bin",
-    compile_command = {
-      -- references: https://codeforces.com/blog/entry/64218 | https://codeforces.com/blog/entry/79024 | https://bytes.usc.edu/cs104/wiki/gcc
-      cpp = {
-        exec = "g++", --[[ clang++ | g++ ]]
-        args = {
-          "-std=c++20",
-          "-O2",
-          "-Wall",
-          -- "-Wextra",
-          -- "-Wshadow",
-          -- "-Wconversion",
-          -- "-Wfloat-equal",
-          -- "-Wduplicated-cond",
-          -- "-Wlogical-op",
-          -- "-fsanitize=undefined,address",
-          "../$(FNAME)",
-          "-o",
-          "$(FNOEXT)",
-        },
-      },
-    },
-    run_command = {
-      cpp = { exec = "./$(FNOEXT)" },
-    },
-    companion_port = 27121,
-    receive_print_message = true,
-    open_received_problems = true,
-    open_received_contests = true,
-
-    received_problems_prompt_path = false,
-    received_contests_prompt_directory = false,
-    received_contests_prompt_extension = false,
-
-    received_files_extension = "cpp",
-    received_contests_directory = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)",
-    received_problems_path = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)/$(PROBLEM).$(FEXT)",
-    received_contests_problems_path = cp_dir .. "/problems/$(JUDGE)/$(CONTEST)/$(PROBLEM).$(FEXT)",
-
-    template_file = vim.fn.stdpath("config") .. "/template/competitest/template.$(FEXT)",
-    evaluate_template_modifiers = true,
-    date_format = "%c",
   },
 }

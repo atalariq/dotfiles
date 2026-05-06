@@ -9,7 +9,7 @@
   on_song_change: None,
   volume_step: 5,
   max_fps: 30,
-  scrolloff: 0,
+  scrolloff: 5,
   wrap_navigation: false,
   enable_mouse: true,
   enable_config_hot_reload: true,
@@ -26,9 +26,9 @@
   directories_sort: SortFormat(group_by_type: true, reverse: false),
   album_art: (
     method: Auto,
-    max_size_px: (width: 1200, height: 1200),
+    max_size_px: (width: 1500, height: 1500),
     disabled_protocols: ["http://", "https://"],
-    vertical_align: Center,
+    vertical_align: Top,
     horizontal_align: Center,
   ),
   keybinds: (
@@ -111,17 +111,17 @@
   ),
   search: (
     case_sensitive: false,
-    ignore_diacritics: false,
-    search_button: false,
+    ignore_diacritics: true,
+    search_button: true,
     mode: Contains,
     tags: [
-    (value: "any",         label: "Any Tag"),
-    (value: "artist",      label: "Artist"),
-    (value: "album",       label: "Album"),
-    (value: "albumartist", label: "Album Artist"),
-    (value: "title",       label: "Title"),
-    (value: "filename",    label: "Filename"),
-    (value: "genre",       label: "Genre"),
+      (value: "any",         label: "Any Tag"),
+      (value: "artist",      label: "Artist"),
+      (value: "album",       label: "Album"),
+      (value: "albumartist", label: "Album Artist"),
+      (value: "title",       label: "Title"),
+      (value: "filename",    label: "Filename"),
+      (value: "genre",       label: "Genre"),
     ],
   ),
   artists: (
@@ -130,55 +130,55 @@
     album_date_tags: [Date],
   ),
   tabs: [
-  (
+    (
       name: "Queue",
       pane: Split(
         direction: Horizontal,
         panes: [
-        (
+          (
+            size: "60%",
+            pane: Pane(Queue)
+          ),
+          (
             size: "40%",
             pane: Split(
               direction: Vertical,
               panes: [
-              (
-                  size: "60%",
+                (
+                  size: "50%",
                   pane: Pane(AlbumArt)
                 ),
-              (
+                (
                   size: "40%",
                   pane: Pane(Lyrics)
                 ),
               ],
             ),
           ),
-        (
-            size: "60%",
-            pane: Pane(Queue)
-          ),
         ],
       ),
     ),
-  (
+    (
       name: "Directories",
       pane: Pane(Directories),
     ),
-  (
+    (
       name: "Artists",
       pane: Pane(Artists),
     ),
-  (
+    (
       name: "Album Artists",
       pane: Pane(AlbumArtists),
     ),
-  (
+    (
       name: "Albums",
       pane: Pane(Albums),
     ),
-  (
+    (
       name: "Playlists",
       pane: Pane(Playlists),
     ),
-  (
+    (
       name: "Search",
       pane: Pane(Search),
     ),
