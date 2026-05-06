@@ -1,0 +1,77 @@
+{
+  "actions": {
+    "widget-settings": "Paramètres du widget"
+  },
+  "settings": {
+    "byteThresholdActive": {
+      "desc": "Définir le seuil d'activité en octets par seconde (o/s).",
+      "label": "Afficher le seuil actif"
+    },
+    "colorRx": {
+      "desc": "Définir la couleur de l'icône de téléchargement (RX) lorsque la valeur est supérieure au seuil.",
+      "label": "RX Active"
+    },
+    "colorSilent": {
+      "desc": "Définir la couleur de l'icône lorsque le trafic est inférieur au seuil.",
+      "label": "RX/TX Inactif"
+    },
+    "colorText": {
+      "desc": "Définir la couleur du texte utilisée pour les valeurs RX et TX.",
+      "label": "Texte"
+    },
+    "colorTx": {
+      "desc": "Définir la couleur de l'icône de téléversement (TX) lorsque le seuil est dépassé.",
+      "label": "TX Active"
+    },
+    "contentMargin": {
+      "desc": "Marge horizontale des deux côtés du contenu du widget.",
+      "label": "Marge du contenu"
+    },
+    "customFontBold": {
+      "desc": "Afficher les valeurs de vitesse en gras.",
+      "label": "Gras"
+    },
+    "customFontFamily": {
+      "desc": "Choisir une police pour les valeurs de vitesse.",
+      "label": "Police",
+      "placeholder": "Sélectionner une police",
+      "searchPlaceholder": "Rechercher des polices…"
+    },
+    "customFontItalic": {
+      "desc": "Afficher les valeurs de vitesse en italique.",
+      "label": "Italique"
+    },
+    "fontSizeModifier": {
+      "desc": "Mettre à l'échelle la taille du texte par rapport à la taille par défaut.",
+      "label": "Modificateur de taille de police"
+    },
+    "horizontalLayout": {
+      "desc": "Afficher les valeurs TX et RX côte à côte au lieu de les empiler.",
+      "label": "Disposition horizontale"
+    },
+    "iconSizeModifier": {
+      "desc": "Ajuster la taille de l'icône par rapport à la taille par défaut.",
+      "label": "Modificateur de taille d'icône"
+    },
+    "iconType": {
+      "desc": "Choisissez le style d'icône utilisé pour les indicateurs TX/RX.",
+      "label": "Type d'icône"
+    },
+    "showNumbers": {
+      "desc": "Afficher les vitesses RX/TX actuelles sous forme de nombres.",
+      "label": "Afficher les valeurs"
+    },
+    "spacingInbetween": {
+      "desc": "Ajuster l'espacement entre les éléments RX/TX.",
+      "label": "Espacement vertical"
+    },
+    "useCustomColors": {
+      "desc": "Activer les couleurs personnalisées au lieu des couleurs par défaut du thème.",
+      "label": "Couleurs personnalisées"
+    },
+    "useCustomFont": {
+      "desc": "Remplacer la police par défaut pour les valeurs de vitesse.",
+      "label": "Police personnalisée"
+    }
+  }
+}
