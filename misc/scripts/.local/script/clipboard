@@ -1,0 +1,170 @@
+#!/bin/bash
+# ~/.local/script/clipman
+# Requires: fzf, cliphist, wl-copy, wl-paste
+
+# Configuration
+CLIPHIST_DB="${CLIPHIST_DB:-$HOME/.cache/cliphist/db}"
+TEMP_FILE="/tmp/cliphist-fzf-$$"
+FZF_OPTIONS="--height=40% --layout=reverse --border --multi --preview='echo {} | cut -d, -f2-' --preview-window=right:60%:wrap"
+
+# Color formatting for FZF
+colorize_clipboard() {
+  cliphist list | while IFS=, read -r timestamp content; do
+    # Truncate long content for display
+    display_content=$(echo "$content" | head -c 100)
+    if [ ${#content} -gt 100 ]; then
+      display_content="${display_content}..."
+    fi
+
+    # Add colors and formatting
+    printf "\e[33m%s\e[0m - \e[36m%s\e[0m\n" "$timestamp" "$display_content"
+  done
+}
+# Main function
+main() {
+  local action="${1:-manage}"
+
+  case "$action" in
+    "delete")
+      delete_selected
+      ;;
+    "copy")
+      copy_selected
+      ;;
+    "stats")
+      show_stats
+      ;;
+    "manage"|*)
+      interactive_manager
+      ;;
+  esac
+}
+# Interactive manager with FZF
+interactive_manager() {
+  while true; do
+    echo "Clipboard Manager"
+    echo "================="
+    colorize_clipboard > "$TEMP_FILE"
+
+    local total=$(wc -l < "$TEMP_FILE")
+    echo -e "\nTotal entries: $total"
+    echo -e "\nSelect action:"
+    echo "1) Delete entries"
+    echo "2) Copy entry to clipboard"
+    echo "3) Show statistics"
+    echo "4) Exit"
+    echo -n "Choice [1-4]: "
+
+    read -r choice
+
+    case "$choice" in
+      1) delete_selected ;;
+      2) copy_selected ;;
+      3) show_stats ;;
+      4) break ;;
+      *) echo "Invalid choice" ;;
+    esac
+
+    echo
+  done
+
+  cleanup
+}
+# Delete selected entries using FZF
+delete_selected() {
+  echo "Select entries to delete (Tab to select multiple, Enter to delete):"
+
+  # Create a clean version without colors for processing
+  cliphist list > "${TEMP_FILE}.clean"
+
+  # Use FZF with colorized display but process clean data
+  local selected
+  selected=$(colorize_clipboard | fzf $FZF_OPTIONS --bind='ctrl-a:select-all,ctrl-d:deselect-all' \
+    --header="Select entries to delete (Tab: toggle, Ctrl+A: select all, Ctrl+D: deselect all)" \
+    --preview='echo {} | sed "s/\x1b\[[0-9;]*m//g" | cut -d, -f2-' \
+    --preview-window=right:60%:wrap)
+
+  if [ -n "$selected" ]; then
+    # Remove ANSI color codes and extract timestamps
+    local to_delete
+    to_delete=$(echo "$selected" | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f1)
+
+    echo "Deleting $(echo "$to_delete" | wc -l) entries..."
+
+    # Delete each selected entry
+    while IFS= read -r timestamp; do
+      if [ -n "$timestamp" ]; then
+        # Find and delete the entry
+        cliphist list | grep "^$timestamp," | cliphist delete
+      fi
+    done <<< "$to_delete"
+
+    echo "Done!"
+  else
+    echo "No entries selected."
+  fi
+}
+# Copy selected entry to clipboard
+copy_selected() {
+  echo "Select entry to copy to clipboard:"
+
+  local selected
+  selected=$(colorize_clipboard | fzf $FZF_OPTIONS --no-multi \
+    --header="Select entry to copy (Enter to copy, Esc to cancel)" \
+    --preview='echo {} | sed "s/\x1b\[[0-9;]*m//g" | cut -d, -f2-' \
+    --preview-window=right:60%:wrap)
+
+  if [ -n "$selected" ]; then
+    # Remove ANSI color codes and extract content
+    local content
+    content=$(echo "$selected" | sed 's/\x1b\[[0-9;]*m//g' | cut -d' ' -f3-)
+
+    # Copy to clipboard
+    echo -n "$content" | wl-copy
+    echo "Copied to clipboard!"
+  else
+    echo "No entry selected."
+  fi
+}
+# Show statistics
+show_stats() {
+  local total=$(cliphist list | wc -l)
+  local oldest=$(cliphist list | head -1 | cut -d, -f1)
+  local newest=$(cliphist list | tail -1 | cut -d, -f1)
+
+  # Count by content type
+  local text_count=$(cliphist list | cut -d, -f2- | grep -c "^[[:print:]]*$")
+  local url_count=$(cliphist list | cut -d, -f2- | grep -c "https\?://")
+  local code_count=$(cliphist list | cut -d, -f2- | grep -c -E "(function|class|def|import|export|const|let|var)")
+
+  echo "Clipboard Statistics"
+  echo "==================="
+  echo "Total entries: $total"
+  echo "Oldest entry: $oldest"
+  echo "Newest entry: $newest"
+  echo ""
+  echo "By content type:"
+  echo "  Text: $text_count"
+  echo "  URLs: $url_count"
+  echo "  Code: $code_count"
+  echo ""
+
+  # Show top 10 most frequent entries
+  echo "Top 10 most frequent entries:"
+  cliphist list | cut -d, -f2- | sort | uniq -c | sort -rn | head -10 | \
+    while read count content; do
+      display_content=$(echo "$content" | head -c 50)
+      if [ ${#content} -gt 50 ]; then
+        display_content="${display_content}..."
+      fi
+      printf "  %3d × %s\n" "$count" "$display_content"
+    done
+}
+# Cleanup function
+cleanup() {
+  rm -f "$TEMP_FILE" "${TEMP_FILE}.clean" 2>/dev/null
+}
+# Trap to clean up temp files
+trap cleanup EXIT INT TERM
+# Run main function
+main "$@"

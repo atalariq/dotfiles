@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Simple FZF interface for deleting clipboard entries
+cliphist list | fzf --multi --height=40% --layout=reverse --border \
+  --preview='echo {} | cut -d, -f2-' \
+  --preview-window=right:60%:wrap \
+  --header="Tab: select, Ctrl+A: select all, Enter: delete selected" \
+  --bind='ctrl-a:select-all,ctrl-d:deselect-all' \
+  | cliphist delete
+  # | while IFS=, read -r timestamp content; do
+  #   if [ -n "$timestamp" ]; then
+  #     echo "Deleting: $timestamp"
+  #     cliphist list | grep "^$timestamp," | cliphist delete
+  #   fi
+  # done
+echo "Done!"

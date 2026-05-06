@@ -1,4 +1,5 @@
 #!/bin/sh
+# Discalimer: AI-generated with few modification by me (@atalariq)
 
 # Default path, bisa di-override dengan argumen pertama
 SSD_PATH="${1:-/run/media/atalariq/AtalariqSSD}"
@@ -13,17 +14,14 @@ fi
 
 echo "🚀 Memulai backup ke: $SSD_PATH"
 
-# echo "📂 Mirror: Music, Media"
-# rsync --archive --human-readable --partial --info=stats1,progress2 --modify-window=1 \
-#   --update \
-#   --delete \
-#   ~/Music ~/Media \
-#   "$SSD_PATH"
-
-rsync --archive --human-readable --partial --info=stats1,progress2 --modify-window=1 \
+rsync \
+  --archive --human-readable \
+  --partial --info=stats1,progress2 --modify-window=1 \
   --update \
-  ~/Music ~/Media \
-  ~/Pictures ~/Videos \
+  ~/Games \
+  ~/Music \
+  ~/Pictures \
+  ~/Videos \
   "$SSD_PATH"
 
 echo "✅ Backup Selesai!"
