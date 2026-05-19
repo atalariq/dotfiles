@@ -27,7 +27,8 @@
             "dev.zed.Zed",
             "com.obsproject.Studio",
             "mpv",
-            "org.gnome.Nautilus"
+            "org.gnome.Nautilus",
+            "obsidian"
         ],
         "position": "center",
         "screenshotAnnotationTool": "",
