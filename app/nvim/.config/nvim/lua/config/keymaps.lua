@@ -82,31 +82,31 @@ cnoremap("<A-BS>", "<C-w>")
 
 -- }}}
 
-vim.keymap.set({ "n", "v" }, "d", function()
-  return vim.g.delete_to_blackhole and '"_d' or "d"
-end, { expr = true })
-
-vim.keymap.set("n", "dd", function()
-  return vim.g.delete_to_blackhole and '"_dd' or "dd"
-end, { expr = true })
-
-vim.keymap.set("v", "D", function()
-  return vim.g.delete_to_blackhole and '"+d' or "D"
-end, { expr = true })
-
-vim.keymap.set("n", "D", function()
-  return vim.g.delete_to_blackhole and '"+dd' or "D"
-end, { expr = true })
-
-Snacks.toggle
-  .new({
-    id = "delete_to_blackhole",
-    name = "Delete to blackhole register (no more clutter on system clipboard)",
-    get = function()
-      return vim.g.delete_to_blackhole ~= false
-    end,
-    set = function(state)
-      vim.g.delete_to_blackhole = state
-    end,
-  })
-  :map("<leader>uy")
+-- vim.keymap.set({ "n", "v" }, "d", function()
+--   return vim.g.delete_to_blackhole and '"_d' or "d"
+-- end, { expr = true })
+--
+-- vim.keymap.set("n", "dd", function()
+--   return vim.g.delete_to_blackhole and '"_dd' or "dd"
+-- end, { expr = true })
+--
+-- vim.keymap.set("v", "D", function()
+--   return vim.g.delete_to_blackhole and '"+d' or "D"
+-- end, { expr = true })
+--
+-- vim.keymap.set("n", "D", function()
+--   return vim.g.delete_to_blackhole and '"+dd' or "D"
+-- end, { expr = true })
+--
+-- Snacks.toggle
+--   .new({
+--     id = "delete_to_blackhole",
+--     name = "Delete to blackhole register (no more clutter on system clipboard)",
+--     get = function()
+--       return vim.g.delete_to_blackhole ~= false
+--     end,
+--     set = function(state)
+--       vim.g.delete_to_blackhole = state
+--     end,
+--   })
+--   :map("<leader>uy")
