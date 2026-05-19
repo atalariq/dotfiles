@@ -120,6 +120,10 @@ If present in the workspace, you must read the following files before initiating
   passively (e.g., "dilakukan", "diimplementasikan", "dapat dilihat").
 - Formal register only. No colloquialisms, no contractions, no informal
   abbreviations.
+- **Never use em dashes (`---` or Unicode `—`).** Use commas, colons, or
+  semicolons as separators. Em dashes produce an AI-generated impression and
+  are inappropriate for academic writing. Regular hyphens (`-`) are acceptable
+  when grammatically warranted.
 
 ### 1.2 Terminology
 - Every English technical term that has no accepted Indonesian equivalent must be
@@ -180,7 +184,7 @@ verify any function you are uncertain about before using it.
 | `#daftar-isi()` | no args | Renders the table of contents. |
 | `#daftar-gambar()` | no args | Renders the list of figures. |
 | `#daftar-tabel()` | no args | Renders the list of tables. |
-| `#include-code(path, ..args)` | via the user's `let` binding | Reads a file and renders it as a code block with a header. Always use the user-defined `let` alias. |
+| `#include-code(path, line-range: (start, end), ..args)` | via the user's `let` binding | Reads a file and renders it as a code block with a header. Always use the user-defined `let` alias. Prefer `line-range` to include only relevant lines per subsection — never include entire source files. |
 | `#img(path, ..args)` | via the user's `let` binding | Wraps a raw image with caption support. Always use the user-defined `let` alias. |
 | `#code(…)` | `#code(header: str, numbering: bool, raw-block)` | Inline code block with optional header and line numbering toggle. |
 | `#col(…)` | `#col(block1, block2)` | Two-column layout, used for side-by-side code and output. |
@@ -266,6 +270,15 @@ Block: use `$ … $` on its own line.
 | Kesimpulan | 10% | Numbered list. Each point maps back to one Tujuan item. |
 
 ### 3.1 Hasil dan Pembahasan — detailed obligations (60% weight)
+
+**Course-specific exceptions:**
+
+- **PPW1 (Praktikum Pemrograman Web 1):** Skip the Analisis Kompleksitas /
+  Analisis Mekanisme subsection (and the accompanying `#tbl()` summary table)
+  unless the user explicitly asks for it. Web layout topics focus on visual
+  outcomes and behavioral explanation, not algorithmic complexity. The
+  complexity analysis rules below do not apply.
+- **PSD / Algoritma courses:** All complexity rules below apply in full.
 
 This is the most heavily graded section. The following are **mandatory**:
 
@@ -449,13 +462,13 @@ is course-agnostic — adapt concept names to the actual matkul:
   == Implementasi [Sub-component, e.g., Node / Schema / Packet Handler]
   == Implementasi [Structure/Feature 1]
   == Implementasi [Structure/Feature 2]
-  == Analisis Kompleksitas (or Analisis Performa for non-algo matkul)
+  == Analisis Kompleksitas (skip for PPW1/web courses unless user asks)
 = Kesimpulan
 ```
 
-The Analisis Kompleksitas subsection must always end with a `#tbl(…)` table
-summarising time and space complexity for all operations (or equivalent
-performance metrics for non-algorithmic topics).
+For algorithm/data-structure courses, the Analisis Kompleksitas subsection
+must end with a `#tbl(…)` table summarising time and space complexity. For
+PPW1 and other web/design courses, omit this section by default.
 
 ---
 
@@ -470,8 +483,8 @@ Before emitting any Phase 3A or 3B output, silently verify every item:
 - [ ] Every code explanation references at least one actual identifier from the
       code (attribute name, method name, variable name).
 - [ ] Every edge case is named and its handling explained.
-- [ ] Hasil dan Pembahasan contains at least one `#col(…)` execution demo.
-- [ ] Analisis Kompleksitas contains a `#tbl(…)` complexity table.
+- [ ] Hasil dan Pembahasan contains at least one `#col(…)` execution demo (for algo courses; for PPW1/web this is optional).
+- [ ] Analisis Kompleksitas contains a `#tbl(…)` complexity table (skip for PPW1/web courses unless user requests it).
 - [ ] No invented Typst functions used.
 - [ ] Placeholder `#rect[TODO: …]` used correctly in 3A for incomplete sections.
 - [ ] Phase label announced at the top of the response.
