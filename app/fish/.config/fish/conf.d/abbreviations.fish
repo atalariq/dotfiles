@@ -37,6 +37,7 @@ abbr lg lazygit
 # }}}
 
 #? systemctl {{{
+abbr sc "sudo systemctl"
 abbr scr "sudo systemctl restart"
 abbr sce "sudo systemctl enable"
 abbr scd "sudo systemctl disable"
@@ -44,6 +45,7 @@ abbr scss "sudo systemctl status"
 abbr scst "sudo systemctl start"
 abbr scsp "sudo systemctl stop"
 
+abbr scu "systemctl --user"
 abbr scur "systemctl --user restart"
 abbr scue "systemctl --user enable"
 abbr scud "systemctl --user disable"
