@@ -31,6 +31,11 @@ if status is-interactive
         zoxide init fish | source
     end
 
+    # https://github.com/sheeki03/tirith
+    if command -q tirith
+        tirith init --shell fish | source
+    end
+
     # fnm, blazing fast node version manager alternative
     # (https://github.com/Schniz/fnm)
     if command -q fnm
