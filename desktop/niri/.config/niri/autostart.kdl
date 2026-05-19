@@ -1,8 +1,11 @@
 // ===== Autostart =====
 spawn-sh-at-startup "qs -c noctalia-shell"
-spawn-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-spawn-sh-at-startup "wl-paste --watch cliphist store"
+spawn-sh-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
+spawn-sh-at-startup "text_expander --daemon"
 // spawn-at-startup "vicinae" "server"
+
+spawn-sh-at-startup "wl-clip-persist --clipboard regular --reconnect-tries 0"
+spawn-sh-at-startup "wl-paste --watch cliphist store"
 
 window-rule {
   match at-startup=true
