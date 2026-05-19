@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# === server-mode — headless server setup for tty3 ===
+# Switches to power-saver, verifies services, shows system status.
+
+echo "==> Switching to power-saver profile..."
+tlpctl power-saver
+
+echo ""
+echo "=== SERVICES ==="
+for svc in tailscaled sshd; do
+  if systemctl is-active --quiet "$svc" 2>/dev/null; then
+    echo "  $svc:      OK"
+  else
+    echo "  $svc:      DEAD"
+  fi
+done
+
+if systemctl --user is-active --quiet hermes-gateway 2>/dev/null; then
+  echo "  hermes:       OK"
+else
+  echo "  hermes:       DEAD"
+fi
+
+echo ""
+echo "=== NETWORK ==="
+local_ip=$(ip -4 addr show wlan0 2>/dev/null | grep -oP 'inet \K[\d.]+' || echo 'N/A')
+ts_ip=$(tailscale ip -4 2>/dev/null || echo 'N/A')
+echo "  Local IP:     $local_ip"
+echo "  Tailscale IP: $ts_ip"
+
+echo ""
+echo "=== BATTERY ==="
+# use exact field names with = suffix to avoid matching *_DESIGN variants
+state=$(grep -oP '^POWER_SUPPLY_STATUS=\K.*' /sys/class/power_supply/BAT0/uevent)
+cap=$(grep -oP '^POWER_SUPPLY_CAPACITY=\K.*' /sys/class/power_supply/BAT0/uevent)
+charge_now=$(grep -oP '^POWER_SUPPLY_CHARGE_NOW=\K.*' /sys/class/power_supply/BAT0/uevent)
+charge_full=$(grep -oP '^POWER_SUPPLY_CHARGE_FULL=\K.*' /sys/class/power_supply/BAT0/uevent)
+charge_full_design=$(grep -oP '^POWER_SUPPLY_CHARGE_FULL_DESIGN=\K.*' /sys/class/power_supply/BAT0/uevent)
+
+health=$(( charge_full * 100 / charge_full_design ))
+
+echo "  Status:       $state"
+echo "  Capacity:     ${cap}%"
+echo "  Health:       ${health}% of design (${charge_full} / ${charge_full_design} mAh)"
+echo "  Cycles:       $(grep -oP 'POWER_SUPPLY_CYCLE_COUNT=\K.*' /sys/class/power_supply/BAT0/uevent)"
+
+echo ""
+echo "=== SYSTEM ==="
+echo "  Uptime:    $(uptime -p | sed 's/^up //')"
+echo "  Load:      $(cut -d' ' -f1-3 /proc/loadavg)"
+echo "  Memory:    $(free -h | awk '/Mem:/{print $3 " / " $2}')"
+
+echo ""
+echo "=== MONITORING ==="
+echo "  watch -n5 ~/.local/script/server-status"
+echo "  btop"
+echo ""
+echo "Server mode active. Safe to close lid."
