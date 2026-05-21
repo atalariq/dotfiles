@@ -28,3 +28,7 @@ fi
 
 # `distrobox enter <profile>` solution so I can use my preferred interactive shell
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+
+# SSH agent (systemd user service) — enter passphrase once per session
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
+ssh-add -l > /dev/null 2>&1 || ssh-add ~/.ssh/atalariq_mac_ed25519
