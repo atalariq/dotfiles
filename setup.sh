@@ -4,11 +4,11 @@ TARGET="${HOME}"
 # Get absoulte path for this dotfiles' directory
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-LAB_APPS=("bat" "fish" "nvim" "yazi")
+LAB_APPS=("bat" "fish" "yazi")
 
 PERSONAL_APPS=(
-  "kitty" "fish" "nvim" "yazi"
-  "ai" "zed" "zellij"
+  "kitty" "fish" "yazi"
+  "zed" "zellij"
   "mpd" "mpv" "imv"
   "aria2" "surge" "yt-dlp"
   "htop" "lazygit"
