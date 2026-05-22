@@ -1,20 +1,8 @@
 // ===== Autostart =====
-spawn-sh-at-startup "qs -c noctalia-shell"
-spawn-sh-at-startup "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"
-spawn-sh-at-startup "text_expander --daemon"
-// spawn-at-startup "vicinae" "server"
+spawn-sh-at-startup "~/.local/script/autostart"
 
-spawn-sh-at-startup "wl-clip-persist --clipboard regular --reconnect-tries 0"
-spawn-sh-at-startup "wl-paste --watch cliphist store"
-
+// WM-specific: prevent first window from stealing focus
 window-rule {
   match at-startup=true
   open-focused false
 }
-
-spawn-sh-at-startup "sleep 3 && kitty"
-spawn-sh-at-startup "sleep 5 && brave"
-// spawn-sh-at-startup "sleep 6 && obsidian"
-// spawn-sh-at-startup "sleep 7 && anki"
-// spawn-sh-at-startup "sleep 11 && vesktop"
-
