@@ -1,0 +1,4 @@
+{
+  "name": "lab",
+  "apps": ["bat", "fish", "yazi"]
+}
