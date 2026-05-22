@@ -1,26 +1,21 @@
-# Managing my secrets
-# Tools used: age/rage, sops
-
-set -gx SOPS_AGE_KEY_FILE $HOME/.config/age/keys.txt
+# secrets.fish — delegates to secrets.sh via bash subprocess
+# Requires: sops, age/rage, bash
+# See docs/secrets.md for setup instructions
 
 function load_secrets
-    set encrypted $HOME/.config/fish/secrets.yaml
+    set -l secrets_sh "$HOME/.config/fish/conf.d/secrets.sh"
 
-    if not test -f $encrypted
+    if not test -f "$secrets_sh"
         return 1
     end
 
-    # Decrypt to a temp variable, parse each line
-    set decrypted (sops -d --output-type dotenv $encrypted)
-
-    for line in $decrypted
-        # Skip empty lines and comments
-        if string match -qr '^[A-Z]' $line
-            set key (string split -m1 '=' $line)[1]
-            set val (string split -m1 '=' $line)[2]
-            set -gx $key $val
+    bash -c 'set -a; source "$1" >/dev/null 2>&1; env' _ "$secrets_sh" \
+        | while read -l line
+            string match -qr '^[A-Z][A-Z0-9_]*=' $line || continue
+            set -l kv (string split -m1 = $line)
+            test (count $kv) -eq 2 || continue
+            set -gx $kv[1] $kv[2]
         end
-    end
 end
 
 if status is-interactive

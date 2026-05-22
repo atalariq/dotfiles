@@ -11,3 +11,6 @@ export SUDO_PROMPT="$(tput bold setaf 1)(sudo)$(tput sgr0) $(tput setaf 6)passwo
 
 export PAGER="bat --paging=always"
 export MANPAGER="nvim +Man!"
+
+# secrets
+[ -f "${HOME}/.config/fish/conf.d/secrets.sh" ] && . "${HOME}/.config/fish/conf.d/secrets.sh"
