@@ -1,0 +1,19 @@
+{
+  "name": "laptop",
+  "apps": [
+    "kitty", "fish", "yazi",
+    "zed", "zellij",
+    "mpd", "mpv", "imv",
+    "aria2", "surge", "yt-dlp",
+    "htop", "lazygit",
+    "tldr", "scholar",
+    "bitwarden"
+  ],
+  "desktop": [
+    "mango", "noctalia"
+  ],
+  "misc": [
+    "fonts", "scripts"
+  ],
+  "system": "archlinux"
+}
