@@ -1,117 +1,110 @@
 # dotfiles
-Place to backup my linux configurations
 
-> DISCLAIMER!
-> 
-> This README is old, so many information is not relevant anymore. DWYOR!
+Configuration files managed via a validated symlink farm.
 
-## Info
+## Setup
 
-- OS : Arch Linux
-- Desktop Environment : GNOME
-- Windows Manager : Hyprland
-- Terminal Emulator : kitty
-- Shell : bash (script) | fish (interactive)
-- File Manager : Nautilus | yazi
-- Media Player : mpv
-- Music Player : Spotify | mpd/ncmpcpp
-- Text Editor : Neovim
-- Other Nice Apps : Obsidian | Anki | Koodo Reader
-
-## Packages
-
-Add `chaotic-aur` repository first: https://aur.chaotic.cx/
-
-Then install `yay` or `paru` or any AUR Wrapper!
 ```bash
-sudo pacman -S yay
+# Clone
+git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
+
+# Deploy (requires jq)
+cd ~/Repos/dotfiles
+./setup.sh laptop
 ```
 
-### GNOME
-```bash
-yay -S gnome gdm \
-  gnome-calculator gnome-calendar gnome-photos gnome-console \
-  gnome-tweaks extension-manager-git \
-  gnome-shell-extensions \
-  gnome-shell-extension-appindicator \
-  gnome-shell-extension-dash-to-dock \
-  gnome-shell-extension-gsconnect \
-  xdg-desktop-portal-gnome
+`setup.sh` delegates to `bootstrap.sh`, which reads a JSON profile and creates symlinks under `$HOME`.
+
+### Profiles
+
+Machine-specific JSON profiles live in `profiles/`. Each declares which modules to deploy:
+
+```json
+{
+  "name": "laptop",
+  "apps": ["kitty", "fish", "yazi", "zed", "zellij"],
+  "desktop": ["mango", "noctalia"],
+  "misc": ["fonts", "scripts"],
+  "system": "archlinux"
+}
 ```
 
-### Hyprland
+| Profile       | For                           |
+| ------------- | ----------------------------- |
+| `laptop.json` | Personal laptop (full)        |
+| `lab.json`    | Lab machine (minimal: bat, fish, yazi) |
+
+You can also deploy a single module directly:
+
 ```bash
-yay -S \
-  hyprland-git \
-  hypridle hyprlock \
-  swww waybar \
-  hyprpicker-git grimblast-git \
-  dunst polkit-gnome \
-  wdisplays kanshi \
-  cliphist wl-clipboard \
-  wofi rofi-lbonn-wayland \
-  brightnessctl playerctl \
-  swappy grim
+./setup.sh use app/fish
+./setup.sh undo app/kitty
 ```
 
-### Applications
+Or pass a custom JSON config:
 
-#### GUI
 ```bash
-yay -S \
-  google-chrome \
-  obsidian anki \
-  evince \
-  libreoffice-still \
-  mpv spotify \
-  telegram-desktop element-desktop vesktop \
-  nautilus nautilus-image-converter nautilus-sendto nautilus-share
+./setup.sh path/to/my-machine.json
 ```
 
-#### CLI/TUI
+### Bootstrapping a fresh machine
+
 ```bash
-yay -S \
-  kitty \
-  stow \
-  neovim \
-  yazi \
-  lazygit \
-  htop neofetch zoxide fzf glow \
-  eza bat ripgrep fd \
-  aria2c wget curl yt-dlp python-spotdl \
-  mpd mpd-mpris mpc ncmpcpp \
-  imagemagick ffmpeg pandoc-cli \
-  alsa-utils brightnessctl playerctl \
+# Install essentials (Arch)
+sudo pacman -S git jq stow
+
+# Deploy dotfiles
+git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
+cd ~/Repos/dotfiles
+./setup.sh laptop
 ```
 
-#### Games
-```bash
-yay -S \
-  itch-setup-bin \
-  mcpelauncher-linux-git \
-  osu-lazer
-```
+## Tech stack
 
-#### Fonts
-```bash
-yay -S \
-  adobe-source-han-sans-cn-fonts adobe-source-han-sans-jp-fonts adobe-source-han-sans-kr-fonts \
-  inter-font noto-fonts noto-fonts-emoji \
-  ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-common ttf-nerd-fonts-symbols-mono
-```
+| Layer             | Primary           | Alternative       |
+| ----------------- | ----------------- | ----------------- |
+| OS                | Arch Linux        | macOS             |
+| WM                | mangoWM           | niri              |
+| Desktop shell     | Noctalia          | —                 |
+| Terminal          | kitty             |                    |
+| Shell (login)     | bash              | zsh               |
+| Shell (interactive) | fish           |                    |
+| Multiplexer       | zellij            | —                 |
+| Editor            | Zed               | Neovim            |
+| File manager      | yazi (TUI)        | Nautilus (GUI)    |
+| Launcher          | noctalia-shell    |                   |
+| Media             | mpv               | mpd/ncmpcpp       |
+| Git TUI           | lazygit           |                   |
+| Screenshots       | grimblast         |                   |
+| Clipboard         | cliphist + wl-clipboard |              |
+| Theming           | Noctalia + pywal  |                   |
+| Secrets           | SOPS + age        |                   |
 
-#### System
-```bash
-yay -S \
-  android-tools android-udev \
-  cups cups-filters cups-pk-helper gutenprint system-config-printer \
-  pipewire pipewire-alsa wireplumber \
-  xdg-utils xdg-user-dirs xdg-user-dirs-gtk xdg-desktop-portal \
-  v4l2loopback-dkms v4l2loopback-utils v4l-utils \
-  btrfs-progs grub-btrfs os-prober-btrfs \
-  gvfs gvfs-afc gvfs-goa gvfs-google gvfs-gphoto2 gvfs-mtp gvfs-nfs gvfs-smb \
-  nfs-utils ntfs-3g dosfstools \
-  mesa-amber lib32-mesa-amber \
-  intel-ucode intel-media-driver vulkan-intel lib32-vulkan-intel
-```
+## Architecture
 
+| Script                  | Role                                        |
+| ----------------------- | ------------------------------------------- |
+| `bootstrap.sh`          | Validated symlink farm (use/profile/undo)   |
+| `setup.sh`              | Thin wrapper around bootstrap.sh            |
+| `autostart`             | Shared app launcher for all WMs             |
+| `controller`            | Unified keybind actions (volume, brightness, media, apps, noctalia) |
+
+| Doc                         | Covers                                          |
+| --------------------------- | ----------------------------------------------- |
+| `CONTEXT.md`                | Domain glossary                                 |
+| `docs/adr/`                 | Architecture decision records                   |
+| `docs/keybindings.md`        | Standard key mappings across WMs                |
+| `docs/script-style.md`       | Conventions for writing shell scripts           |
+| `docs/secrets.md`            | SOPS/age secrets setup guide                    |
+| `docs/agents/`               | Agent skill configuration (issue tracker, labels, domain docs) |
+
+## Dependencies
+
+### Required
+- `jq` — JSON profile parsing
+- `bash` — bootstrap and scripts
+
+### Optional
+- `age` / `rage` — secrets decryption
+- `sops` — secrets file management
+- `fish` — interactive shell (config deployed but bash/zsh work without it)
