@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="1.0.0"
+SCRIPT_NAME="controller"
+
+# ─── logging ─────────────────────────────────────────────────────────────────
+info() { echo -e "\033[0;36m→\033[0m $*" >&2; }
+ok()   { echo -e "  \033[0;32m✓\033[0m $*" >&2; }
+warn() { echo -e "\033[1;33mwarn:\033[0m $*" >&2; }
+err()  { echo -e "\033[0;31merror:\033[0m $*" >&2; }
+
+# ─── usage ───────────────────────────────────────────────────────────────────
+usage() {
+    cat <<EOF
+$SCRIPT_NAME — Unified action dispatcher for WM keybindings
+
+Usage:
+  $SCRIPT_NAME volume    up|down|mute
+  $SCRIPT_NAME brightness up|down
+  $SCRIPT_NAME kbdlight  up|down
+  $SCRIPT_NAME player    play|pause|next|prev
+  $SCRIPT_NAME app       terminal|browser|filemanager
+  $SCRIPT_NAME noctalia  launcher|clipboard|emoji|control-center|notifications|wallpaper|settings|session|dock
+
+Options:
+  -h, --help     Show this help
+  -v, --version  Show version
+
+Dependencies: qs (noctalia-shell), playerctl, kbdlight
+EOF
+    exit 0
+}
+
+version() {
+    echo "$SCRIPT_NAME v$VERSION"
+    exit 0
+}
+
+# ─── cleanup ─────────────────────────────────────────────────────────────────
+cleanup() { :; }
+trap cleanup EXIT INT TERM
+
+# ─── actions ─────────────────────────────────────────────────────────────────
+
+do_volume() {
+    case "${1:-}" in
+        up)   qs -c noctalia-shell ipc call volume increase  ;;
+        down) qs -c noctalia-shell ipc call volume decrease  ;;
+        mute) qs -c noctalia-shell ipc call volume muteOutput ;;
+        *)    err "volume: expected up|down|mute"; exit 1     ;;
+    esac
+}
+
+do_brightness() {
+    case "${1:-}" in
+        up)   qs -c noctalia-shell ipc call brightness increase ;;
+        down) qs -c noctalia-shell ipc call brightness decrease ;;
+        *)    err "brightness: expected up|down"; exit 1         ;;
+    esac
+}
+
+do_kbdlight() {
+    case "${1:-}" in
+        up|down) kbdlight "$1" ;;
+        *) err "kbdlight: expected up|down"; exit 1 ;;
+    esac
+}
+
+do_player() {
+    case "${1:-}" in
+        play)  playerctl play        ;;
+        pause) playerctl pause       ;;
+        next)  playerctl next        ;;
+        prev)  playerctl previous    ;;
+        *)     err "player: expected play|pause|next|prev"; exit 1 ;;
+    esac
+}
+
+do_app() {
+    case "${1:-}" in
+        terminal)   kitty &
+            ;;
+        browser)    brave &
+            ;;
+        filemanager) nautilus &
+            ;;
+        *) err "app: expected terminal|browser|filemanager"; exit 1 ;;
+    esac
+}
+
+do_noctalia() {
+    case "${1:-}" in
+        launcher)       qs -c noctalia-shell ipc call launcher toggle         ;;
+        clipboard)      qs -c noctalia-shell ipc call launcher clipboard      ;;
+        emoji)          qs -c noctalia-shell ipc call launcher emoji          ;;
+        control-center) qs -c noctalia-shell ipc call controlCenter toggle    ;;
+        notifications)  qs -c noctalia-shell ipc call notifications toggleHistory ;;
+        wallpaper)      qs -c noctalia-shell ipc call wallpaper toggle        ;;
+        settings)       qs -c noctalia-shell ipc call settings toggle         ;;
+        session)        qs -c noctalia-shell ipc call sessionMenu toggle      ;;
+        dock)           qs -c noctalia-shell ipc call dock toggle             ;;
+        *) err "noctalia: expected launcher|clipboard|emoji|control-center|notifications|wallpaper|settings|session|dock"; exit 1 ;;
+    esac
+}
+
+# ─── main ────────────────────────────────────────────────────────────────────
+
+parse_args() {
+    while (( $# > 0 )); do
+        case "$1" in
+            -h|--help)    usage   ;;
+            -v|--version) version ;;
+            --) shift; break ;;
+            -*) err "Unknown option: $1"; usage ;;
+            *)  break ;;
+        esac
+        shift
+    done
+}
+
+parse_args "$@"
+
+domain="${1:-}"
+action="${2:-}"
+
+if [[ -z "$domain" ]]; then
+    err "Missing domain. Use -h for usage."
+    exit 1
+fi
+
+case "$domain" in
+    volume)     do_volume     "$action" ;;
+    brightness) do_brightness "$action" ;;
+    kbdlight)   do_kbdlight   "$action" ;;
+    player)     do_player     "$action" ;;
+    app)        do_app        "$action" ;;
+    noctalia)   do_noctalia   "$action" ;;
+    *)          err "Unknown domain: $domain"; usage ;;
+esac

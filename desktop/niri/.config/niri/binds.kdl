@@ -25,11 +25,11 @@ binds {
   // }
 
 
-  XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
-  XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
-  XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
-  XF86KbdBrightnessDown allow-when-locked=true { spawn "kbdlight" "down"; }
-  XF86KbdBrightnessUp allow-when-locked=true { spawn "kbdlight" "up"; }
+  XF86AudioPrev allow-when-locked=true { spawn "controller" "player" "prev"; }
+  XF86AudioPlay allow-when-locked=true { spawn "controller" "player" "play"; }
+  XF86AudioNext allow-when-locked=true { spawn "controller" "player" "next"; }
+  XF86KbdBrightnessDown allow-when-locked=true { spawn "controller" "kbdlight" "down"; }
+  XF86KbdBrightnessUp allow-when-locked=true { spawn "controller" "kbdlight" "up"; }
 
   XF86LaunchA { screenshot; }
   Ctrl+XF86LaunchA { screenshot-screen; }
