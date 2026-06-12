@@ -11,10 +11,10 @@
         "enableClipboardChips": true,
         "enableClipboardHistory": true,
         "enableClipboardSmartIcons": true,
-        "enableSessionSearch": false,
-        "enableSettingsSearch": false,
-        "enableWindowsSearch": false,
-        "iconMode": "native",
+        "enableSessionSearch": true,
+        "enableSettingsSearch": true,
+        "enableWindowsSearch": true,
+        "iconMode": "tabler",
         "ignoreMouseInput": false,
         "overviewLayer": true,
         "pinnedApps": [
@@ -34,7 +34,7 @@
         "screenshotAnnotationTool": "",
         "showCategories": false,
         "showIconBackground": false,
-        "sortByMostUsed": true,
+        "sortByMostUsed": false,
         "terminalCommand": "kitty -e",
         "viewMode": "grid"
     },
@@ -48,7 +48,7 @@
         "volumeFeedback": false,
         "volumeFeedbackSoundFile": "",
         "volumeOverdrive": false,
-        "volumeStep": 5
+        "volumeStep": 2
     },
     "bar": {
         "autoHideDelay": 500,
@@ -196,6 +196,11 @@
                     "showPowerProfiles": true
                 },
                 {
+                    "defaultSettings": {
+                    },
+                    "id": "plugin:mirror-mirror"
+                },
+                {
                     "clockColor": "none",
                     "customFont": "",
                     "formatHorizontal": "HH:mm ddd, MMM dd",
@@ -218,7 +223,7 @@
     "brightness": {
         "backlightDeviceMappings": [
         ],
-        "brightnessStep": 5,
+        "brightnessStep": 2,
         "enableDdcSupport": false,
         "enforceMinimum": false
     },
@@ -277,7 +282,7 @@
             }
         ],
         "diskPath": "/",
-        "position": "close_to_bar_button",
+        "position": "center",
         "shortcuts": {
             "left": [
                 {
@@ -413,13 +418,13 @@
     "hooks": {
         "colorGeneration": "",
         "darkModeChange": "",
-        "enabled": false,
-        "performanceModeDisabled": "",
-        "performanceModeEnabled": "",
+        "enabled": true,
+        "performanceModeDisabled": "tlpctl balanced",
+        "performanceModeEnabled": "tlpctl performance",
         "screenLock": "",
         "screenUnlock": "",
         "session": "",
-        "startup": "",
+        "startup": "~/.local/script/noctalia-autostart",
         "wallpaperChange": ""
     },
     "idle": {
