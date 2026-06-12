@@ -3,95 +3,75 @@ set -euo pipefail
 
 SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
 VERSION="1.0.0"
-WAIT_INTERVAL=2
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-info()  { echo -e "${CYAN}→${NC} $*"; }
-ok()    { echo -e "  ${GREEN}✓${NC} $*"; }
-warn()  { echo -e "${RED}warn:${NC} $*" >&2; }
+info() { echo -e "${CYAN}→${NC} $*"; }
+ok() { echo -e "  ${GREEN}✓${NC} $*"; }
+warn() { echo -e "${RED}warn:${NC} $*" >&2; }
 
 usage() {
-    cat <<EOF
+  cat <<EOF
 $SCRIPT_NAME — Shared autostart for all window managers
 
 Launches applications that every WM needs, with ordering:
   1. noctalia-shell, polkit agent, text expander (parallel)
   2. clipboard history (sequential: persist then watch)
-  3. Wait for noctalia notification daemon
-  4. Terminal (kitty)
-  5. Browser (brave)
 
 Usage: $SCRIPT_NAME [--help|--version]
 
 This script is called by WM configs (mango exec-once, niri spawn-sh-at-startup).
 WM-specific startup items (xdg-desktop-portal-wlr, window rules) stay in WM configs.
 EOF
-    exit 0
+  exit 0
 }
 
-version() { echo "$SCRIPT_NAME v$VERSION"; exit 0; }
+version() {
+  echo "$SCRIPT_NAME v$VERSION"
+  exit 0
+}
 
 parse_args() {
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -h|--help)    usage ;;
-            -v|--version) version ;;
-            *)            warn "Unknown option: $1"; usage ;;
-        esac
-        shift
-    done
-}
-
-wait_for_process() {
-    local proc="$1" timeout="${2:-30}" elapsed=0
-
-    info "Waiting for $proc..."
-    while (( elapsed < timeout )); do
-        if pgrep -f "$proc" >/dev/null 2>&1; then
-            ok "$proc ready (after ${elapsed}s)"
-            return 0
-        fi
-        sleep "$WAIT_INTERVAL"
-        ((elapsed += WAIT_INTERVAL))
-    done
-
-    warn "$proc did not start within ${timeout}s, continuing anyway"
-    return 1
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help) usage ;;
+    -v | --version) version ;;
+    *)
+      warn "Unknown option: $1"
+      usage
+      ;;
+    esac
+    shift
+  done
 }
 
 main() {
-    parse_args "$@"
+  parse_args "$@"
 
-    # Phase 1: Launch parallel services
-    info "Starting shared services..."
-    qs -c noctalia-shell &
-    /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-    text_expander --daemon &
-    ok "noctalia-shell, polkit, text_expander launched"
+  # Phase 1: Launch parallel services
+  info "Starting shared services..."
+  /usr/lib/xdg-desktop-portal --replace &
+  noctalia &
 
-    # Phase 2: Clipboard (ordered: persist must be ready before watch)
-    info "Starting clipboard history..."
-    wl-clip-persist --clipboard regular --reconnect-tries 0 &
-    sleep 1
-    wl-paste --watch cliphist store &
-    ok "clipboard history"
+  sleep 1
 
-    # Phase 3: Wait for noctalia (browser needs its notification daemon)
-    wait_for_process "noctalia" 30
+  /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+  text_expander --daemon &
+  ok "noctalia-shell, polkit, text_expander launched"
 
-    # Phase 4: Terminal
-    kitty &
-    ok "terminal (kitty)"
+  # Phase 2: Clipboard (ordered: persist must be ready before watch)
+  info "Starting clipboard history..."
+  wl-clip-persist --clipboard regular --reconnect-tries 0 &
 
-    # Phase 5: Browser
-    brave &
-    ok "browser (brave)"
+  sleep 1
 
-    info "Autostart complete"
+  wl-paste --watch cliphist store &
+  ok "clipboard history"
+
+  info "Autostart complete"
 }
 
 main "$@"
