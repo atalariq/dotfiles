@@ -20,4 +20,9 @@ bin/
 *.uuid
 
 # Noctalia plugins (reinstallable from plugins.json)
-desktop/noctalia/.config/noctalia/plugins/
+noctalia/plugins/
+
+# Secrets
+# secrets.yaml
+*.agekey
+keys.txt
