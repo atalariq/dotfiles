@@ -81,7 +81,7 @@ Scripts must remain independently copy-pasteable. This means:
 - Dependencies MUST be listed in a comment at the top:
 
   ```bash
-  # Depends: jq, fzf, cliphist
+  # Depends: python3, fzf, cliphist
   ```
 
 - The `info`/`ok`/`warn`/`err` functions are the one replicated pattern — they

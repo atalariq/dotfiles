@@ -8,7 +8,7 @@ Neovim used to live in a separate `nvim-config` repo while the rest of the machi
 
 ## Decision
 
-Move the Neovim setup into `dotfiles` as a first-class module under `app/nvim/.config/`.
+Move the Neovim setup into `dotfiles` as a first-class module under `config/app/nvim/.config/`.
 
 Keep only the real `NVIM_APPNAME` profiles that are still used:
 

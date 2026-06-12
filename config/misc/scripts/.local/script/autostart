@@ -55,19 +55,21 @@ main() {
   info "Starting shared services..."
   /usr/lib/xdg-desktop-portal --replace &
   noctalia &
+  ok "noctalia shell"
 
   sleep 1
 
   /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-  text_expander --daemon &
-  ok "noctalia-shell, polkit, text_expander launched"
+  ok "gnome polkit"
+
+  # text_expander --daemon &
+  # ok "text_expander (espanso alternative)"
+
 
   # Phase 2: Clipboard (ordered: persist must be ready before watch)
   info "Starting clipboard history..."
   wl-clip-persist --clipboard regular --reconnect-tries 0 &
-
   sleep 1
-
   wl-paste --watch cliphist store &
   ok "clipboard history"
 

@@ -26,3 +26,9 @@ noctalia/plugins/
 # secrets.yaml
 *.agekey
 keys.txt
+
+# Local files that I wanna keep
+.hermes
+.archived
+*.local.*
+*.private.*
