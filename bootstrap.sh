@@ -106,13 +106,24 @@ resolve_conflict() {
     local target="$1" source="$2"
 
     if [[ -L "$target" ]]; then
-        local existing_real source_real
-        existing_real="$(readlink -f "$target" 2>/dev/null || readlink "$target")"
+        local raw_link existing_real source_real
+        raw_link="$(readlink "$target" 2>/dev/null || true)"
+        existing_real="$(readlink -f "$target" 2>/dev/null || printf '%s' "$raw_link")"
         source_real="$(readlink -f "$source" 2>/dev/null || realpath "$source" 2>/dev/null || echo "$source")"
+
         if [[ "$existing_real" == "$source_real" ]]; then
             echo "skip"
             return
         fi
+
+        case "$raw_link" in
+            *Repos/dotfiles/app/*|*Repos/dotfiles/desktop/*|*Repos/dotfiles/misc/*|*Repos/dotfiles/system/*)
+                warn "Stale dotfiles symlink at $target → $raw_link"
+                echo "overwrite"
+                return
+                ;;
+        esac
+
         warn "Symlink exists at $target → $existing_real"
         confirm "Replace with → $source ?"
         return
