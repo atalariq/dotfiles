@@ -1,9 +1,6 @@
 set -g NVIM_PROFILES \
     nvim \
-    nvim-k \
-    nvim-lazyvim \
-    nvim-minimal \
-    nvim-minimax
+    nvim-minimal
 
 if not set -q NVIM_APPNAME
     set -Ux NVIM_APPNAME nvim
@@ -24,10 +21,7 @@ end
 abbr -a nvds nvim-default-select
 
 alias nvimd "env NVIM_APPNAME=nvim nvim"
-alias nvimk "env NVIM_APPNAME=nvim-k nvim"
-alias nviml "env NVIM_APPNAME=nvim-lazyvim nvim"
 alias nvimm "env NVIM_APPNAME=nvim-minimal nvim"
-alias nvimM "env NVIM_APPNAME=nvim-minimax nvim"
 
 # ------------------------------------------------------------
 # Neovim + fzf file picker
