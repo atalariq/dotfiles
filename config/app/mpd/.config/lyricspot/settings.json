@@ -1,0 +1,12 @@
+{
+  "show_ui": true,
+  "lyrics_centered": true,
+  "current_bold": true,
+  "current_uppercase": false,
+  "current_double": true,
+  "current_standout": false,
+  "inactive_dim": true,
+  "dynamic": false,
+  "offset": 0.0,
+  "ui_style": "classic"
+}
