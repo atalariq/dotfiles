@@ -59,6 +59,10 @@ cd ~/Repos/dotfiles
 ./setup.sh laptop
 ```
 
+## Neovim
+
+The `app/nvim` module now lives in this repo and owns two `NVIM_APPNAME` trees: `nvim` for the main config and `nvim-minimal` for the fallback profile. The Fish helper at `app/fish/.config/fish/conf.d/40-nvim.fish` exposes the selector and aliases for those two profiles only.
+
 ## Tech stack
 
 | Layer             | Primary           | Alternative       |

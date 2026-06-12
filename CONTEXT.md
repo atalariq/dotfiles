@@ -9,8 +9,9 @@ A **module** is any stow-able config directory — a self-contained piece of the
 | kitty     | app      | Terminal emulator config + themes                         |
 | fish      | app      | Fish shell: config, conf.d/, functions/, completions/     |
 | yazi      | app      | TUI file manager with plugins and flavors                 |
-| zed       | app      | Text editor: settings, keymaps, themes                    |
-| zellij    | app      | Terminal multiplexer                                      |
+|| zed       | app      | Text editor: settings, keymaps, themes                    |
+|| nvim      | app      | Neovim config + `NVIM_APPNAME` profiles (`nvim`, `nvim-minimal`) |
+|| zellij    | app      | Terminal multiplexer                                      |
 | mpd       | app      | Music Player Daemon + ncmpcpp + rmpc clients              |
 | mpv       | app      | Video player: config, keybinds, scripts                   |
 | imv       | app      | Image viewer                                              |
