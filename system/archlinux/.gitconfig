@@ -7,11 +7,11 @@ username = atalariq
 signingkey = 82653D343C6C81D2
 
 [core]
-editor = nvim
+	editor = nvim
 excludesfile = /home/atalariq/.gitignore_global
 
 [init]
-defaultBranch = main
+	defaultBranch = main
 
 [http]
 postBuffer = 524288000
@@ -29,3 +29,17 @@ gpgSign = true
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
+[pull]
+	rebase = false
+[fetch]
+	prune = true
+[rerere]
+	enabled = true
+[rebase]
+	autostash = true
+[push]
+	autoSetupRemote = true
+[diff]
+	algorithm = histogram
+[merge]
+	conflictstyle = zdiff3

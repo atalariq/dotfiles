@@ -1,0 +1,49 @@
+#!/bin/bash
+# Toggle antara dnscrypt-proxy dan DHCP DNS
+# Usage: dnscrypt-toggle [on|off|status]
+
+CONF_FILE="/etc/systemd/resolved.conf"
+
+status() {
+    echo "=== DNSCrypt Status ==="
+    if systemctl is-active --quiet dnscrypt-proxy; then
+        echo "dnscrypt-proxy:  RUNNING"
+    else
+        echo "dnscrypt-proxy:  STOPPED"
+    fi
+    echo ""
+    echo "=== Current DNS ==="
+    resolvectl status | grep -A2 "Global" | head -3
+    echo ""
+    echo "=== Stub Listener ==="
+    grep "^DNSStubListener=" $CONF_FILE 2>/dev/null || echo "DNSStubListener=yes (default)"
+}
+
+dnscrypt_on() {
+    echo "→ Switching to DNSCrypt-PROXY mode..."
+    sudo sed -i 's/^DNSStubListener=.*/DNSStubListener=no/' $CONF_FILE
+    sudo systemctl restart systemd-resolved
+    sudo systemctl start dnscrypt-proxy
+    echo "✓ Done. DNS now encrypted via dnscrypt-proxy."
+}
+
+dnscrypt_off() {
+    echo "→ Switching to DHCP mode (for captive portal login)..."
+    sudo systemctl stop dnscrypt-proxy
+    sudo sed -i 's/^DNSStubListener=.*/DNSStubListener=yes/' $CONF_FILE
+    sudo systemctl restart systemd-resolved
+    echo "✓ Done. DNS from DHCP — go login to captive portal."
+}
+
+case "${1:-status}" in
+    on)     dnscrypt_on ;;
+    off)    dnscrypt_off ;;
+    status) status ;;
+    *)
+        echo "Usage: dnscrypt-toggle [on|off|status]"
+        echo "  on     → encrypt DNS via dnscrypt-proxy"
+        echo "  off    → plain DHCP DNS (for captive portals)"
+        echo "  status → show current state"
+        exit 1
+        ;;
+esac

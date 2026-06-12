@@ -19,7 +19,7 @@ Usage:
   $SCRIPT_NAME volume    up|down|mute
   $SCRIPT_NAME brightness up|down
   $SCRIPT_NAME kbdlight  up|down
-  $SCRIPT_NAME player    play|pause|next|prev
+  $SCRIPT_NAME player    toggle|stop|next|prev
   $SCRIPT_NAME app       terminal|browser|filemanager
   $SCRIPT_NAME noctalia  launcher|clipboard|emoji|control-center|notifications|wallpaper|settings|session|dock
 
@@ -45,34 +45,38 @@ trap cleanup EXIT INT TERM
 
 do_volume() {
     case "${1:-}" in
-        up)   qs -c noctalia-shell ipc call volume increase  ;;
-        down) qs -c noctalia-shell ipc call volume decrease  ;;
-        mute) qs -c noctalia-shell ipc call volume muteOutput ;;
+        up)   noctalia msg volume-up  ;;
+        down) noctalia msg volume-down  ;;
+        mute) noctalia msg volume-mute ;;
         *)    err "volume: expected up|down|mute"; exit 1     ;;
     esac
 }
 
 do_brightness() {
     case "${1:-}" in
-        up)   qs -c noctalia-shell ipc call brightness increase ;;
-        down) qs -c noctalia-shell ipc call brightness decrease ;;
+        up)   noctalia msg brightness-up ;;
+        down) noctalia msg brightness-down ;;
         *)    err "brightness: expected up|down"; exit 1         ;;
     esac
 }
 
 do_kbdlight() {
     case "${1:-}" in
-        up|down) kbdlight "$1" ;;
+        up|down) kbdlight "$1" 1 ;;
         *) err "kbdlight: expected up|down"; exit 1 ;;
     esac
 }
 
 do_player() {
     case "${1:-}" in
-        play)  playerctl play        ;;
-        pause) playerctl pause       ;;
-        next)  playerctl next        ;;
-        prev)  playerctl previous    ;;
+        # play)  playerctl play        ;;
+        # pause) playerctl pause       ;;
+        # next)  playerctl next        ;;
+        # prev)  playerctl previous    ;;
+        toggle)  noctalia msg media toggle        ;;
+        stop) noctalia msg media stop       ;;
+        next)  noctalia msg media next        ;;
+        prev)  noctalia msg media previous    ;;
         *)     err "player: expected play|pause|next|prev"; exit 1 ;;
     esac
 }
@@ -91,15 +95,15 @@ do_app() {
 
 do_noctalia() {
     case "${1:-}" in
-        launcher)       qs -c noctalia-shell ipc call launcher toggle         ;;
-        clipboard)      qs -c noctalia-shell ipc call launcher clipboard      ;;
-        emoji)          qs -c noctalia-shell ipc call launcher emoji          ;;
-        control-center) qs -c noctalia-shell ipc call controlCenter toggle    ;;
-        notifications)  qs -c noctalia-shell ipc call notifications toggleHistory ;;
-        wallpaper)      qs -c noctalia-shell ipc call wallpaper toggle        ;;
-        settings)       qs -c noctalia-shell ipc call settings toggle         ;;
-        session)        qs -c noctalia-shell ipc call sessionMenu toggle      ;;
-        dock)           qs -c noctalia-shell ipc call dock toggle             ;;
+        launcher)       noctalia msg panel-toggle launcher         ;;
+        clipboard)      noctalia msg panel-toggle clipboard      ;;
+        emoji)          noctalia msg panel-toggle launcher "/emoji"          ;;
+        control-center) noctalia msg panel-toggle control-center    ;;
+        notifications)  noctalia msg panel-toggle notifications   ;;
+        wallpaper)      noctalia msg panel-toggle wallpaper       ;;
+        settings)       noctalia msg settings-toggle         ;;
+        session)        noctalia msg panel-toggle session      ;;
+        dock)           noctalia msg dock-toggle             ;;
         *) err "noctalia: expected launcher|clipboard|emoji|control-center|notifications|wallpaper|settings|session|dock"; exit 1 ;;
     esac
 }

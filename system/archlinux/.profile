@@ -14,3 +14,16 @@ export MANPAGER="nvim +Man!"
 
 # secrets
 [ -f "${HOME}/.config/fish/conf.d/secrets.sh" ] && . "${HOME}/.config/fish/conf.d/secrets.sh"
+
+# SSH auth socket fix
+if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+    for sock in \
+      "$XDG_RUNTIME_DIR/gcr/ssh" \
+      "$XDG_RUNTIME_DIR/keyring/ssh"
+    do
+      if [ -S "$sock" ]; then
+        export SSH_AUTH_SOCK="$sock"
+        break
+      fi
+    done
+  fi

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+VERSION="1.0.0"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+info() { echo -e "${CYAN}→${NC} $*"; }
+ok() { echo -e "  ${GREEN}✓${NC} $*"; }
+warn() { echo -e "${RED}warn:${NC} $*" >&2; }
+
+usage() {
+  cat <<EOF
+$SCRIPT_NAME — Noctalia Autostart Hook
+
+Launches applications after noctalia completely loaded:
+  1. Terminal (kitty)
+  2. Browser (brave)
+  3. etc. (discord, anki, obsidian, ...)
+
+Usage: $SCRIPT_NAME [--help|--version]
+
+This script is called by Noctalia Hooks Config (Settings > Hooks > Noctalia Started).
+See also ~/.local/script/autostart for more general autostart app/daemon.
+EOF
+  exit 0
+}
+
+version() {
+  echo "$SCRIPT_NAME v$VERSION"
+  exit 0
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help) usage ;;
+    -v | --version) version ;;
+    *)
+      warn "Unknown option: $1"
+      usage
+      ;;
+    esac
+    shift
+  done
+}
+
+main() {
+  parse_args "$@"
+
+  sleep 1 && \
+  kitty & ok "terminal (kitty)"
+
+  sleep 2 && \
+    brave & ok "browser (brave)"
+
+  # sleep 3 && \
+  #   webcord & ok "Discord client (webcord)"
+
+  # sleep 2
+  # anki & ok "Anki"
+
+  info "Autostart complete"
+}
+
+main "$@"

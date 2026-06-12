@@ -2,7 +2,39 @@
 # One-shot system status for headless server mode.
 # Usage: watch -n5 ~/.local/script/server-status
 
-# === Battery ===
+# ─── Helpers ──────────────────────────────────────────────
+# Strip ANSI escape sequences and non-printing chars for width counting
+strip() {
+    echo -n "$1" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/[^[:print:]]//g'
+}
+
+# Only use ANSI attributes when stdout is a real terminal (TTY, kitty, etc).
+# Under `watch` stdout is a pipe, so we fall back to plain text.
+if [[ -t 1 ]] && [[ -n "${TERM:-}" ]] && [[ "$TERM" != "dumb" ]]; then
+    BOLD=$'\e[1m'
+    RESET=$'\e[0m'
+else
+    BOLD=''
+    RESET=''
+fi
+
+# Print a line padded inside a box of fixed width
+W=50
+fill() { awk -v c="$1" -v n="$2" 'BEGIN{for(i=1;i<=n;i++) printf "%s", c}'; }
+box_top()    { echo "╭$(fill '─' $W)╮"; }
+box_mid()    { echo "├$(fill '─' $W)┤"; }
+box_bot()    { echo "╰$(fill '─' $W)╯"; }
+box_empty()  { echo "│$(printf '%*s' $W '')│"; }
+box_row() {
+    local raw="$1"
+    local plain=$(strip "$raw")
+    local len=${#plain}
+    local pad=$(( W - len ))
+    (( pad < 0 )) && pad=0
+    printf "│%s%*s│\n" "$raw" "$pad" ""
+}
+
+# ─── Battery ──────────────────────────────────────────────
 state=$(grep -oP '^POWER_SUPPLY_STATUS=\K.*' /sys/class/power_supply/BAT0/uevent)
 cap=$(grep -oP '^POWER_SUPPLY_CAPACITY=\K.*' /sys/class/power_supply/BAT0/uevent)
 charge_now=$(grep -oP '^POWER_SUPPLY_CHARGE_NOW=\K.*' /sys/class/power_supply/BAT0/uevent)
@@ -10,37 +42,40 @@ charge_full=$(grep -oP '^POWER_SUPPLY_CHARGE_FULL=\K.*' /sys/class/power_supply/
 
 time_to_full=""
 if [[ "$state" == "Charging" ]]; then
-  # crude estimate from current_now (uA) and charge_now (uAh) remaining delta
-  current_now=$(grep -oP 'POWER_SUPPLY_CURRENT_NOW=\K.*' /sys/class/power_supply/BAT0/uevent)
-  delta=$(( charge_full - charge_now ))
-  if (( current_now > 0 )); then
-    mins=$(( delta * 60 / current_now ))
-    time_to_full="$(printf '%dh%dm' $((mins/60)) $((mins%60)))"
-  fi
+    current_now=$(grep -oP 'POWER_SUPPLY_CURRENT_NOW=\K.*' /sys/class/power_supply/BAT0/uevent)
+    delta=$(( charge_full - charge_now ))
+    if (( current_now > 0 )); then
+        mins=$(( delta * 60 / current_now ))
+        time_to_full="$(printf '%dh%dm' $((mins/60)) $((mins%60)))"
+    fi
 fi
 
-battery_icon=""
-if   (( cap >= 90 )); then battery_icon=""
-elif (( cap >= 75 )); then battery_icon=""
-elif (( cap >= 50 )); then battery_icon=""
-elif (( cap >= 25 )); then battery_icon=""
+battery_icon=$'\xef\x89\x84'
+if   (( cap >= 90 )); then battery_icon=$'\xef\x89\x80'
+elif (( cap >= 75 )); then battery_icon=$'\xef\x89\x81'
+elif (( cap >= 50 )); then battery_icon=$'\xef\x89\x82'
+elif (( cap >= 25 )); then battery_icon=$'\xef\x89\x83'
+fi
+battery_line="  ${battery_icon} ${cap}% ${state}"
+if [[ -n $time_to_full ]]; then
+    battery_line="${battery_line} → full in ${time_to_full}"
 fi
 
-# === CPU ===
+# ─── CPU ──────────────────────────────────────────────────
 cpu_load=$(cut -d' ' -f1-3 /proc/loadavg)
 cpus=$(nproc)
 # top 3 CPU-hungry processes
 top_procs=$(ps --no-headers -eo pid,comm,%cpu --sort=-%cpu 2>/dev/null | head -4 |
-  awk '{printf "  %-6s %-20s %5s%%\n", $1, $2, $3}')
+    awk '{printf "  %-6s %-20s %5s%%\n", $1, $2, $3}')
 
-# === Memory ===
+# ─── Memory ───────────────────────────────────────────────
 mem_total=$(free -h | awk '/Mem:/{print $2}')
 mem_used=$(free -h | awk '/Mem:/{print $3}')
 mem_pct=$(free | awk '/Mem:/{printf "%.0f", $3/$2 * 100}')
 swap_total=$(free -h | awk '/Swap:/{print $2}')
 swap_used=$(free -h | awk '/Swap:/{print $3}')
 
-# === Network ===
+# ─── Network ──────────────────────────────────────────────
 # rx/tx delta over 1 second
 rx1=$(awk '/wlan0/{print $2}' /proc/net/dev)
 tx1=$(awk '/wlan0/{print $10}' /proc/net/dev)
@@ -52,37 +87,37 @@ rx_rate=$(( (rx2 - rx1) * 2 ))  # scaled to 1s
 tx_rate=$(( (tx2 - tx1) * 2 ))
 
 format_rate() {
-  local val=$1
-  if (( val > 1048576 )); then echo "$(awk "BEGIN{printf \"%.1f\", $val/1048576}") MB/s"
-  elif (( val > 1024 )); then echo "$(awk "BEGIN{printf \"%.1f\", $val/1024}") KB/s"
-  else echo "${val} B/s"
-  fi
+    local val=$1
+    if (( val > 1048576 )); then echo "$(awk "BEGIN{printf \"%.1f\", $val/1048576}") MB/s"
+    elif (( val > 1024 )); then echo "$(awk "BEGIN{printf \"%.1f\", $val/1024}") KB/s"
+    else echo "${val} B/s"
+    fi
 }
 
-# === Temperature ===
+# ─── Temperature ──────────────────────────────────────────
 cpu_temp=$(awk '{print int($1/1000)}' /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo "N/A")
 
-# === Render ===
-clear
-echo "╭─────────────────────────────────────────────╮"
-printf "│  \033[1mServer Status\033[0m  —  %s        │\n" "$(date '+%H:%M:%S')"
-echo "├─────────────────────────────────────────────┤"
-printf "│  %s %s %s %s  %s  %-10s          │\n" \
-  "$battery_icon" "$cap%" "$state" \
-  "$( [[ -n $time_to_full ]] && echo "→ full in $time_to_full" || echo "" )"
-echo "│                                             │"
-printf "│  CPU: %s  (%d cores)              │\n" "$cpu_load" "$cpus"
-printf "│  Temp: %s°C                              │\n" "$cpu_temp"
-echo "│  Top processes:                            │"
-echo "$top_procs" | while IFS= read -r line; do
-  printf "│  %-42s│\n" "$line"
-done
-echo "│                                             │"
-printf "│  Mem:  %s / %s (%d%%)                    │\n" "$mem_used" "$mem_total" "$mem_pct"
-[[ -n "$swap_used" && "$swap_used" != "0B" ]] && \
-  printf "│  Swap: %s / %s                          │\n" "$swap_used" "$swap_total"
-echo "│                                             │"
-printf "│  ↓ RX %-12s  ↑ TX %-12s│\n" "$(format_rate $rx_rate)" "$(format_rate $tx_rate)"
-echo "│                                             │"
-printf "│  Uptime: %-33s│\n" "$(uptime -p | sed 's/^up //')"
-echo "╰─────────────────────────────────────────────╯"
+# ─── Render ───────────────────────────────────────────────
+# (watch clears screen itself; don't add manual clear here)
+
+box_top
+box_row "  ${BOLD}Server Status${RESET}  —  $(date '+%H:%M:%S')"
+box_mid
+box_row "$battery_line"
+box_empty
+box_row "  CPU: ${cpu_load}  (${cpus} cores)"
+box_row "  Temp: ${cpu_temp}°C"
+box_row "  Top processes:"
+while IFS= read -r line; do
+    box_row "$line"
+done <<< "$top_procs"
+box_empty
+box_row "  Mem:  ${mem_used} / ${mem_total} (${mem_pct}%)"
+if [[ -n "$swap_used" && "$swap_used" != "0B" ]]; then
+    box_row "  Swap: ${swap_used} / ${swap_total}"
+fi
+box_empty
+box_row "  ↓ RX $(format_rate $rx_rate)    ↑ TX $(format_rate $tx_rate)"
+box_empty
+box_row "  Uptime: $(uptime -p | sed 's/^up //')"
+box_bot
