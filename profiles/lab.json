@@ -1,4 +1,8 @@
 {
   "name": "lab",
-  "apps": ["bat", "fish", "yazi"]
+  "modules": [
+    "app/bat",
+    "app/fish",
+    "app/yazi"
+  ]
 }

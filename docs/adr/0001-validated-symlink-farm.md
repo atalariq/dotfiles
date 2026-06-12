@@ -30,12 +30,12 @@ Failures halt the deploy for that module only — other modules continue.
 
 ### Rollback
 
-**Manifest-driven.** Every `bootstrap use` and `bootstrap profile` writes symlink paths to `~/.local/state/bootstrap/manifest`. `bootstrap undo` reads the manifest and removes the listed symlinks (only if they still point to dotfile sources).
+- **Manifest-driven.** Every `bootstrap use` and `bootstrap profile` writes symlink paths to module-specific manifest files under `~/.local/state/bootstrap/manifests/`. `bootstrap undo` reads the matching manifest and removes the listed symlinks.
 
 ## Consequences
 
 - **Removes** GNU Stow as a dependency (replaced by `ln -s` + bash logic)
 - **Adds** test surface: bootstrap operations are testable through the manifest and validation output
-- **Adds** manifest state directory: `~/.local/state/bootstrap/manifest`
-- **Adds** `jq` as required dependency (for profile parsing)
+- **Adds** manifest state directory: `~/.local/state/bootstrap/manifests/`
+- **Adds** `python3` as required dependency (for profile parsing and JSON validation)
 - `setup.sh` becomes a thin wrapper that calls `bootstrap profile <name>`

@@ -5,6 +5,7 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET="${HOME}"
 MANIFEST_DIR="${HOME}/.local/state/bootstrap/manifests"
 PROFILES_DIR="${DOTFILES_DIR}/profiles"
+CONFIG_ROOT="${DOTFILES_DIR}/config"
 
 mkdir -p "$MANIFEST_DIR"
 
@@ -31,8 +32,6 @@ EOF
     exit 1
 }
 
-# ─── helpers ─────────────────────────────────────────────────────────────────
-
 err()  { echo -e "${RED}error:${NC} $*" >&2; }
 warn() { echo -e "${YELLOW}warn:${NC} $*" >&2; }
 info() { echo -e "${CYAN}→${NC} $*"; }
@@ -43,19 +42,65 @@ confirm() {
     local ans
     read -rp "$prompt [s=skip / o=overwrite / b=backup]: " ans
     case "$ans" in
-        s|S|skip)   echo "skip"   ;;
+        s|S|skip) echo "skip" ;;
         o|O|overwrite) echo "overwrite" ;;
-        b|B|backup) echo "backup"  ;;
-        *)          echo "skip"   ;;
+        b|B|backup) echo "backup" ;;
+        *) echo "skip" ;;
     esac
 }
 
-manifest_file() {
-    local category="$1" module="$2"
-    echo "${MANIFEST_DIR}/${category}_${module}"
+normalize_module_ref() {
+    local module_ref="${1:-}"
+    module_ref="${module_ref#config/}"
+    module_ref="${module_ref#/}"
+
+    if [[ -z "$module_ref" ]] || [[ "$module_ref" != */* ]]; then
+        err "Expected <category/module> (e.g. app/fish)"
+        return 1
+    fi
+
+    printf '%s\n' "$module_ref"
 }
 
-# ─── conflict resolution ─────────────────────────────────────────────────────
+module_source_dir() {
+    local module_ref
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    printf '%s\n' "${CONFIG_ROOT}/${module_ref}"
+}
+
+manifest_file() {
+    local module_ref
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    printf '%s\n' "${MANIFEST_DIR}/${module_ref//\//__}"
+}
+
+profile_modules() {
+    local profile_path="$1"
+    python3 - "$profile_path" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+profile = Path(sys.argv[1])
+data = json.loads(profile.read_text())
+modules = data.get("modules")
+if isinstance(modules, list):
+    for module in modules:
+        if isinstance(module, str) and module.strip():
+            print(module.strip())
+    raise SystemExit(0)
+
+for module in data.get("apps", []):
+    print(f"app/{module}")
+for module in data.get("desktop", []):
+    print(f"desktop/{module}")
+for module in data.get("misc", []):
+    print(f"misc/{module}")
+system = data.get("system")
+if isinstance(system, str) and system.strip():
+    print(f"system/{system.strip()}")
+PY
+}
 
 resolve_conflict() {
     local target="$1" source="$2"
@@ -65,7 +110,7 @@ resolve_conflict() {
         existing_real="$(readlink -f "$target" 2>/dev/null || readlink "$target")"
         source_real="$(readlink -f "$source" 2>/dev/null || realpath "$source" 2>/dev/null || echo "$source")"
         if [[ "$existing_real" == "$source_real" ]]; then
-            echo "skip"  # already linked to our source
+            echo "skip"
             return
         fi
         warn "Symlink exists at $target → $existing_real"
@@ -82,22 +127,46 @@ resolve_conflict() {
     echo "create"
 }
 
-# ─── symlink deployment ──────────────────────────────────────────────────────
+ensure_target_parent() {
+    local target="$1"
+    local parent
+    parent="$(dirname "$target")"
+
+    python3 - "$parent" <<'PY'
+from pathlib import Path
+import sys
+
+parent = Path(sys.argv[1]).expanduser()
+home = Path.home()
+
+for path in reversed([parent, *parent.parents]):
+    try:
+        path.relative_to(home)
+    except ValueError:
+        continue
+
+    if path.is_symlink() and not path.exists():
+        path.unlink()
+
+parent.mkdir(parents=True, exist_ok=True)
+PY
+}
 
 symlink_module() {
-    local category="$1" module="$2"
-    local src_dir="${DOTFILES_DIR}/${category}/${module}"
-    local mf
-    mf="$(manifest_file "$category" "$module")"
+    local module_ref src_dir mf
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    src_dir="$(module_source_dir "$module_ref")" || return 1
+    mf="$(manifest_file "$module_ref")" || return 1
 
     if [[ ! -d "$src_dir" ]]; then
         err "Source directory not found: $src_dir"
         return 1
     fi
 
-    info "Deploying ${category}/${module}"
+    : > "$mf"
+    info "Deploying ${module_ref}"
 
-    local count=0 errors=0
+    local count=0
     while IFS= read -r -d '' src; do
         local rel="${src#"${src_dir}/"}"
         local target="${TARGET}/${rel}"
@@ -117,7 +186,7 @@ symlink_module() {
                 rm -rf "$target"
                 ;&
             create)
-                mkdir -p "$(dirname "$target")"
+                ensure_target_parent "$target"
                 ln -sf "$src" "$target"
                 echo "$target" >> "$mf"
                 ok "$rel"
@@ -126,7 +195,7 @@ symlink_module() {
             backup)
                 mv "$target" "${target}.bak"
                 warn "$rel (backed up to ${target}.bak)"
-                mkdir -p "$(dirname "$target")"
+                ensure_target_parent "$target"
                 ln -sf "$src" "$target"
                 echo "$target" >> "$mf"
                 ((count++)) || true
@@ -135,57 +204,60 @@ symlink_module() {
     done < <(find "$src_dir" -type f -print0)
 
     echo ""
-    info "Linked $count files in ${category}/${module}"
+    info "Linked $count files in ${module_ref}"
     return 0
 }
 
-# ─── validation ──────────────────────────────────────────────────────────────
+validate_json_file() {
+    local target="$1"
+    python3 -m json.tool "$target" >/dev/null 2>&1 && ok "json valid: $(basename "$target")" || {
+        err "json invalid: $target"
+        return 1
+    }
+}
 
 validate_module() {
-    local category="$1" module="$2"
-    local mf
-    mf="$(manifest_file "$category" "$module")"
+    local module_ref mf
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    mf="$(manifest_file "$module_ref")" || return 1
     local passed=0 failed=0
 
     if [[ ! -f "$mf" ]]; then
-        info "No manifest for ${category}/${module}, skipping validation"
+        info "No manifest for ${module_ref}, skipping validation"
         return 0
     fi
 
     while IFS= read -r target; do
         [[ -z "$target" ]] && continue
 
-        # symlink resolves
         if [[ ! -e "$target" ]]; then
             err "Broken symlink: $target"
             ((failed++)) || true
             continue
         fi
 
-        # config syntax check by extension
         local ext="${target##*.}"
         case "$ext" in
             fish)
                 if command -v fish &>/dev/null; then
-                    fish -n "$target" 2>/dev/null && ok "fish syntax: $(basename "$target")" || { err "fish syntax: $target"; ((failed++)) || true; }
+                    fish -n "$target" 2>/dev/null && ok "fish syntax: $(basename "$target")" || {
+                        err "fish syntax: $target"
+                        ((failed++)) || true
+                    }
                 fi
                 ;;
             json)
-                if command -v jq &>/dev/null; then
-                    jq . "$target" >/dev/null 2>&1 && ok "json valid: $(basename "$target")" || { err "json invalid: $target"; ((failed++)) || true; }
-                fi
+                validate_json_file "$target" || ((failed++)) || true
                 ;;
             kdl)
                 ok "kdl: $(basename "$target")"
                 ;;
-            conf|cfg|conf|toml|yml|yaml)
+            conf|cfg|toml|yml|yaml)
                 ok "readable: $(basename "$target")"
                 ;;
         esac
 
-        # script check: shebang + executable
-        if head -c2 "$target" 2>/dev/null | grep -q '#!'; then
-            local exec_bit
+        if head -n1 "$target" 2>/dev/null | grep -q '^#!/'; then
             if [[ -x "$target" ]]; then
                 ok "executable: $(basename "$target")"
             else
@@ -194,10 +266,12 @@ validate_module() {
             fi
         fi
 
-        # secrets check
         if [[ "$(basename "$target")" == "secrets.yaml" ]]; then
             if command -v sops &>/dev/null; then
-                sops -d "$target" >/dev/null 2>&1 && ok "secrets decrypt: $(basename "$target")" || { err "secrets decrypt failed: $target"; ((failed++)) || true; }
+                sops -d "$target" >/dev/null 2>&1 && ok "secrets decrypt: $(basename "$target")" || {
+                    err "secrets decrypt failed: $target"
+                    ((failed++)) || true
+                }
             else
                 warn "sops not found, skipping secrets check"
             fi
@@ -208,26 +282,24 @@ validate_module() {
 
     echo ""
     if (( failed > 0 )); then
-        err "Validation: $passed passed, $failed failed in ${category}/${module}"
+        err "Validation: $passed passed, $failed failed in ${module_ref}"
         return 1
-    else
-        ok "Validation: $passed passed in ${category}/${module}"
     fi
+
+    ok "Validation: $passed passed in ${module_ref}"
 }
 
-# ─── undo / rollback ─────────────────────────────────────────────────────────
-
 undo_module() {
-    local category="$1" module="$2"
-    local mf
-    mf="$(manifest_file "$category" "$module")"
+    local module_ref mf
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    mf="$(manifest_file "$module_ref")" || return 1
 
     if [[ ! -f "$mf" ]]; then
-        warn "No manifest found for ${category}/${module}"
+        warn "No manifest found for ${module_ref}"
         return 1
     fi
 
-    info "Rolling back ${category}/${module}"
+    info "Rolling back ${module_ref}"
 
     local count=0
     while IFS= read -r target; do
@@ -244,11 +316,9 @@ undo_module() {
 
     rm "$mf"
     echo ""
-    info "Rolled back $count symlinks in ${category}/${module}"
+    info "Rolled back $count symlinks in ${module_ref}"
     return 0
 }
-
-# ─── profile deploy ──────────────────────────────────────────────────────────
 
 deploy_profile() {
     local name="$1"
@@ -262,58 +332,31 @@ deploy_profile() {
     info "Deploying profile: $name"
     local failed=0
 
-    # apps
-    local apps
-    apps="$(jq -r '.apps[]?' "$profile" 2>/dev/null)" || true
-    for app in $apps; do
-        [[ -z "$app" ]] && continue
-        symlink_module "app" "$app" && validate_module "app" "$app" || { ((failed++)) || true; warn "app/$app failed, continuing..."; }
-    done
-
-    # desktop
-    local desktop
-    desktop="$(jq -r '.desktop[]?' "$profile" 2>/dev/null)" || true
-    for dm in $desktop; do
-        [[ -z "$dm" ]] && continue
-        symlink_module "desktop" "$dm" && validate_module "desktop" "$dm" || { ((failed++)) || true; warn "desktop/$dm failed, continuing..."; }
-    done
-
-    # misc
-    local misc
-    misc="$(jq -r '.misc[]?' "$profile" 2>/dev/null)" || true
-    for m in $misc; do
-        [[ -z "$m" ]] && continue
-        symlink_module "misc" "$m" && validate_module "misc" "$m" || { ((failed++)) || true; warn "misc/$m failed, continuing..."; }
-    done
-
-    # system
-    local sys
-    sys="$(jq -r '.system // empty' "$profile" 2>/dev/null)" || true
-    if [[ -n "$sys" ]]; then
-        symlink_module "system" "$sys" && validate_module "system" "$sys" || { ((failed++)) || true; warn "system/$sys failed, continuing..."; }
-    fi
+    while IFS= read -r module_ref; do
+        [[ -z "$module_ref" ]] && continue
+        symlink_module "$module_ref" && validate_module "$module_ref" || {
+            ((failed++)) || true
+            warn "$module_ref failed, continuing..."
+        }
+    done < <(profile_modules "$profile")
 
     if (( failed > 0 )); then
         err "Profile deploy finished with $failed failures"
         return 1
     fi
+
     ok "Profile deploy complete"
 }
-
-# ─── main ────────────────────────────────────────────────────────────────────
 
 main() {
     local cmd="${1:-}"
     case "$cmd" in
         use)
             shift
-            local arg="${1:-}"
-            if [[ -z "$arg" ]] || [[ ! "$arg" =~ / ]]; then
-                err "Expected <category/module> (e.g. app/fish)"
-                usage
-            fi
-            local category="${arg%%/*}" module="${arg##*/}"
-            symlink_module "$category" "$module" && validate_module "$category" "$module"
+            local module_ref="${1:-}"
+            [[ -z "$module_ref" ]] && usage
+            module_ref="$(normalize_module_ref "$module_ref")" || exit 1
+            symlink_module "$module_ref" && validate_module "$module_ref"
             ;;
         profile)
             shift
@@ -323,13 +366,10 @@ main() {
             ;;
         undo)
             shift
-            local arg="${1:-}"
-            if [[ -z "$arg" ]] || [[ ! "$arg" =~ / ]]; then
-                err "Expected <category/module> (e.g. app/fish)"
-                usage
-            fi
-            local category="${arg%%/*}" module="${arg##*/}"
-            undo_module "$category" "$module"
+            local module_ref="${1:-}"
+            [[ -z "$module_ref" ]] && usage
+            module_ref="$(normalize_module_ref "$module_ref")" || exit 1
+            undo_module "$module_ref"
             ;;
         *)
             usage
