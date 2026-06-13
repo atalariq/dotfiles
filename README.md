@@ -15,6 +15,8 @@ cd ~/Repos/dotfiles
 
 `setup.sh` is a thin wrapper around `bootstrap.sh`. The bootstrap script reads a profile, links files into `$HOME`, detects conflicts, and validates the result.
 
+Default behavior is file-level symlinking. Modules can opt into scoped directory-level symlinks through module metadata when a subtree is intentionally managed as one unit. `misc/scripts` uses that for `~/.local/script`.
+
 ## Repo layout
 
 Deployable modules now live under `config/`:

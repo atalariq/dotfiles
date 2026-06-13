@@ -26,6 +26,8 @@ Replace GNU Stow with a **validated symlink farm** implemented as a bootstrap sc
 - Scripts have valid shebangs and are executable
 - Secrets (`secrets.yaml`) decrypt successfully via `sops`
 
+Most modules are linked file-by-file. A module may declare a scoped directory-level symlink for a subtree that is intentionally managed as one unit. `misc/scripts` uses that for `~/.local/script` while keeping the same conflict handling and manifest-based rollback.
+
 Failures halt the deploy for that module only — other modules continue.
 
 ### Rollback

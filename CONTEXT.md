@@ -40,10 +40,11 @@ Those resolve to real paths like `config/app/fish` and `config/system/archlinux`
 | hyprland | desktop | Hyprland WM (legacy, disabled) |
 | wal | desktop | pywal color scheme system |
 | fonts | misc | Custom fonts + fontconfig |
-| scripts | misc | Utility scripts under `~/.local/script/` |
+| scripts | misc | Utility scripts under `~/.local/script/` (deployed as one declared directory symlink) |
 | startpage | misc | Custom browser start page |
 | archlinux | system | Arch Linux: bash, zsh, git, X11, Wayland flags, XDG |
 | mac | system | macOS: minimal zshrc |
+
 
 ## Profile
 
@@ -73,6 +74,8 @@ A **validated symlink farm** replaces `stow -R` with direct `ln -s` calls, guard
 1. Pre-validation: check source paths exist, target parents exist
 2. Conflict detection: skip or warn when target already exists and is not the same symlink
 3. Post-validation: symlinks resolve, configs parse, scripts are executable, secrets decrypt
+
+Default deployment is file-by-file. Modules can declare specific directory-level symlinks for subtrees that are intentionally managed as one unit. `misc/scripts` uses that escape hatch for `~/.local/script`.
 
 ## Autostart
 
