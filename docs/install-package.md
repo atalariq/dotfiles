@@ -16,7 +16,7 @@ Goal: keep package installation understandable and reproducible without pretendi
 ```bash
 sudo pacman -Syu
 sudo pacman -S --needed \
-  git bash python fish \
+  git bash python fish neovim fzf bat \
   uv mise go rustup
 ```
 
@@ -24,18 +24,30 @@ That is enough for bootstrap plus the common language toolchains.
 
 ## Recommended core dev tooling
 
+Bias this toward the stack that actually matters day-to-day: Go, web, SQL, containers, docs, and dotfiles.
+
 ```bash
 sudo pacman -S --needed \
-  just pixi php kotlin \
+  just pixi \
   shfmt shellcheck prettier \
   stylua typos yamllint
+```
+
+## Secondary / coursework / experiment tooling
+
+Install these when you actually need them, not by reflex:
+
+```bash
+sudo pacman -S --needed \
+  php kotlin
 ```
 
 ## LSPs
 
 ```bash
 sudo pacman -S --needed \
-  bash-language-server lua-language-server systemd-lsp \
+  bash-language-server lua-language-server clang \
+  systemd-lsp \
   yaml-language-server dockerfile-language-server gitlab-ci-ls just-lsp \
   texlab tinymist marksman \
   eslint-language-server tailwindcss-language-server \
@@ -52,6 +64,13 @@ yay -S --needed \
   vtsls
 ```
 
+Notes:
+- Skip `gopls` here if you already install it through Go (`go install golang.org/x/tools/gopls@latest`).
+- Skip `rust-analyzer` here if you want to rely on `rustup component add rust-analyzer` instead.
+- Current Neovim config uses `postgres_lsp` as the main SQL server and keeps `sqls` as optional fallback, not a second always-on default.
+- `tombi` replaces `taplo` in this setup.
+- Arch's `dockerfile-language-server` package currently exposes the `docker-langserver` binary. That is the command Neovim checks for.
+
 ## Formatters and linters
 
 ```bash
@@ -65,7 +84,7 @@ Optional / AUR:
 
 ```bash
 yay -S --needed \
-  google-java-format hadolint-bin detekt-bin
+  google-java-format hadolint-bin detekt-cli
 ```
 
 ## Debuggers
@@ -74,6 +93,19 @@ yay -S --needed \
 sudo pacman -S --needed \
   delve python-debugpy lldb xdebug
 ```
+
+## Current Neovim plugin runtime deps
+
+These are not generic system packages. They matter because the current `config/app/nvim` setup actually calls them.
+
+```bash
+sudo pacman -S --needed \
+  deno websocat
+```
+
+Why:
+- `peek.nvim` builds with `deno`
+- `typst-preview.nvim` expects `tinymist` and `websocat`
 
 ## Language ecosystems
 
@@ -104,8 +136,13 @@ That doc covers:
 - Hermes Agent
 - OpenCode
 - Codex CLI
-- Gemini CLI
 - Zed integration
+
+For backup/safety-net purposes, this repo now also carries curated config snapshots for:
+- `config/app/ai-tools/.config/opencode/`
+- `config/app/ai-tools/.codex/`
+
+Important: Neovim currently does **not** have an AI plugin wired in. AI tooling today lives in CLI workflows plus Zed agent integration. That is probably the right default for now unless a Neovim-side tool proves it adds signal instead of friction.
 
 ## Post-install verification
 

@@ -46,9 +46,6 @@
   "agent_servers": {
     "opencode": {
       "type": "registry"
-    },
-    "gemini": {
-      "type": "registry"
     }
   },
   "buffer_font_family": "Fira Code",

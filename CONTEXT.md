@@ -19,24 +19,15 @@ Those resolve to real paths like `config/app/fish` and `config/system/archlinux`
 | yazi | app | TUI file manager with plugins and flavors |
 | zed | app | Text editor: settings, keymaps, themes |
 | nvim | app | Neovim config + `NVIM_APPNAME` profiles (`nvim`, `nvim-minimal`) |
-| zellij | app | Terminal multiplexer |
 | mpd | app | Music Player Daemon + ncmpcpp + rmpc clients |
 | mpv | app | Video player: config, keybinds, scripts |
 | imv | app | Image viewer |
 | aria2 | app | Download manager |
-| surge | app | Network proxy |
 | yt-dlp | app | YouTube/media downloader |
-| htop | app | Process viewer |
 | lazygit | app | Git TUI |
-| tldr | app | Tealdeer (simplified man pages) |
-| scholar | app | Zotero TUI |
-| bitwarden | app | Bitwarden CLI (rbw) |
 | espanso | app | Text expander (disabled by default) |
-| glow | app | Markdown renderer (disabled by default) |
-| bat | app | Cat with syntax highlighting (minimal/lab profile) |
 | mango | desktop | mangoWM Wayland compositor config |
 | niri | desktop | niri scrollable-tiling Wayland compositor config |
-| noctalia | desktop | Noctalia desktop shell + GTK/Qt theming |
 | hyprland | desktop | Hyprland WM (legacy, disabled) |
 | wal | desktop | pywal color scheme system |
 | fonts | misc | Custom fonts + fontconfig |
@@ -56,7 +47,6 @@ Example:
 {
   "name": "lab",
   "modules": [
-    "app/bat",
     "app/fish",
     "app/yazi"
   ]

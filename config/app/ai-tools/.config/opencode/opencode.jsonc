@@ -1,0 +1,276 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // ─── PRIMARY MODEL ───────────────────────────────────────────────────────────
+  // Qwen3.7 Max: top Go model (60.6% SWE-Pro, 57 AA Index, 116 t/s)
+  // Pakai opencode-go — sudah dibayar, pakai semaksimal mungkin
+  // "model": "opencode-go/qwen3.7-max",
+
+  // Small model untuk task ringan (title gen, quick explain, dll)
+  // DS4 Flash via Go — cepat, unlimited-ish, tidak buang kredit DeepSeek direct
+  "small_model": "opencode-go/deepseek-v4-flash",
+
+  // Default agent: executor (Kimi K2.6 — sustained agentic terbaik)
+  "default_agent": "build",
+
+  // ─── PROVIDERS ───────────────────────────────────────────────────────────────
+  "provider": {
+    "opencode-go": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "apiKey": "{env:OPENCODE_GO_API_KEY}",
+        "baseURL": "https://opencode.ai/zen/go/v1"
+      }
+    },
+    "deepseek": {
+      "npm": "@ai-sdk/anthropic",
+      "options": {
+        "apiKey": "{env:DEEPSEEK_API_KEY_OPENCODE}",
+        "baseURL": "https://api.deepseek.com/anthropic"
+      },
+      "models": {
+        "deepseek-v4-flash": {
+          "options": {
+            "reasoningEffort": "high"
+          }
+        },
+        "deepseek-v4-pro": {
+          "limit": {
+            "context": 1048576,
+            "output": 262144
+          },
+          "options": {
+            "reasoningEffort": "max",
+            "thinking": {
+              "type": "enabled",
+              "budgetTokens": 32768
+            }
+          }
+        }
+      }
+    },
+    "openrouter": {
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "apiKey": "{env:OPENROUTER_API_KEY}",
+        "baseURL": "https://openrouter.ai/api/v1"
+      }
+    },
+  },
+  // ─── CUSTOM AGENTS ───────────────────────────────────────────────────────────
+  "agent": {
+    // /agent planner — untuk PRD, breakdown task, arsitektur
+    // Qwen3.7 Max: reasoning terdalam di Go + read-only (tidak bisa edit file)
+    "plan": {
+      "description": "PRD, specs, architecture breakdown, task decomposition",
+      "model": "opencode-go/qwen3.7-max",
+      "prompt": "You are a senior software architect. Before any output, produce an exhaustive plan: Understand (goals, constraints, assumptions) → Decompose (numbered stages with inputs/outputs/risks) → Critique (top 3 failure modes, gaps) → Revise → Handoff block. Be verbose in planning. Never skip phases. Output PLAN only — do not write code.",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    // /agent executor — untuk agentic coding task panjang, multi-file
+    // Kimi K2.6: best sustained multi-step + tool call consistency di Go
+    "build": {
+      "description": "Long-running agentic coding, multi-file edits, sustained tasks",
+      "model": "opencode-go/kimi-k2.6",
+      "prompt": "You are a senior engineer executing a provided plan. Use tools immediately — never describe actions, just do them. Follow the plan stage by stage. On blockers: stop, report explicitly, wait for instruction. Write idiomatic TypeScript or Go. Always run tests after edits."
+    },
+    // /agent reviewer — untuk code review, PR review
+    // GLM-5.1: best coding quality + SWE-Pro di Go, read-only
+    "review": {
+      "description": "Code review, PR review, security/perf audit",
+      "model": "opencode-go/glm-5.1",
+      "prompt": "You are a senior code reviewer. Review for: correctness, idiomatic style (TS/Go conventions), security (injection, auth, secrets), performance hotspots, and test coverage gaps. Output structured findings: [CRITICAL] > [WARNING] > [SUGGESTION]. Be concise and specific. Do not rewrite code unless asked.",
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    },
+    // /agent quick — untuk fix cepat, debug singkat, explain
+    // MiniMax M3: SWE-Pro #2 di Go (59%), paling available (3200 req/5hr)
+    // "quick": {
+    //   "description": "Quick fixes, debug, explain, single-file tasks",
+    //   "model": "opencode-go/minimax-m3",
+    //   "prompt": "You are a focused engineer. Be concise. Identify root cause, fix it, explain why in 1-2 lines. Prefer minimal diffs."
+    // },
+    // // /agent db — untuk task PostgreSQL: schema, query, migration
+    // // Qwen3.7 Plus: vision + reasoning, murah, cukup untuk DB tasks
+    // "db": {
+    //   "description": "PostgreSQL schema design, query optimization, migrations",
+    //   "model": "opencode-go/qwen3.7-plus",
+    //   "prompt": "You are a PostgreSQL expert. For schema: normalize to 3NF unless denormalization is justified. For queries: explain plan first, then optimize. For migrations: always reversible (up/down). Use parameterized queries. Never expose credentials."
+    // }
+  },
+  // ─── MCP SERVERS ─────────────────────────────────────────────────────────────
+  "mcp": {
+    // ── SELALU AKTIF ───────────────────────────────────────────────────────────
+    // Context7: docs lookup TS/Go libraries — sangat berguna saat coding
+    "context7": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      }
+    },
+    // GitHub: PR, issues, repo — core workflow
+    "github": {
+      "enabled": true,
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PAT_TOKEN}"
+      },
+      "oauth": false
+    },
+    // Mnemosyne: persistent memory antar sesi
+    "mnemosyne": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "mnemosyne",
+        "mcp"
+      ]
+    },
+    // Sequential Thinking: eksternalisasi reasoning untuk complex problems
+    // Ringan, no external API, sangat berguna untuk agentic multi-step
+    "sequential-thinking": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    // PostgreSQL: query, schema inspect, migration check
+    // Ganti DATABASE_URL di .env dengan koneksi lo
+    "postgres": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "{env:DATABASE_URL}"
+      ]
+    },
+    // ── ENABLE PER PROJECT ─────────────────────────────────────────────────────
+    // Chrome DevTools: debug web, inspect DOM — enable saat frontend work
+    "chrome-devtools": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
+    },
+    // Typst: document generation — enable kalau perlu laporan/paper
+    "typst": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "ghcr.io/johannesbrandenburger/typst-mcp:latest"
+      ]
+    },
+    // Manim: animasi/diagram — enable per project
+    "manim": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "/home/atalariq/Dev/MCP/manim-mcp-server/.venv/bin/python3",
+        "/home/atalariq/Dev/MCP/manim-mcp-server/src/manim_server.py"
+      ],
+      "environment": {
+        "MANIM_EXECUTABLE": "/home/atalariq/.local/bin/manim"
+      }
+    },
+    // Remotion: video generation — enable per project
+    "remotion": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@remotion/mcp@latest"
+      ]
+    }
+  },
+  // ─── COMPACTION ──────────────────────────────────────────────────────────────
+  "compaction": {
+    "auto": true,
+    "prune": true, // Hapus old tool outputs otomatis
+    "reserved": 20000 // Reserve 20K tokens untuk response — lebih aman dari default
+  },
+  // ─── TOOL OUTPUT ─────────────────────────────────────────────────────────────
+  "tool_output": {
+    "max_lines": 500, // Keep — reasonable
+    "max_bytes": 32768 // Keep — 32KB cukup
+  },
+  // ─── PERMISSIONS ─────────────────────────────────────────────────────────────
+  "permission": {
+    "external_directory": {
+      "/tmp/*": "allow",
+      "/home/atalariq/Dev/*": "allow",
+      "/home/atalariq/Kuliah/*": "allow",
+      "/home/atalariq/Repos/*": "allow",
+      "/home/atalariq/Works/*": "allow",
+      "/home/atalariq/.mnemosyne/*": "allow",
+      "*": "ask" // Keep — good default, jangan auto-allow semua
+    }
+  },
+  // ─── PLUGINS ─────────────────────────────────────────────────────────────────
+  "plugin": [
+    "@mohak34/opencode-notifier@latest",
+    "@franlol/opencode-md-table-formatter@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "opencode-wakatime",
+    "opencode-goal-plugin"
+  ],
+  // ─── COMMANDS & INSTRUCTIONS ─────────────────────────────────────────────────
+  "command": {
+    "goal": {
+      "description": "Set a session-scoped goal and auto-continue until complete.",
+      "template": "$ARGUMENTS",
+      "agent": "build"
+    },
+  },
+  "instructions": [
+    // "/home/atalariq/.config/opencode/instructions/RULES.md",
+    "/home/atalariq/.config/opencode/instructions/SHELL_STRATEGY.md",
+  ],
+  // ─── LSP & FORMATTER ─────────────────────────────────────────────────────────
+  "lsp": true,
+  "formatter": true,
+  // --- EXPERIMENTAL (POLICIES) -------------------------------------------------
+  "experimental": {
+    "policies": [
+      {
+        "effect": "deny",
+        "action": "provider.use",
+        "resource": "*"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "opencode-go"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "deepseek"
+      },
+      {
+        "effect": "allow",
+        "action": "provider.use",
+        "resource": "openrouter"
+      },
+    ]
+  }
+}
