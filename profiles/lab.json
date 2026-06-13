@@ -1,7 +1,6 @@
 {
   "name": "lab",
   "modules": [
-    "app/bat",
     "app/fish",
     "app/yazi"
   ]

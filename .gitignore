@@ -28,7 +28,7 @@ noctalia/plugins/
 keys.txt
 
 # Local files that I wanna keep
-.hermes
+/.hermes
 .archived
 *.local.*
 *.private.*
