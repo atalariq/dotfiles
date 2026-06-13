@@ -32,20 +32,20 @@ EOF
     exit 1
 }
 
-err()  { echo -e "${RED}error:${NC} $*" >&2; }
+err() { echo -e "${RED}error:${NC} $*" >&2; }
 warn() { echo -e "${YELLOW}warn:${NC} $*" >&2; }
 info() { echo -e "${CYAN}→${NC} $*"; }
-ok()   { echo -e "  ${GREEN}✓${NC} $*"; }
+ok() { echo -e "  ${GREEN}✓${NC} $*"; }
 
 confirm() {
     local prompt="$1"
     local ans
     read -rp "$prompt [s=skip / o=overwrite / b=backup]: " ans
     case "$ans" in
-        s|S|skip) echo "skip" ;;
-        o|O|overwrite) echo "overwrite" ;;
-        b|B|backup) echo "backup" ;;
-        *) echo "skip" ;;
+    s | S | skip) echo "skip" ;;
+    o | O | overwrite) echo "overwrite" ;;
+    b | B | backup) echo "backup" ;;
+    *) echo "skip" ;;
     esac
 }
 
@@ -72,6 +72,33 @@ manifest_file() {
     local module_ref
     module_ref="$(normalize_module_ref "$1")" || return 1
     printf '%s\n' "${MANIFEST_DIR}/${module_ref//\//__}"
+}
+
+module_metadata_file() {
+    local module_ref
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    printf '%s\n' "${CONFIG_ROOT}/${module_ref}/.bootstrap.json"
+}
+
+directory_links_for_module() {
+    local module_ref metadata
+    module_ref="$(normalize_module_ref "$1")" || return 1
+    metadata="$(module_metadata_file "$module_ref")" || return 1
+
+    [[ -f "$metadata" ]] || return 0
+
+    python3 - "$metadata" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+metadata = Path(sys.argv[1])
+data = json.loads(metadata.read_text())
+
+for item in data.get("directory_links", []):
+    if isinstance(item, str) and item.strip():
+        print(item.strip().strip("/"))
+PY
 }
 
 profile_modules() {
@@ -117,11 +144,11 @@ resolve_conflict() {
         fi
 
         case "$raw_link" in
-            *Repos/dotfiles/app/*|*Repos/dotfiles/desktop/*|*Repos/dotfiles/misc/*|*Repos/dotfiles/system/*)
-                warn "Stale dotfiles symlink at $target → $raw_link"
-                echo "overwrite"
-                return
-                ;;
+        *Repos/dotfiles/app/* | *Repos/dotfiles/desktop/* | *Repos/dotfiles/misc/* | *Repos/dotfiles/system/*)
+            warn "Stale dotfiles symlink at $target → $raw_link"
+            echo "overwrite"
+            return
+            ;;
         esac
 
         warn "Symlink exists at $target → $existing_real"
@@ -174,48 +201,114 @@ symlink_module() {
         return 1
     fi
 
-    : > "$mf"
+    : >"$mf"
     info "Deploying ${module_ref}"
 
     local count=0
-    while IFS= read -r -d '' src; do
-        local rel="${src#"${src_dir}/"}"
+    local linked_dirs=()
+
+    while IFS= read -r rel; do
+        [[ -z "$rel" ]] && continue
+
+        local src="${src_dir}/${rel}"
         local target="${TARGET}/${rel}"
+
+        if [[ ! -d "$src" ]]; then
+            err "Declared directory link is not a directory: $src"
+            return 1
+        fi
 
         local action
         action="$(resolve_conflict "$target" "$src")"
 
         case "$action" in
-            skip)
-                if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$src" ]]; then
-                    ok "$rel (already linked)"
-                else
-                    warn "$rel (skipped)"
-                fi
-                ;;
-            overwrite)
-                rm -rf "$target"
-                ;&
-            create)
-                ensure_target_parent "$target"
-                ln -sf "$src" "$target"
-                echo "$target" >> "$mf"
-                ok "$rel"
-                ((count++)) || true
-                ;;
-            backup)
-                mv "$target" "${target}.bak"
-                warn "$rel (backed up to ${target}.bak)"
-                ensure_target_parent "$target"
-                ln -sf "$src" "$target"
-                echo "$target" >> "$mf"
-                ((count++)) || true
-                ;;
+        skip)
+            if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+                ok "$rel (already linked dir)"
+                linked_dirs+=("$rel")
+            else
+                warn "$rel (skipped dir)"
+            fi
+            ;;
+        overwrite)
+            rm -rf "$target"
+            ;&
+        create)
+            ensure_target_parent "$target"
+            ln -sfn "$src" "$target"
+            echo "$target" >>"$mf"
+            ok "$rel/"
+            linked_dirs+=("$rel")
+            ((count++)) || true
+            ;;
+        backup)
+            mv "$target" "${target}.bak"
+            warn "$rel (backed up to ${target}.bak)"
+            ensure_target_parent "$target"
+            ln -sfn "$src" "$target"
+            echo "$target" >>"$mf"
+            ok "$rel/"
+            linked_dirs+=("$rel")
+            ((count++)) || true
+            ;;
+        esac
+    done < <(directory_links_for_module "$module_ref")
+
+    while IFS= read -r -d '' src; do
+        local rel="${src#"${src_dir}/"}"
+        local target="${TARGET}/${rel}"
+        local skip_file=0
+        local linked_dir
+
+        if [[ "$rel" == ".bootstrap.json" ]]; then
+            continue
+        fi
+
+        for linked_dir in "${linked_dirs[@]}"; do
+            if [[ "$rel" == "$linked_dir"/* ]]; then
+                skip_file=1
+                break
+            fi
+        done
+
+        if ((skip_file)); then
+            continue
+        fi
+
+        local action
+        action="$(resolve_conflict "$target" "$src")"
+
+        case "$action" in
+        skip)
+            if [[ -L "$target" ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+                ok "$rel (already linked)"
+            else
+                warn "$rel (skipped)"
+            fi
+            ;;
+        overwrite)
+            rm -rf "$target"
+            ;&
+        create)
+            ensure_target_parent "$target"
+            ln -sf "$src" "$target"
+            echo "$target" >>"$mf"
+            ok "$rel"
+            ((count++)) || true
+            ;;
+        backup)
+            mv "$target" "${target}.bak"
+            warn "$rel (backed up to ${target}.bak)"
+            ensure_target_parent "$target"
+            ln -sf "$src" "$target"
+            echo "$target" >>"$mf"
+            ((count++)) || true
+            ;;
         esac
     done < <(find "$src_dir" -type f -print0)
 
     echo ""
-    info "Linked $count files in ${module_ref}"
+    info "Linked $count entries in ${module_ref}"
     return 0
 }
 
@@ -249,23 +342,23 @@ validate_module() {
 
         local ext="${target##*.}"
         case "$ext" in
-            fish)
-                if command -v fish &>/dev/null; then
-                    fish -n "$target" 2>/dev/null && ok "fish syntax: $(basename "$target")" || {
-                        err "fish syntax: $target"
-                        ((failed++)) || true
-                    }
-                fi
-                ;;
-            json)
-                validate_json_file "$target" || ((failed++)) || true
-                ;;
-            kdl)
-                ok "kdl: $(basename "$target")"
-                ;;
-            conf|cfg|toml|yml|yaml)
-                ok "readable: $(basename "$target")"
-                ;;
+        fish)
+            if command -v fish &>/dev/null; then
+                fish -n "$target" 2>/dev/null && ok "fish syntax: $(basename "$target")" || {
+                    err "fish syntax: $target"
+                    ((failed++)) || true
+                }
+            fi
+            ;;
+        json)
+            validate_json_file "$target" || ((failed++)) || true
+            ;;
+        kdl)
+            ok "kdl: $(basename "$target")"
+            ;;
+        conf | cfg | toml | yml | yaml)
+            ok "readable: $(basename "$target")"
+            ;;
         esac
 
         if head -n1 "$target" 2>/dev/null | grep -q '^#!/'; then
@@ -289,10 +382,10 @@ validate_module() {
         fi
 
         ((passed++)) || true
-    done < "$mf"
+    done <"$mf"
 
     echo ""
-    if (( failed > 0 )); then
+    if ((failed > 0)); then
         err "Validation: $passed passed, $failed failed in ${module_ref}"
         return 1
     fi
@@ -323,7 +416,7 @@ undo_module() {
         else
             warn "Not a symlink, skipping: $target"
         fi
-    done < "$mf"
+    done <"$mf"
 
     rm "$mf"
     echo ""
@@ -351,7 +444,7 @@ deploy_profile() {
         }
     done < <(profile_modules "$profile")
 
-    if (( failed > 0 )); then
+    if ((failed > 0)); then
         err "Profile deploy finished with $failed failures"
         return 1
     fi
@@ -362,29 +455,32 @@ deploy_profile() {
 main() {
     local cmd="${1:-}"
     case "$cmd" in
-        use)
-            shift
-            local module_ref="${1:-}"
-            [[ -z "$module_ref" ]] && usage
-            module_ref="$(normalize_module_ref "$module_ref")" || exit 1
-            symlink_module "$module_ref" && validate_module "$module_ref"
-            ;;
-        profile)
-            shift
-            local name="${1:-}"
-            [[ -z "$name" ]] && { err "Expected profile name"; usage; }
-            deploy_profile "$name"
-            ;;
-        undo)
-            shift
-            local module_ref="${1:-}"
-            [[ -z "$module_ref" ]] && usage
-            module_ref="$(normalize_module_ref "$module_ref")" || exit 1
-            undo_module "$module_ref"
-            ;;
-        *)
+    use)
+        shift
+        local module_ref="${1:-}"
+        [[ -z "$module_ref" ]] && usage
+        module_ref="$(normalize_module_ref "$module_ref")" || exit 1
+        symlink_module "$module_ref" && validate_module "$module_ref"
+        ;;
+    profile)
+        shift
+        local name="${1:-}"
+        [[ -z "$name" ]] && {
+            err "Expected profile name"
             usage
-            ;;
+        }
+        deploy_profile "$name"
+        ;;
+    undo)
+        shift
+        local module_ref="${1:-}"
+        [[ -z "$module_ref" ]] && usage
+        module_ref="$(normalize_module_ref "$module_ref")" || exit 1
+        undo_module "$module_ref"
+        ;;
+    *)
+        usage
+        ;;
     esac
 }
 
