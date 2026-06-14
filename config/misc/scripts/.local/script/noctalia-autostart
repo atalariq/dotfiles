@@ -52,11 +52,12 @@ parse_args() {
 main() {
   parse_args "$@"
 
-  sleep 1 && \
-  kitty & ok "terminal (kitty)"
+  sleep 1 &&
+    kitty &
+  ok "terminal (kitty)"
 
-  sleep 2 && \
-    brave & ok "browser (brave)"
+  # sleep 2 && \
+  #   brave & ok "browser (brave)"
 
   # sleep 3 && \
   #   webcord & ok "Discord client (webcord)"
