@@ -5,41 +5,34 @@ email = atalariq.dev@outlook.com
 name = Atalariq Barra Hadinugraha
 username = atalariq
 signingkey = 82653D343C6C81D2
-
 [core]
-	editor = nvim
+editor = nvim
 excludesfile = /home/atalariq/.gitignore_global
-
 [init]
-	defaultBranch = main
-
+defaultBranch = main
 [http]
 postBuffer = 524288000
-
 [commit]
 gpgsign = true
-
 [tag]
 gpgSign = true
 [credential]
-	helper = /usr/lib/git-core/git-credential-libsecret
+helper = /usr/lib/git-core/git-credential-libsecret
 [credential "https://github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
+helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
-	helper = 
-	helper = !/usr/bin/gh auth git-credential
+helper = !/usr/bin/gh auth git-credential
 [pull]
-	rebase = false
+rebase = false
 [fetch]
-	prune = true
+prune = true
 [rerere]
-	enabled = true
+enabled = true
 [rebase]
-	autostash = true
+autostash = true
 [push]
-	autoSetupRemote = true
+autoSetupRemote = true
 [diff]
-	algorithm = histogram
+algorithm = histogram
 [merge]
-	conflictstyle = zdiff3
+conflictstyle = zdiff3
