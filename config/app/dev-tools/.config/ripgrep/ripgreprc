@@ -1,0 +1,10 @@
+--hidden
+--glob=!.git/*
+--glob=!node_modules/*
+--glob=!dist/*
+--glob=!build/*
+--glob=!target/*
+--glob=!coverage/*
+--smart-case
+--line-number
+--column
