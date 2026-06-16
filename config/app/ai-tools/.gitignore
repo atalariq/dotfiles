@@ -1,0 +1,14 @@
+# ai-tools: track config, ignore runtime/session state
+.claude/projects/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/history.jsonl
+.claude/*.log
+.config/rtk/*.db
+.config/rtk/*.log
+.config/rtk/history/
+.config/rtk/tee/
+.config/tirith/*.log
+.tirith/*.log
+.tirith/cache/
