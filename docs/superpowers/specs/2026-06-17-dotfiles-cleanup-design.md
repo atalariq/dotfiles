@@ -57,12 +57,7 @@ the symlinked buffer path.
    ```
 2. Set `std = "vim"` in `selene.toml` (keep existing `[lints]` allows).
 
-### A3. Re-enable lua_ls
-
-`lua-language-server` is installed; `lazydev` is already wired (`lsp.lua:8-18`)
-but `lua_ls` is commented out (`lsp.lua:63-65`). Uncomment it (not a new plugin).
-
-### A4. New keymap — cd to project root
+### A3. New keymap — cd to project root
 
 `<leader>cd` → cd to project root via
 `vim.fs.root(0, { ".git", ".hg", ".svn", "Makefile", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", ".luarc.json" })`,

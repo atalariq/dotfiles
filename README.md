@@ -13,7 +13,7 @@ cd ~/Repos/dotfiles
 ./setup.sh laptop
 ```
 
-`setup.sh` is a thin wrapper around `bootstrap.sh`. The bootstrap script reads a profile, links files into `$HOME`, detects conflicts, and validates the result.
+`setup.sh` (repo root) is a shim that forwards to `script/setup.sh`, which delegates to `script/bootstrap.sh`. The bootstrap script reads a profile, links files into `$HOME`, detects conflicts, and validates the result.
 
 Default behavior is file-level symlinking. Modules can opt into scoped directory-level symlinks through module metadata when a subtree is intentionally managed as one unit. `misc/scripts` uses that for `~/.local/script`.
 
@@ -28,6 +28,8 @@ config/
   misc/
   system/
 profiles/
+script/
+secrets/
 docs/
 ```
 
@@ -57,10 +59,10 @@ Machine-specific JSON profiles live in `profiles/`. Each profile declares deploy
 }
 ```
 
-| Profile | For |
-| --- | --- |
-| `laptop.json` | Personal laptop (full) |
-| `lab.json` | Lab machine (minimal shell/editor tools) |
+| Profile       | For                                      |
+| ------------- | ---------------------------------------- |
+| `laptop.json` | Personal laptop (full)                   |
+| `lab.json`    | Lab machine (minimal shell/editor tools) |
 
 You can also pass a custom JSON config:
 
@@ -90,7 +92,7 @@ GitHub does not support "clone just one folder" directly. If you want a subset, 
 git clone --filter=blob:none --no-checkout git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
 cd ~/Repos/dotfiles
 git sparse-checkout init --cone
-git sparse-checkout set config/app/fish profiles bootstrap.sh setup.sh README.md
+git sparse-checkout set config/app/fish profiles script/setup.sh script/bootstrap.sh setup.sh README.md
 git checkout main
 ```
 
@@ -109,6 +111,7 @@ Use this only for truly standalone files. It is a bad fit for modules like Fish,
 ## Neovim
 
 The `app/nvim` module lives in this repo at `config/app/nvim` and owns two `NVIM_APPNAME` trees:
+
 - `nvim` for the main config
 - `nvim-minimal` for the fallback profile
 
@@ -116,63 +119,57 @@ The Fish helper at `config/app/fish/.config/fish/conf.d/40-nvim.fish` exposes th
 
 ## AI tooling
 
-Current AI/dev-agent setup is documented in [`docs/ai-tools.md`](docs/ai-tools.md).
-
-That page covers:
-- Hermes Agent
-- OpenCode
-- Codex CLI
-- Gemini CLI
-- Zed agent integration
+AI tool configs are backed up under `config/app/ai-tools/`.
 
 ## Tech stack
 
-| Layer | Primary | Alternative |
-| --- | --- | --- |
-| OS | Arch Linux | macOS |
-| WM | mangoWM | niri |
-| Desktop shell | Noctalia | — |
-| Terminal | kitty | — |
-| Shell (login) | bash | zsh |
-| Shell (interactive) | fish | — |
-| Multiplexer | zellij | — |
-| Editor | Zed | Neovim |
-| File manager | yazi (TUI) | Nautilus (GUI) |
-| Launcher | noctalia-shell | — |
-| Media | mpv | mpd/ncmpcpp |
-| Git TUI | lazygit | — |
-| Screenshots | grimblast | — |
-| Clipboard | cliphist + wl-clipboard | — |
-| Theming | Noctalia + pywal | — |
-| Secrets | SOPS + age | — |
+| Layer               | Primary                 | Alternative    |
+| ------------------- | ----------------------- | -------------- |
+| OS                  | Arch Linux              | macOS          |
+| WM                  | mangoWM                 | niri           |
+| Desktop shell       | Noctalia                | —              |
+| Terminal            | kitty                   | —              |
+| Shell (login)       | bash                    | zsh            |
+| Shell (interactive) | fish                    | —              |
+| Multiplexer         | zellij                  | —              |
+| Editor              | Zed                     | Neovim         |
+| File manager        | yazi (TUI)              | Nautilus (GUI) |
+| Launcher            | noctalia-shell          | —              |
+| Media               | mpv                     | mpd/ncmpcpp    |
+| Git TUI             | lazygit                 | —              |
+| Screenshots         | grimblast               | —              |
+| Clipboard           | cliphist + wl-clipboard | —              |
+| Theming             | Noctalia + pywal        | —              |
+| Secrets             | SOPS + age              | —              |
 
 ## Architecture
 
-| Script | Role |
-| --- | --- |
-| `bootstrap.sh` | Validated symlink farm (`use` / `profile` / `undo`) |
-| `setup.sh` | Thin wrapper around `bootstrap.sh` |
-| `config/misc/scripts/.local/script/autostart` | Shared app launcher for all WMs |
-| `config/misc/scripts/.local/script/controller` | Unified keybind actions |
+| Script                                         | Role                                                |
+| ---------------------------------------------- | --------------------------------------------------- |
+| `script/bootstrap.sh`                          | Validated symlink farm (`use` / `profile` / `undo`) |
+| `script/setup.sh`                              | Entry point: parses args, delegates to bootstrap    |
+| `setup.sh`                                     | Repo-root shim → forwards to `script/setup.sh`      |
+| `secrets/`                                     | SOPS/age encrypted secrets + POSIX loader           |
+| `config/misc/scripts/.local/script/autostart`  | Shared app launcher for all WMs                     |
+| `config/misc/scripts/.local/script/controller` | Unified keybind actions                             |
 
-| Doc | Covers |
-| --- | --- |
-| `CONTEXT.md` | Domain glossary |
-| `docs/adr/` | Architecture decision records |
-| `docs/keybindings.md` | Standard key mappings across WMs |
-| `docs/script-style.md` | Conventions for writing shell scripts |
-| `docs/secrets.md` | SOPS/age secrets setup guide |
-| `docs/install-package.md` | Package and tool installation guide |
-| `docs/ai-tools.md` | AI CLI and editor agent setup |
-| `docs/agents/` | Agent skill configuration |
+| Doc                       | Covers                                |
+| ------------------------- | ------------------------------------- |
+| `CONTEXT.md`              | Domain glossary                       |
+| `AGENTS.md`               | Agent and contributor guide           |
+| `docs/script-style.md`    | Conventions for writing shell scripts |
+| `docs/secrets.md`         | SOPS/age secrets setup guide          |
+| `docs/install-package.md` | Package and tool installation guide   |
 
 ## Dependencies
 
 ### Required
+
 - `bash` — bootstrap and scripts
 - `python3` — profile parsing and JSON validation during bootstrap
 
 ### Optional
+
 - `fish` — interactive shell config
 - `sops` — secrets management
 - `age` / `rage` — secrets key management

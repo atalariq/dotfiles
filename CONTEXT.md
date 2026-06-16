@@ -1,115 +1,58 @@
-# Dotfiles Domain Glossary
+# Dotfiles Conceptual Glossary
 
-## Modules
+## Module
 
-A **module** is a deployable config directory rooted under `config/`. Each module is self-contained and can be deployed or skipped independently.
+A **module** is the unit of deployment. It lives under `config/<category>/<name>/` where category is one of `app`, `desktop`, `misc`, or `system`. Files inside a module mirror their intended target path under `$HOME` — so `config/app/fish/.config/fish/config.fish` links to `~/.config/fish/config.fish`.
 
-CLI examples still use `<category>/<module>`:
-- `app/fish`
-- `desktop/mango`
-- `misc/scripts`
-- `system/archlinux`
-
-Those resolve to real paths like `config/app/fish` and `config/system/archlinux`.
-
-| Module | Category | Description |
-| --- | --- | --- |
-| kitty | app | Terminal emulator config + themes |
-| fish | app | Fish shell: config, conf.d/, functions/, completions/ |
-| yazi | app | TUI file manager with plugins and flavors |
-| zed | app | Text editor: settings, keymaps, themes |
-| nvim | app | Neovim config + `NVIM_APPNAME` profiles (`nvim`, `nvim-minimal`) |
-| mpd | app | Music Player Daemon + ncmpcpp + rmpc clients |
-| mpv | app | Video player: config, keybinds, scripts |
-| imv | app | Image viewer |
-| aria2 | app | Download manager |
-| yt-dlp | app | YouTube/media downloader |
-| lazygit | app | Git TUI |
-| espanso | app | Text expander (disabled by default) |
-| mango | desktop | mangoWM Wayland compositor config |
-| niri | desktop | niri scrollable-tiling Wayland compositor config |
-| hyprland | desktop | Hyprland WM (legacy, disabled) |
-| wal | desktop | pywal color scheme system |
-| fonts | misc | Custom fonts + fontconfig |
-| scripts | misc | Utility scripts under `~/.local/script/` (deployed as one declared directory symlink) |
-| startpage | misc | Custom browser start page |
-| archlinux | system | Arch Linux: bash, zsh, git, X11, Wayland flags, XDG |
-| mac | system | macOS: minimal zshrc |
-
+Modules are addressed as `<category>/<name>` in CLI commands (e.g. `app/fish`, `desktop/mango`).
 
 ## Profile
 
-A **profile** is a JSON file (`profiles/<name>.json`) that declares which modules to deploy on a machine. Profiles now use one flat `modules` array instead of separate `apps`, `desktop`, `misc`, and `system` keys.
-
-Example:
+A **profile** is a `profiles/<name>.json` file with a flat `modules` array declaring which modules to deploy together on a machine. Example:
 
 ```json
 {
-  "name": "lab",
-  "modules": [
-    "app/fish",
-    "app/yazi"
-  ]
+  "name": "laptop",
+  "modules": ["app/fish", "app/kitty", "desktop/mango", "system/archlinux"]
 }
 ```
 
 ## Bootstrap
 
-The **bootstrap** process reads a profile, validates the environment, creates symlinks with conflict detection, and verifies the result. It replaces GNU Stow with a validated symlink farm.
+**Bootstrap** is the deploy system (`./setup.sh` at repo root, a shim over `script/bootstrap.sh`). It reads a profile or a single module path, creates per-file symlinks under `$HOME`, detects conflicts, and validates results. It replaces GNU Stow with an explicit, validated process.
 
 ## Validated Symlink Farm
 
-A **validated symlink farm** replaces `stow -R` with direct `ln -s` calls, guarded by:
+On each deploy, bootstrap enforces a validation pipeline:
 
-1. Pre-validation: check source paths exist, target parents exist
-2. Conflict detection: skip or warn when target already exists and is not the same symlink
-3. Post-validation: symlinks resolve, configs parse, scripts are executable, secrets decrypt
+1. Pre-check: source paths exist; target parent directories exist
+2. Conflict detection: warn (or interactively resolve) when a target already exists and is not the expected symlink
+3. Post-validation: symlinks resolve correctly; Fish config parses without error; JSON is well-formed; SOPS secrets decrypt; scripts have executable bits set
 
-Default deployment is file-by-file. Modules can declare specific directory-level symlinks for subtrees that are intentionally managed as one unit. `misc/scripts` uses that escape hatch for `~/.local/script`.
+Default linking is file-by-file. This keeps unrelated files in the same directory independent.
+
+## Directory Folding
+
+When a module's target directory does not yet exist in `$HOME`, bootstrap may link the entire subtree as a single directory symlink instead of per-file links. This is conservative: it only applies when the target directory is absent. Modules can force this behavior via a `.bootstrap.json` `directory_links` declaration (e.g. `misc/scripts` uses this for `~/.local/script/`).
 
 ## Autostart
 
-The **autostart** script (`~/.local/script/autostart`) launches shared applications when any WM starts. WM-specific startup items stay in each WM's config. The autostart script handles ordering: apps that depend on earlier services wait for readiness checks before launching.
-
-Source path in repo: `config/misc/scripts/.local/script/autostart`.
+`config/desktop/*/` modules may include autostart scripts that launch shared applications when a window manager or Wayland session starts. WM-specific startup items live in each WM's own config; the autostart layer handles ordering and readiness checks for shared services.
 
 ## Controller
 
-The **controller** script (`~/.local/script/controller`) provides a unified interface for actions bound to keyboard shortcuts across all WMs.
-
-Subcommands:
-- `controller volume up|down|mute` — audio control
-- `controller brightness up|down` — screen brightness
-- `controller kbdlight up|down` — keyboard backlight
-- `controller player play|pause|next|prev` — media player control
-- `controller app terminal|browser|filemanager|chat` — launch common apps
-- `controller noctalia launcher|clipboard|emoji` — Noctalia shell IPC actions
-
-WM bind files become thin adapters that call `controller <action>`.
-
-## Keybinding Convention
-
-A **keybinding convention** is a markdown document (`docs/keybindings.md`) listing the standard key-to-action mapping across mangoWM, niri, and Hyprland. It covers window management, workspace/tag navigation, monitor/screen, app launching, media control, system controls, Noctalia shell, and screenshots.
+A **controller** is a module that manages or coordinates other modules. Currently rare; most modules are self-contained.
 
 ## Secrets Loading
 
-**Secrets loading** decrypts `~/.config/fish/secrets.yaml` (SOPS/age) and exports values as environment variables.
-
-There are two implementations:
-- `secrets.sh` — POSIX sh script sourceable by bash and zsh. Sourced from `.profile` at login.
-- `secrets.fish` — Fish wrapper that invokes a bash subprocess, sources `secrets.sh`, then re-exports the resulting env vars.
+`secrets/` contains a SOPS/age-encrypted `secrets.yaml` and a POSIX `load.sh` loader. Bootstrap links them to `~/.config/sops/` and `~/.local/script/` respectively. `.profile` sources `load.sh` at login to export decrypted values as environment variables. Fish gets a thin wrapper that invokes a bash subprocess to re-export those values into the Fish environment.
 
 See `docs/secrets.md` for the full setup guide.
 
 ## Script Conventions
 
-All scripts under `~/.local/script/` follow a **script convention** so they stay self-contained, copy-pasteable, and predictable. The conventions cover shebangs, error handling (`set -euo pipefail`), argument parsing (`while`/`case`), logging (`info`/`ok`/`warn`/`err`), and cleanup (`trap`). See `docs/script-style.md`.
+Shell scripts under `config/misc/scripts/` (deployed to `~/.local/script/`) follow a shared style: POSIX-compatible shebangs, `set -euo pipefail`, `while`/`case` argument parsing, consistent `info`/`ok`/`warn`/`err` logging helpers, and `trap` cleanup. See `docs/script-style.md`.
 
-The **template** (`template.sh`) is the scaffold for new scripts. Copy it, fill in the sections, and the convention is satisfied by construction.
+---
 
-## Dependencies
-
-- `bash` — required for bootstrap and general scripts
-- `python3` — required for profile parsing and JSON validation during bootstrap
-- `age` / `rage` — required for secrets decryption
-- `sops` — required for secrets decryption
+The module inventory is NOT maintained here. Source of truth: `config/<category>/<module>` on disk + `profiles/*.json`.
