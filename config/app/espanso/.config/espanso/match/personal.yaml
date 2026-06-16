@@ -1,0 +1,24 @@
+matches:
+  - triggers: [':name',  ':nama']
+    replace: 'Atalariq Barra Hadinugraha'
+    uppercase_style: 'capitalize_words'
+    propagate_case: true
+
+  - triggers: [":email", ":dmail"]
+    replace: 'atalariq.dev@outlook.com'
+
+  - triggers: [":gmail", ":pmail"]
+    replace: 'atalariq26@gmail.com'
+
+  - triggers: [":ugm", ":umail"]
+    replace: 'atalariqbarrahadinugraha@mail.ugm.ac.id'
+
+  - trigger: ":nim"
+    replace: '25/557554/SV/26192'
+
+  - trigger: ":trpl"
+    replace: 'Teknologi Rekayasa Perangkat Lunak'
+
+  - trigger: ":wa"
+    replace: 'wa.me/62859106987796'
+
