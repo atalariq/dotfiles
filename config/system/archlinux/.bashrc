@@ -54,3 +54,7 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/atalariq/.local/bin:$PATH"
