@@ -1,0 +1,73 @@
+{
+  "Arrow function": {
+    "prefix": "af",
+    "body": "const $1 = ($2): $3 => {$0}"
+  },
+  "Async arrow function": {
+    "prefix": "aaf",
+    "body": "const $1 = async ($2): Promise<$3> => {$0}"
+  },
+  "Interface": {
+    "prefix": "iface",
+    "body": ["interface $1 {", "\t$0", "}"]
+  },
+  "Type alias": {
+    "prefix": "type",
+    "body": "type $1 = $0"
+  },
+  "React FC": {
+    "prefix": "rfc",
+    "body": [
+      "interface ${1:$TM_FILENAME_BASE}Props {",
+      "\t$2",
+      "}",
+      "",
+      "export default function ${1:$TM_FILENAME_BASE}({ $3 }: ${1:$TM_FILENAME_BASE}Props) {",
+      "\treturn (",
+      "\t\t<div>$0</div>",
+      "\t)",
+      "}"
+    ]
+  },
+  "useState": {
+    "prefix": "ust",
+    "body": "const [$1, set${1/(.*)/${1:/capitalize}/}] = useState<$2>($3)"
+  },
+  "useEffect": {
+    "prefix": "uef",
+    "body": ["useEffect(() => {", "\t$0", "}, [$1])"]
+  },
+  "Try/catch": {
+    "prefix": "tc",
+    "body": ["try {", "\t$0", "} catch (err) {", "\tconsole.error(err)", "}"]
+  },
+  "Console log": {
+    "prefix": "cl",
+    "body": "console.log($0)"
+  },
+  "Astro component": {
+    "prefix": "astro",
+    "body": [
+      "---",
+      "interface Props {",
+      "\t$1",
+      "}",
+      "",
+      "const { $2 } = Astro.props",
+      "---",
+      "",
+      "<div>",
+      "\t$0",
+      "</div>"
+    ]
+  },
+  "Fetch": {
+    "prefix": "fetch",
+    "body": [
+      "const res = await fetch('$1')",
+      "if (!res.ok) throw new Error(`HTTP ${res.status}`)",
+      "const data: $2 = await res.json()",
+      "$0"
+    ]
+  }
+}

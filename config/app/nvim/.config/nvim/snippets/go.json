@@ -1,0 +1,85 @@
+{
+  "Main": {
+    "prefix": "main",
+    "body": [
+      "package main",
+      "",
+      "import \"fmt\"",
+      "",
+      "func main() {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": ["func $1($2) $3 {", "\t$0", "}"]
+  },
+  "Error check": {
+    "prefix": "ife",
+    "body": ["if err != nil {", "\treturn ${1:err}", "}", "$0"]
+  },
+  "Error wrap": {
+    "prefix": "ifw",
+    "body": [
+      "if err != nil {",
+      "\treturn fmt.Errorf(\"$1: %w\", err)",
+      "}",
+      "$0"
+    ]
+  },
+  "If": {
+    "prefix": "if",
+    "body": ["if $1 {", "\t$0", "}"]
+  },
+  "For range": {
+    "prefix": "forr",
+    "body": ["for ${1:i}, ${2:v} := range ${3:s} {", "\t$0", "}"]
+  },
+  "Goroutine": {
+    "prefix": "go",
+    "body": ["go func() {", "\t$0", "}()"]
+  },
+  "Struct": {
+    "prefix": "st",
+    "body": ["type $1 struct {", "\t$0", "}"]
+  },
+  "Interface": {
+    "prefix": "iface",
+    "body": ["type $1 interface {", "\t$0", "}"]
+  },
+  "Test function": {
+    "prefix": "test",
+    "body": [
+      "func Test$1(t *testing.T) {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Benchmark": {
+    "prefix": "bench",
+    "body": [
+      "func Benchmark$1(b *testing.B) {",
+      "\tfor b.Loop() {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "HTTP handler": {
+    "prefix": "handler",
+    "body": [
+      "func $1(w http.ResponseWriter, r *http.Request) {",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Slog info": {
+    "prefix": "logi",
+    "body": "slog.Info(\"$1\"$0)"
+  },
+  "Slog error": {
+    "prefix": "loge",
+    "body": "slog.Error(\"$1\", \"err\", err$0)"
+  }
+}

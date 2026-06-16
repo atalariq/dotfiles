@@ -1,0 +1,81 @@
+{
+  "Document Setup": {
+    "prefix": "doc",
+    "body": [
+      "#set document(title: \"$1\", author: \"$2\")",
+      "#set page(paper: \"${3:a4}\", margin: (x: 2.5cm, y: 2.5cm))",
+      "#set text(font: \"${4:New Computer Modern}\", size: ${5:11}pt)",
+      "#set par(justify: true, leading: 0.65em)",
+      "",
+      "$0"
+    ]
+  },
+  "Heading": {
+    "prefix": "h1",
+    "body": "= $0"
+  },
+  "Heading 2": {
+    "prefix": "h2",
+    "body": "== $0"
+  },
+  "Heading 3": {
+    "prefix": "h3",
+    "body": "=== $0"
+  },
+  "Figure": {
+    "prefix": "fig",
+    "body": [
+      "#figure(",
+      "  image(\"$1\", width: ${2:80}%),",
+      "  caption: [$3],",
+      ") <$4>",
+      "$0"
+    ]
+  },
+  "Code Block": {
+    "prefix": "cb",
+    "body": ["```${1:lang}", "$0", "```"]
+  },
+  "Raw Inline": {
+    "prefix": "ri",
+    "body": "`$1`$0"
+  },
+  "Link": {
+    "prefix": "lk",
+    "body": "#link(\"$1\")[$2]$0"
+  },
+  "Reference": {
+    "prefix": "ref",
+    "body": "@$0"
+  },
+  "Bibliography": {
+    "prefix": "bib",
+    "body": "#bibliography(\"$1\")"
+  },
+  "Table": {
+    "prefix": "tbl",
+    "body": [
+      "#table(",
+      "  columns: ($1),",
+      "  [$2], [$3],",
+      "  $0",
+      ")"
+    ]
+  },
+  "Math Block": {
+    "prefix": "mb",
+    "body": ["$ $0 $"]
+  },
+  "Math Inline": {
+    "prefix": "mi",
+    "body": "$$$1$$$0"
+  },
+  "Note Box": {
+    "prefix": "note",
+    "body": [
+      "#block(fill: luma(230), inset: 8pt, radius: 4pt)[",
+      "  *Note:* $0",
+      "]"
+    ]
+  }
+}

@@ -3,6 +3,13 @@
 vim.opt.termguicolors = true
 vim.opt.mouse = "a"
 
+if vim.fn.has("nvim-0.12") == 1 then
+  vim.opt.smoothscroll = true
+end
+
+vim.opt.updatetime = 250 -- lebih responsif (default 4000ms)
+vim.opt.timeoutlen = 300 -- untuk which-key / mini.clue
+
 -- line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -15,6 +22,7 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.breakindent = true
+vim.opt.linebreak = true
 
 -- search
 vim.opt.hlsearch = true
@@ -31,12 +39,20 @@ vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.opt.wrap = false
 vim.opt.showmode = false
+vim.opt.scrolloff = 8 -- biar cursor ga nempel pinggir
+vim.opt.sidescrolloff = 8
+
+-- Fold
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
 
 -- persistence
 vim.opt.undofile = true
 vim.opt.backup = false
 vim.opt.swapfile = false
 vim.opt.autoread = true
+
+vim.opt.sessionoptions = "buffers,curdir,folds,tabpages,winsize"
 
 -- completion menu
 vim.opt.pumheight = 10
