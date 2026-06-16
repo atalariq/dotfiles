@@ -1,0 +1,4 @@
+# OBS runtime noise
+logs/
+profiler_data/
+crashes/
