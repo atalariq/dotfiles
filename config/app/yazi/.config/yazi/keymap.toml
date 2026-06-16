@@ -12,8 +12,6 @@ prepend_keymap = [
 	{ on = "s",         run = "search --via=fd",             desc = "Search files by name via fd" },
 	{ on = "S",         run = "search --via=rg",             desc = "Search files by content via ripgrep" },
 	{ on = "<C-s>",     run = "escape --search",             desc = "Cancel the ongoing search" },
-	{ on = "Z",         run = "plugin fzf",                  desc = "Jump to a file/directory via fzf" },
-	{ on = "z",         run = "plugin zoxide",               desc = "Jump to a directory via zoxide" },
 
 	# Filter/Find
 	{ on = "f", run = "filter --smart", desc = "Filter files" },
@@ -34,19 +32,6 @@ prepend_keymap = [
 	{ on = [ "g", "k" ], run = "cd ~/Kuliah" },
 	{ on = [ "g", "R" ], run = "cd ~/Repos" },
   { on = [ "g", "r" ], run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"', desc = "Go to git root folder" },
-
-  # Plugin
-  { on = "L", run  = "plugin bypass" },
-  { on = "H", run  = "plugin bypass reverse" },
-	{ on = "O", run = "plugin open-with-cmd"},
-	{ on = "<Enter>",    run = "open --interactive"},
-	{ on = "<S-Enter>",  run = "plugin open-with-cmd -- block"},
-  { on = [ "g", "D" ], run = "shell -- ripdrag --and-exit --basename --resizable --all %h", desc = "Drag file" },
-  { on = [ "g", "m" ], run  = "plugin mount", desc = "Mount devices"},
-  { on = [ "g", "P" ], run = "plugin save-clipboard-to-file", desc = "Paste clipboard content to file and hover after created" },
-  { on = [ "g", "M" ], run = "plugin mediainfo -- toggle-metadata", desc = "Toggle media preview metadata" },
-  { on = [ "c", "m" ], run  = "plugin chmod", desc = "Chmod on selected files"},
-
 ]
 
 [tasks]
