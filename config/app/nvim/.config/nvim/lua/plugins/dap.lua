@@ -1,11 +1,7 @@
-local ok, dap = pcall(require, "dap")
-if not ok then
-  return
-end
+local executable = require("core.utils").executable
 
-local function executable(cmd)
-  return vim.fn.executable(cmd) == 1
-end
+local dap = require("dap")
+require("dap-view").setup()
 
 if executable("dlv") then
   dap.adapters.go = function(callback, config)
@@ -75,6 +71,3 @@ if executable("lldb-dap") then
     }
   end
 end
-
--- Bash / JS / PHP need distro-specific adapter entrypoints. Keep Android/Kotlin
--- debugging out of Neovim; Android Studio remains the sane fallback.
