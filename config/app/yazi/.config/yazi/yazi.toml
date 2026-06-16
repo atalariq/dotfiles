@@ -35,29 +35,3 @@ suppress_preload = false
 #   { run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
 # ]
 
-[plugin]
-prepend_previewers = [
-  { mime = "application/postscript", run = "mediainfo" },
-  { mime = "application/subrip", run = "mediainfo" },
-  { mime = "application/{*zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}", run = "ouch" },
-  { mime = "audio/*", run = "exifaudio" },
-  { mime = "{audio,video,image}/*", run = "mediainfo" },
-  { mime = "{audio,video,image}/*", run = "mediainfo" },
-  { mime = 'application/sqlite3', run = 'preview-sqlite' },
-  { url = '*.sqlite3', run = 'preview-sqlite' },
-  # { url = '*.typ', run = 'preview-typst' },
-
-]
-prepend_preloaders = [
-  { mime = "application/postscript", run = "mediainfo" },
-  { mime = "application/subrip", run = "mediainfo" },
-  # { url = '*.typ', run = 'preview-typst' },
-]
-prepend_spotters = [
-  { mime = 'audio/mpegurl', run = 'code' },
-  { mime = "audio/*", run = "spot-audio" },
-  { mime = "image/*", run = "spot-image" },
-  { mime = "video/*", run = "spot-video" },
-  { url = "*", run = "spot" },
-  { url = "*/", run = "spot" },
-]
