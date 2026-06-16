@@ -1,6 +1,7 @@
 set -g NVIM_PROFILES \
     nvim \
-    nvim-minimal
+    nvim-minimal \
+    nvim-minimax
 
 if not set -q NVIM_APPNAME
     set -Ux NVIM_APPNAME nvim
@@ -18,15 +19,9 @@ function nvim-default-select --description "Select and set global default NVIM_A
     echo "Default NVIM_APPNAME set to: $appname"
 end
 
-abbr -a nvds nvim-default-select
-
-alias nvimd "env NVIM_APPNAME=nvim nvim"
-alias nvimm "env NVIM_APPNAME=nvim-minimal nvim"
-
 # ------------------------------------------------------------
 # Neovim + fzf file picker
 # ------------------------------------------------------------
-
 function nvim-fzf --description "Pick a file with fzf and open it in Neovim"
     set -l file (
         fzf \
@@ -42,4 +37,34 @@ function nvim-fzf --description "Pick a file with fzf and open it in Neovim"
     nvim "$file"
 end
 
+# ------------------------------------------------------------
+# Neovim + fzf config picker
+# ------------------------------------------------------------
+function nvim-config --description "Pick a nvim configurations file with fzf and open it in Neovim"
+    set -l file (
+        find $XDG_CONFIG_HOME/$NVIM_APPNAME -type f,l | \
+        fzf \
+            --reverse \
+            --height 80% \
+            --border \
+            --preview 'bat --style=numbers --color=always --line-range :500 {}' \
+            --preview-window 'right:60%:wrap'
+    )
+
+    test -n "$file"; or return 1
+
+    nvim "$file"
+end
+
+# ------------------------------------------------------------
+# Abbreviations & Aliases
+# ------------------------------------------------------------
+
+abbr -a e nvim
 abbr -a f nvim-fzf
+abbr -a nvimc nvim-config
+abbr -a nvds nvim-default-select
+
+alias nvimd "env NVIM_APPNAME=nvim nvim"
+alias nvimm "env NVIM_APPNAME=nvim-minimal nvim"
+alias nvimx "env NVIM_APPNAME=nvim-minimax nvim"

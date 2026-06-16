@@ -2,10 +2,13 @@
 alias :Q exit
 alias :q exit
 
-alias .. "cd .."
-alias ... "cd ../.."
-alias .... "cd ../../.."
-alias ..... "cd ../../../.."
+alias cd='pushd'
+alias pd='popd'
+
+# alias .. "cd .."
+# alias ... "cd ../.."
+# alias .... "cd ../../.."
+# alias ..... "cd ../../../.."
 
 alias c clear
 alias h history

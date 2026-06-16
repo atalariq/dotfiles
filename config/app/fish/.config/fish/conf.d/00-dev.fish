@@ -40,6 +40,9 @@ set -gx OPENCODE_ENABLE_EXA 1
 set -gx OPENSPEC_TELEMETRY  0
 set -gx MNEMOSYNE_DATA_DIR  "$HOME/.mnemosyne/data"
 
+# -- Tooling --------------------------------------------
+set -gx VALE_CONFIG_PATH $HOME/.config/vale/.vale.ini
+
 # ── Local Paths ────────────────────────────────────────
 set -gx LOCAL_BIN "$HOME/.local/bin"
 set -gx LOCAL_SCRIPT "$HOME/.local/script"
