@@ -26,7 +26,7 @@ creation_rules:
 ### 3. Create `secrets.yaml`
 
 ```sh
-sops --config .sops.yaml config/app/fish/.config/fish/secrets.yaml
+sops secrets/secrets.yaml
 ```
 
 SOPS opens your editor. Add entries in dotenv format:
@@ -39,52 +39,42 @@ ANTHROPIC_API_KEY=sk-ant...xxxx
 
 Save and close. SOPS encrypts the file automatically.
 
-### 4. Verify decryption works
+### 4. Verify decryption
 
 ```sh
-sops -d config/app/fish/.config/fish/secrets.yaml
+sops -d secrets/secrets.yaml
 ```
 
 Should print your keys in `KEY=VALUE` format.
 
+## File Locations
+
+| Repo path                                             | Deployed to                             | Role                       |
+| ----------------------------------------------------- | --------------------------------------- | -------------------------- |
+| `secrets/secrets.yaml`                                | `~/.config/sops/secrets.yaml`           | Encrypted secrets store    |
+| `secrets/load.sh`                                     | `~/.local/script/secrets-load`          | POSIX loader (bash/zsh/sh) |
+| `config/app/fish/.config/fish/conf.d/90-secrets.fish` | `~/.config/fish/conf.d/90-secrets.fish` | Fish thin wrapper          |
+| `config/system/archlinux/.profile`                    | `~/.profile`                            | Sources loader at login    |
+| `.sops.yaml`                                          | repo root                               | SOPS encryption rules      |
+| `~/.config/age/keys.txt`                              | never committed                         | Age private key            |
+
 ## How It Works
 
-### At shell startup
-
-**.profile** (bash/zsh login shells) sources `~/.config/fish/conf.d/secrets.sh`:
-
-```text
-.profile → secrets.sh → sops -d secrets.yaml → export KEY=VALUE
+```
+.profile → ~/.local/script/secrets-load → sops -d secrets.yaml → export KEY=VALUE
+fish     → conf.d/90-secrets.fish → bash → secrets-load → re-export into fish env
 ```
 
-**Fish** (interactive shell) runs `conf.d/secrets.fish`:
-
-```text
-secrets.fish → bash subprocess → source secrets.sh → env → re-export in fish
-```
-
-### File locations
-
-| File | Role |
-| --- | --- |
-| `~/.config/age/keys.txt` | Age private key |
-| `~/.config/fish/conf.d/secrets.sh` | POSIX loader (bash/zsh) |
-| `~/.config/fish/conf.d/secrets.fish` | Fish wrapper |
-| `~/.config/fish/secrets.yaml` | Encrypted secrets |
-| `dotfiles/.sops.yaml` | SOPS encryption rules |
-| `dotfiles/config/app/fish/.config/fish/conf.d/secrets.sh` | Source file linked into `~/.config/fish/conf.d/` |
-| `dotfiles/config/app/fish/.config/fish/secrets.yaml` | Encrypted secrets source |
-
-### Rotating the age key
+## Key Rotation
 
 1. Generate a new key: `age-keygen -o ~/.config/age/keys-new.txt`
 2. Add both keys to `.sops.yaml`: `age: <old-key>,<new-key>`
-3. Re-encrypt: `sops updatekeys config/app/fish/.config/fish/secrets.yaml`
+3. Re-encrypt: `sops updatekeys secrets/secrets.yaml`
 4. Remove old key from `.sops.yaml`
-5. Replace `keys.txt` with `keys-new.txt`
+5. Replace `~/.config/age/keys.txt` with `keys-new.txt`
 
 ## Dependencies
 
 - `sops` — encrypt/decrypt
 - `age` or `rage` — key management
-- `bash` — required by the Fish bridge (already present)
+- `bash` — required by the Fish bridge
