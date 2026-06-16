@@ -1,8 +1,8 @@
 #!/bin/sh
 
-FULL=$(mmsg -g -c)
-APPID=$(echo "$FULL" | grep appid | cut -d' ' -f 3-)
-TITLE=$(echo "$FULL" | grep title | cut -d' ' -f 3- )
+FULL=$(mmsg get focusing-client)
+APPID=$(echo "$FULL" | jq .appid | sed -e 's/"//g')
+TITLE=$(echo "$FULL" | jq .title | sed -e 's/"//g')
 
 MSG="appid:${APPID},title:${TITLE}"
 
