@@ -1,0 +1,22 @@
+matches:
+  - trigger: ":ai"
+    replace: "{{snippet}}"
+    vars:
+      - name: files
+        type: shell
+        params:
+          cmd: "find ~/Grimoire/Meta/llm/snippets -maxdepth 1 -type f"
+      - name: picker
+        type: form
+        params:
+          layout: |
+            Select file:
+            [[file]]
+          fields:
+            file:
+              type: list
+              values: "{{files}}"
+      - name: snippet
+        type: shell
+        params:
+          cmd: "cat {{picker.file}}"

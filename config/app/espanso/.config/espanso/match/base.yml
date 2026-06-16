@@ -1,21 +1,39 @@
+# espanso match file
+# For a complete introduction, visit the official docs at: https://espanso.org/docs/
+# You can use this file to define the base matches (aka snippets)
+# that will be available in every application when using espanso.
+# Matches are substitution rules: when you type the "trigger" string
+# it gets replaced by the "replace" string.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/espanso/espanso/dev/schemas/match.schema.json
 matches:
   # Simple text replacement
-  - trigger: ':espanso'
-    replace: 'Hi there!'
-
-  # Print the current date
-  - trigger: '//date'
-    replace: '{{date}}'
+  - trigger: ":espanso"
+    replace: "Hi there!"
+  # Simple replacement
+  - trigger: ":sig"
+    replace: "Best regards,\nJohn"
+  # Multiple triggers for one replacement
+  - triggers: [":hi", ":hello"]
+    replace: "Hello there!"
+  # Date variable
+  - trigger: ":date"
+    replace: "{{date}}"
     vars:
       - name: date
         type: date
         params:
-          format: '%d-%m-%Y'
-
-  # Markdown clipboard format
-  - trigger: '//a'
-    replace: '[$|$]({{clipboard}})'
+          format: "%Y-%m-%d"
+  # Shell command
+  - trigger: ":ip"
+    replace: "{{ip}}"
     vars:
-      - name: 'clipboard'
-        type: 'clipboard'
-
+      - name: ip
+        type: shell
+        params:
+          cmd: "curl -s ifconfig.me"
+  # Clipboard
+  - triggers: [":paste", ":ppp"]
+    replace: "{{clip}}"
+    vars:
+      - name: clip
+        type: clipboard
