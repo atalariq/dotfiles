@@ -1,182 +1,71 @@
-# Package Installation Guide
+# Package Installation
 
-This page is the install/reference doc for development packages used across the dotfiles and editor setup.
+Reference snapshot of explicitly-installed packages on this machine. Not a
+blind bootstrap — install what a given machine actually needs.
 
-Goal: keep package installation understandable and reproducible without pretending one giant command is always the right answer.
-
-## Install philosophy
-
-- Prefer built-in package managers first.
-- Keep the base machine small, then add language- or tool-specific extras as needed.
-- AUR packages are optional, not assumed.
-- This doc is a reference, not a blind one-shot bootstrap script.
-
-## Minimal base for this repo
+## Minimal base (for bootstrap)
 
 ```bash
-sudo pacman -Syu
-sudo pacman -S --needed \
-  git bash python fish neovim fzf bat \
-  uv mise go rustup
+sudo pacman -Syu --needed git bash python fish neovim
 ```
 
-That is enough for bootstrap plus the common language toolchains.
+## Native (pacman, explicit)
 
-## Recommended core dev tooling
-
-Bias this toward the stack that actually matters day-to-day: Go, web, SQL, containers, docs, and dotfiles.
+226 packages as of 2026-06-17.
 
 ```bash
 sudo pacman -S --needed \
-  just pixi \
-  shfmt shellcheck prettier \
-  stylua typos yamllint
+  7zip accountsservice adw-gtk-theme alacritty anki aria2 astyle atuin \
+  base base-devel bash-language-server bat biome bluetui bluez \
+  bluez-deprecated-tools bluez-utils brightnessctl btop bun cava ccache \
+  cliphist cloudflare-speed-cli cmake d2 ddcutil delve dnscrypt-proxy \
+  docker docker-buildx docker-compose dockerfile-language-server dua-cli duf \
+  dust efibootmgr eslint-language-server ethtool evtest eza fastfetch fbset \
+  fd fish fvm fyi fzf ghostscript git git-delta git-filter-repo git-lfs \
+  github-cli gitlab-ci-ls gitleaks gitoxide glab glow gnome-tweaks go \
+  gofumpt golangci-lint gpu-screen-recorder gtk-layer-shell gvfs htop \
+  hyperfine imagemagick impala imv intel-gpu-tools intel-media-driver \
+  intel-ucode inter-font inxi iwd jdk21-openjdk jemalloc jless jpegoptim jq \
+  just just-lsp kdeconnect kitty kotlin ktlint lazygit less lib32-gamemode \
+  lib32-mesa libnotify libpulse libreoffice-fresh libva-intel-driver \
+  libwebp-utils linux-firmware linux-firmware-intel linux-zen \
+  linux-zen-headers lldb lua-language-server mado man-db marksman maven \
+  mdfried mediainfo mise mpc mpd mpv mpv-mpris nautilus neovim nicotine+ \
+  noto-fonts-cjk noto-fonts-emoji ntfs-3g nvtop obs-studio openai-codex \
+  opencode openssh oxipng pacman-contrib papirus-icon-theme pavucontrol \
+  perl-image-exiftool pgformatter php pipewire pipewire-alsa pipewire-jack \
+  pipewire-pulse pkgfile polkit-gnome prettier procs profile-cleaner psutils \
+  python-matplotlib python-numpy python-pipx qutebrowser reflector ripgrep \
+  rmpc rst2pdf rsync ruff rumdl rustup satty selene shfmt showmethekey \
+  smartmontools sops sqlfluff starship stylua systemd-lsp \
+  tailwindcss-language-server tealdeer terminus-font tesseract-data-eng \
+  tesseract-data-ind texlab time tinymist tlp tlp-pd tmux tokei tombi tree \
+  tree-sitter-cli ttf-fira-code ttf-nerd-fonts-symbols \
+  ttf-nerd-fonts-symbols-common ttf-nerd-fonts-symbols-mono ty typos \
+  typos-lsp typst typstyle ufw unzip uv vale vscode-css-languageserver \
+  vscode-html-languageserver vscode-json-languageserver vulkan-intel waycheck \
+  wayland-protocols wayland-utils websocat wev wget wireless_tools wireplumber \
+  wl-clip-persist wl-clipboard wl-mirror wlr-randr wtype wxwidgets-gtk3 \
+  xdg-desktop-portal-wlr xdg-utils xorg-xrdb xorg-xwayland \
+  xwayland-satellite yaml-language-server yamlfmt yamllint yazi yq yt-dlp \
+  zathura zathura-pdf-mupdf zip zoxide zram-generator
 ```
 
-## Secondary / coursework / experiment tooling
+## AUR (yay, explicit)
 
-Install these when you actually need them, not by reflex:
-
-```bash
-sudo pacman -S --needed \
-  php kotlin
-```
-
-## LSPs
-
-```bash
-sudo pacman -S --needed \
-  bash-language-server lua-language-server clang \
-  systemd-lsp \
-  yaml-language-server dockerfile-language-server gitlab-ci-ls just-lsp \
-  texlab tinymist marksman \
-  eslint-language-server tailwindcss-language-server \
-  vscode-html-languageserver vscode-css-languageserver vscode-json-languageserver
-```
-
-Optional / AUR / ecosystem-specific:
+44 packages as of 2026-06-17.
 
 ```bash
 yay -S --needed \
-  jdtls kotlin-lsp-bin \
-  basedpyright-bin phpactor-bin \
-  postgres-language-server-bin sqls-bin \
-  vtsls
+  basedpyright-bin beekeeper-studio-bin brave-bin detekt-bin facetimehd-data \
+  facetimehd-dkms facetimehd-firmware google-breakpad google-chrome \
+  google-cloud-cli google-cloud-cli-gsutil google-java-format hadolint-bin \
+  helium-browser-bin herdr-bin jdtls kanata-bin kbdlight kotlin-lsp-bin \
+  lazysql lyricspot macbook-12-1-linux-fixes mangowm mbpfan-git mpdris2-rs \
+  noctalia-git phpactor-bin postgres-language-server-bin python-unoserver \
+  python-yams qt6ct-kde ripdrag-git rtk-bin shellcheck-bin sqls-bin tableplus \
+  tirith usql ventoy-bin vscode-js-debug vtsls wakadash-bin webcord-bin wlrctl \
+  yay-bin
 ```
 
-Notes:
-- Skip `gopls` here if you already install it through Go (`go install golang.org/x/tools/gopls@latest`).
-- Skip `rust-analyzer` here if you want to rely on `rustup component add rust-analyzer` instead.
-- Current Neovim config uses `postgres_lsp` as the main SQL server and keeps `sqls` as optional fallback, not a second always-on default.
-- `tombi` replaces `taplo` in this setup.
-- Arch's `dockerfile-language-server` package currently exposes the `docker-langserver` binary. That is the command Neovim checks for.
-
-## Formatters and linters
-
-```bash
-sudo pacman -S --needed \
-  gofumpt pgformatter biome yamlfmt \
-  typstyle ktlint golangci-lint python-ruff \
-  selene sqlfluff
-```
-
-Optional / AUR:
-
-```bash
-yay -S --needed \
-  google-java-format hadolint-bin detekt-cli
-```
-
-## Debuggers
-
-```bash
-sudo pacman -S --needed \
-  delve python-debugpy lldb xdebug
-```
-
-## Current Neovim plugin runtime deps
-
-These are not generic system packages. They matter because the current `config/app/nvim` setup actually calls them.
-
-```bash
-sudo pacman -S --needed \
-  deno websocat
-```
-
-Why:
-- `peek.nvim` builds with `deno`
-- `typst-preview.nvim` expects `tinymist` and `websocat`
-
-## Language ecosystems
-
-### Rust
-
-```bash
-rustup default stable
-cargo install iwe iwes
-```
-
-### Node / JS
-
-Corepack is assumed. Enable it once:
-
-```bash
-corepack enable
-```
-
-### Python
-
-Use `uv` for isolated installs and project envs. Avoid random global `pip install` on this machine.
-
-## AI / agent tooling
-
-Package names and install method can drift, so keep the exact current setup in [`docs/ai-tools.md`](./ai-tools.md).
-
-That doc covers:
-- Hermes Agent
-- OpenCode
-- Codex CLI
-- Zed integration
-
-For backup/safety-net purposes, this repo now also carries curated config snapshots for:
-- `config/app/ai-tools/.config/opencode/`
-- `config/app/ai-tools/.codex/`
-
-Important: Neovim currently does **not** have an AI plugin wired in. AI tooling today lives in CLI workflows plus Zed agent integration. That is probably the right default for now unless a Neovim-side tool proves it adds signal instead of friction.
-
-## Post-install verification
-
-Run whatever applies to the stack you actually installed:
-
-```bash
-bash --version
-python3 --version
-uv --version
-mise --version
-go version
-rustup --version
-lua-language-server --version
-stylua --version
-ruff --version
-shellcheck --version
-shfmt --version
-prettier --version
-```
-
-Optional checks:
-
-```bash
-just --version
-tinymist --version
-marksman --version
-delve version
-```
-
-## What is intentionally not automated
-
-- Full package installation for every machine persona
-- AUR bootstrap policy
-- GPU / Android / Java heavy toolchains by default
-- Per-project language tools that only matter in one repo
-
-That stuff changes too often. Better as docs and conscious installs than magic that rots.
+Regenerate with `pacman -Qqen` / `pacman -Qqem`.
