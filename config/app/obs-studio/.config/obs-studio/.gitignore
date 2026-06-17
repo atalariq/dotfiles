@@ -2,3 +2,6 @@
 logs/
 profiler_data/
 crashes/
+basic/scenes/*.bak
+plugin_config/rtmp-services/amazon_ivs_ingests.json
+plugin_config/rtmp-services/twitch_ingests.json
