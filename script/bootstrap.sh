@@ -300,8 +300,33 @@ symlink_module() {
 		esac
 	done < <(directory_links_for_module "$module_ref")
 
-	# --- Auto directory-folding: link whole .config/<app> dirs when target absent ---
-	# Collect candidate dirs that sit under .config/ inside the module source
+	# --- Auto directory-folding: link whole .config/<app> dirs when safe ---
+	# A target dir is "ours" (safe to replace) when every entry in it is a symlink
+	# pointing into this dotfiles repo's config dir. That covers both the "fresh
+	# install" case (dir absent) and the "previously deployed file-by-file" case.
+	_dir_is_ours() {
+		local dir="$1" cfg_root="$2"
+		[[ -d "$dir" ]] || return 0 # absent → safe
+		# Dir is already a symlink pointing into our config root → already ours
+		if [[ -L "$dir" ]]; then
+			local lnk
+			lnk="$(readlink "$dir")"
+			case "$lnk" in "$cfg_root"/*) return 0 ;; esac
+		fi
+		[[ -n "$(ls -A "$dir" 2>/dev/null)" ]] || return 0 # empty → safe
+		local entry
+		while IFS= read -r -d '' entry; do
+			[[ -L "$entry" ]] || return 1
+			local lnk
+			lnk="$(readlink "$entry")"
+			case "$lnk" in
+			"$cfg_root"/*) ;;
+			*) return 1 ;;
+			esac
+		done < <(find "$dir" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
+		return 0
+	}
+
 	while IFS= read -r rel; do
 		[[ -z "$rel" ]] && continue
 
@@ -319,8 +344,9 @@ symlink_module() {
 		local src="${src_dir}/${rel}"
 		local target="${TARGET}/${rel}"
 
-		# Only fold when the target does NOT exist — conservative rule
-		if [[ ! -e "$target" ]] && [[ ! -L "$target" ]]; then
+		# Fold when target is absent, empty, or contains only our own symlinks
+		if _dir_is_ours "$target" "$CONFIG_ROOT"; then
+			[[ -d "$target" && ! -L "$target" ]] && run rm -rf "$target"
 			ensure_target_parent "$target"
 			run ln -sfn "$src" "$target"
 			if ! ((DRY_RUN)); then echo "$target" >>"$mf"; fi
@@ -329,9 +355,9 @@ symlink_module() {
 			((count++)) || true
 		fi
 	done < <(
-		find "$src_dir" -mindepth 2 -maxdepth 3 -type d \
-			-path '*/.config/*' -prune -print 2>/dev/null |
-			sed "s#^${src_dir}/##" || true
+		find "$src_dir" -mindepth 2 -type d 2>/dev/null |
+			sed "s#^${src_dir}/##" |
+			sort || true
 	)
 
 	# --- Per-file symlinks ---
