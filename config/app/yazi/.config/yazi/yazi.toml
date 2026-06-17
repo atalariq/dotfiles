@@ -19,19 +19,27 @@ image_delay = 0
 image_quality = 70
 
 [tasks]
-file_workers = 3
-plugin_workers = 5
-fetch_workers = 5
-preload_workers = 2
-process_workers = 5
-bizarre_retry = 3
-image_alloc = 1073741824     # 1073741824 Bytes = 1024MB = 1GB
-image_bound = [10000, 10000]
-suppress_preload = false
+image_alloc = 1073741824  # = 1024*1024*1024 = 1024MB
 
-# [opener]
-# extract = [
-#   { run = 'ouch d -y %*', desc = "Extract here with ouch", for = "windows" },
-#   { run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
-# ]
+[opener]
+extract = [
+	{ run = 'ouch d -y %*', desc = "Extract here with ouch", for = "windows" },
+	{ run = 'ouch d -y "$@"', desc = "Extract here with ouch", for = "unix" },
+]
 
+[plugin]
+prepend_preloaders = [
+  # https://yazi-rs.github.io/docs/tips/#folder-previewer
+  { url = "/remote/**", run = "noop" },
+  # Replace magick, image, video with mediainfo
+  { mime = "{audio,video,image}/*", run = "mediainfo" },
+  { mime = "application/subrip", run = "mediainfo" },
+]
+
+prepend_previewers = [
+  { mime = "application/{*zip,tar,bzip2,7z*,rar,xz,zstd,java-archive}", run = "ouch --show-file-icons --list-view" },
+
+  # Replace magick, image, video with mediainfo
+  { mime = "{audio,video,image}/*", run = "mediainfo" },
+  { mime = "application/subrip", run = "mediainfo" },
+]
