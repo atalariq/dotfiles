@@ -1,6 +1,9 @@
 local lint = require("lint")
 
 local linters = {
+  selene = {
+    append_args = { "--config", vim.fn.stdpath("config") .. "/selene.toml" },
+  },
   vale = { append_args = { "--config", vim.fn.expand("~/.config/vale/.vale.ini"), "--output", "JSON" } },
   rumdl = {
     append_args = {

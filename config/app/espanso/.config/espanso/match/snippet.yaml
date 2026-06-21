@@ -5,7 +5,7 @@ matches:
       - name: files
         type: shell
         params:
-          cmd: "find ~/Grimoire/Meta/llm/snippets -maxdepth 1 -type f"
+          cmd: "find ~/.config/espanso/snippets -maxdepth 1 -type f -name '*.md' ! -name 'README.md'"
       - name: picker
         type: form
         params:

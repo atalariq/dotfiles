@@ -76,7 +76,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 -- cd to project root of the current file (markers), fallback to file dir
 map("n", "<leader>cd", function()
-  local markers = { ".git", ".hg", ".svn", "Makefile", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", ".luarc.json" }
+  local markers =
+    { ".git", ".hg", ".svn", "Makefile", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", ".luarc.json" }
   local root = vim.fs.root(0, markers)
   if not root then
     local fname = vim.api.nvim_buf_get_name(0)
@@ -85,3 +86,8 @@ map("n", "<leader>cd", function()
   vim.cmd.cd(vim.fn.fnameescape(root))
   vim.notify("cwd → " .. root)
 end, { desc = "cd to project root" })
+
+-- toggle line wrap for current window
+map("n", "<leader>uw", function()
+  vim.wo.wrap = not vim.wo.wrap
+end, { desc = "Toggle line wrap" })

@@ -1,6 +1,6 @@
 vim.opt_local.spell = true
 vim.opt_local.spelllang = { "id", "en" }
-vim.opt_local.wrap = true
+vim.opt_local.wrap = false
 vim.opt_local.linebreak = true
 vim.opt_local.conceallevel = 2
 
@@ -15,24 +15,6 @@ require("markdown_preview").setup({
 
 -- markdown preview
 vim.keymap.set("n", "<leader>tlp", "<cmd>MarkdownPreview<CR>", { desc = "Toggle Live Preview markdown/html/asciidoc" })
-
--- --- iwe -------------------------------------------------
-require("iwe").setup({
-  lsp = {
-    cmd = { "iwes" },
-    name = "iwes",
-    debounce_text_changes = 500,
-    auto_format_on_save = true,
-  },
-  mappings = {
-    enable_markdown_mappings = true,
-    enable_telescope_keybindings = false,
-    enable_lsp_keybindings = false,
-    leader = "<leader>",
-    localleader = "<localleader>",
-  },
-  telescope = { enabled = false },
-})
 
 -- --- render-markdown -------------------------------------
 require("render-markdown").setup({

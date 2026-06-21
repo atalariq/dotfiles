@@ -6,7 +6,7 @@ set -gx ANDROID_HOME "$HOME/Dev/android-sdk"
 set -gx ANDROID_SDK_ROOT "$ANDROID_HOME"
 
 # ── Java ───────────────────────────────────────────────
-set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk
+set -gx JAVA_HOME /usr/lib/jvm/java-21-openjdk
 
 # ── Flutter / FVM ──────────────────────────────────────
 set -gx CHROME_EXECUTABLE /usr/bin/google-chrome-stable

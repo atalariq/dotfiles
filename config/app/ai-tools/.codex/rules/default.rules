@@ -26,3 +26,8 @@ prefix_rule(pattern=["pnpm", "--dir", "apps/mobile", "run", "typecheck"], decisi
 prefix_rule(pattern=["pnpm", "--filter", "mobile", "exec", "tsc", "--noEmit"], decision="allow")
 prefix_rule(pattern=["pnpm", "--filter", "api", "typecheck"], decision="allow")
 prefix_rule(pattern=["pnpm", "exec", "tsx", "--test"], decision="allow")
+prefix_rule(pattern=["rtk", "git", "add"], decision="allow")
+prefix_rule(pattern=["rtk", "git", "commit"], decision="allow")
+prefix_rule(pattern=["rtk", "git", "check-ignore", "-v", ".worktrees/"], decision="allow")
+prefix_rule(pattern=["rtk", "git", "worktree"], decision="allow")
+prefix_rule(pattern=["rtk", "git", "diff", "--cached", "--check"], decision="allow")

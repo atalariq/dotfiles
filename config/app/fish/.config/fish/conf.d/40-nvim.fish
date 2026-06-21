@@ -42,7 +42,7 @@ end
 # ------------------------------------------------------------
 function nvim-config --description "Pick a nvim configurations file with fzf and open it in Neovim"
     set -l file (
-        find $XDG_CONFIG_HOME/$NVIM_APPNAME -type f,l | \
+        fd --type f --follow . "$XDG_CONFIG_HOME/$NVIM_APPNAME" | \
         fzf \
             --reverse \
             --height 80% \
