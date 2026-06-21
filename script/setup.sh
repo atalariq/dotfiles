@@ -20,6 +20,9 @@ Usage:
   setup [--dry-run]           adopt <category/module>   Adopt existing HOME files
   setup [--dry-run]           secrets                Link secrets files
   setup <path/to/config.json>                        Deploy from a custom JSON config
+  setup                       doctor                 Check all deployed symlinks for breakage
+  setup                       status [category/module] Show deployment status
+  setup                       diff   [category/module] Show symlink drift
 
   Short form: setup app/fish  (equivalent to: setup use app/fish)
 
@@ -36,6 +39,9 @@ Examples:
   setup undo profile laptop
   setup restow app/nvim
   setup secrets
+  setup doctor
+  setup status app/fish
+  setup diff
 EOF
 	exit 1
 }
@@ -109,7 +115,7 @@ main() {
 	# Short form: if the first non-flag arg contains '/' and is not a known
 	# subcommand, treat it as: setup use <arg>
 	case "$arg" in
-	lab | personal | use | undo | restow | adopt | profile | secrets | *.json) ;;
+	lab | personal | use | undo | restow | adopt | profile | secrets | doctor | status | diff | *.json) ;;
 	*)
 		if [[ "$arg" == */* ]]; then
 			pos_args=("use" "${pos_args[@]}")
@@ -125,7 +131,7 @@ main() {
 	personal)
 		"$BOOTSTRAP" "${flags[@]}" profile laptop
 		;;
-	use | undo | restow | adopt | profile | secrets)
+	use | undo | restow | adopt | profile | secrets | doctor | status | diff)
 		"$BOOTSTRAP" "${flags[@]}" "${pos_args[@]}"
 		;;
 	*.json)

@@ -45,6 +45,9 @@ Usage:
   bootstrap [--dry-run] [--force] undo <category/module>
   bootstrap [--dry-run] [--force] undo profile <name>
   bootstrap [--dry-run]           secrets
+  bootstrap                       doctor
+  bootstrap                       status [category/module]
+  bootstrap                       diff   [category/module]
 
 Options:
   --dry-run   Print actions without executing them
@@ -58,6 +61,9 @@ Examples:
   bootstrap undo app/kitty
   bootstrap undo profile laptop
   bootstrap secrets
+  bootstrap doctor
+  bootstrap status app/fish
+  bootstrap diff
 EOF
 	exit 1
 }
@@ -631,6 +637,221 @@ deploy_secrets() {
 	ok "secrets linked (secrets/secrets.yaml → ~/.config/sops/secrets.yaml, secrets/load.sh → ~/.local/script/secrets-load)"
 }
 
+# ---------------------------------------------------------------------------
+# Inspection commands
+# ---------------------------------------------------------------------------
+
+cmd_doctor() {
+	if [[ ! -d "$MANIFEST_DIR" ]] || [[ -z "$(ls -A "$MANIFEST_DIR" 2>/dev/null)" ]]; then
+		info "No deployed modules found (manifest dir empty or absent)"
+		return 0
+	fi
+
+	local ok_count=0 broken_count=0
+
+	while IFS= read -r -d '' mf; do
+		local mf_base
+		mf_base="$(basename "$mf")"
+		local module_ref="${mf_base//__//}"
+
+		info "Checking ${module_ref}"
+
+		while IFS= read -r target; do
+			[[ -z "$target" ]] && continue
+
+			if [[ ! -L "$target" ]]; then
+				echo -e "  ${RED}✗${NC} ${target} (not a symlink — was it overwritten?)"
+				((broken_count++)) || true
+			elif [[ ! -e "$target" ]]; then
+				local dest
+				dest="$(readlink "$target")"
+				echo -e "  ${RED}✗${NC} ${target} (dangling symlink → ${dest})"
+				((broken_count++)) || true
+			else
+				ok "$target"
+				((ok_count++)) || true
+			fi
+		done <"$mf"
+	done < <(find "$MANIFEST_DIR" -maxdepth 1 -type f -print0 2>/dev/null)
+
+	echo ""
+	if ((broken_count > 0)); then
+		echo -e "${CYAN}Doctor:${NC} ${ok_count} OK, ${RED}${broken_count} broken${NC}"
+		return 1
+	else
+		echo -e "${CYAN}Doctor:${NC} ${GREEN}${ok_count} OK, 0 broken${NC}"
+		return 0
+	fi
+}
+
+_status_one() {
+	local module_ref="$1"
+	local mf
+	mf="$(manifest_file "$module_ref")" || return 1
+	local src_dir
+	src_dir="$(module_source_dir "$module_ref")" || return 1
+
+	info "Status: ${module_ref}"
+
+	if [[ ! -f "$mf" ]]; then
+		echo -e "  ${YELLOW}[NOT DEPLOYED]${NC}"
+		return 0
+	fi
+
+	# Build a lookup of all manifest entries
+	local -a manifest_entries=()
+	while IFS= read -r entry; do
+		[[ -z "$entry" ]] && continue
+		manifest_entries+=("$entry")
+	done <"$mf"
+
+	# Walk all source files (excluding .bootstrap.json)
+	while IFS= read -r -d '' src; do
+		local rel="${src#"${src_dir}/"}"
+		[[ "$rel" == ".bootstrap.json" ]] && continue
+
+		local target="${TARGET}/${rel}"
+		local covered=0
+		local covered_entry=""
+
+		# Check if the target itself is in the manifest, or a parent dir is
+		local entry
+		for entry in "${manifest_entries[@]}"; do
+			if [[ "$entry" == "$target" ]]; then
+				covered=1
+				covered_entry="$entry"
+				break
+			fi
+			# Check if a parent directory is in the manifest (directory-folded)
+			if [[ "$target" == "${entry}/"* ]]; then
+				covered=1
+				covered_entry="$entry"
+				break
+			fi
+		done
+
+		if ((covered)); then
+			if [[ -L "$covered_entry" && -e "$covered_entry" ]]; then
+				ok "${rel} (linked)"
+			elif [[ -L "$covered_entry" && ! -e "$covered_entry" ]]; then
+				echo -e "  ${RED}[BROKEN]${NC} ${rel} (linked in manifest but symlink is broken)"
+			else
+				echo -e "  ${YELLOW}[REGULAR]${NC} ${rel} (in manifest but not a symlink — drift?)"
+			fi
+		else
+			echo -e "  ${RED}✗${NC} ${rel}  ${YELLOW}[UNLINKED — run: setup restow ${module_ref}]${NC}"
+		fi
+	done < <(find "$src_dir" -type f -print0 2>/dev/null)
+}
+
+cmd_status() {
+	local module_ref_arg="${1:-}"
+
+	if [[ -n "$module_ref_arg" ]]; then
+		local module_ref
+		module_ref="$(normalize_module_ref "$module_ref_arg")" || return 1
+		_status_one "$module_ref"
+	else
+		if [[ ! -d "$MANIFEST_DIR" ]] || [[ -z "$(ls -A "$MANIFEST_DIR" 2>/dev/null)" ]]; then
+			info "No deployed modules found (manifest dir empty or absent)"
+			return 0
+		fi
+
+		while IFS= read -r -d '' mf; do
+			local mf_base
+			mf_base="$(basename "$mf")"
+			local module_ref="${mf_base//__//}"
+			_status_one "$module_ref"
+			echo ""
+		done < <(find "$MANIFEST_DIR" -maxdepth 1 -type f -print0 2>/dev/null)
+	fi
+}
+
+_diff_one() {
+	local module_ref="$1"
+	local mf
+	mf="$(manifest_file "$module_ref")" || return 1
+
+	info "Diff: ${module_ref}"
+
+	if [[ ! -f "$mf" ]]; then
+		echo -e "  ${YELLOW}[NOT DEPLOYED]${NC}"
+		return 0
+	fi
+
+	while IFS= read -r target; do
+		[[ -z "$target" ]] && continue
+
+		if [[ ! -e "$target" && ! -L "$target" ]]; then
+			echo -e "  ${YELLOW}[MISSING]${NC}  ${target}"
+		elif [[ -L "$target" ]]; then
+			local dest
+			dest="$(readlink "$target")"
+			case "$dest" in
+			"${CONFIG_ROOT}"/*)
+				echo -e "  ${GREEN}[SYMLINK]${NC}  ${target} → ${dest}"
+				;;
+			*)
+				echo -e "  ${YELLOW}[FOREIGN]${NC}  ${target} → ${dest}"
+				;;
+			esac
+		else
+			echo -e "  ${RED}[REGULAR]${NC}  ${target}  ← drift! was symlink, now regular file"
+			echo -e "  Run: setup restow ${module_ref}   to re-link"
+		fi
+	done <"$mf"
+
+	return 0
+}
+
+cmd_diff() {
+	local module_ref_arg="${1:-}"
+
+	if [[ -n "$module_ref_arg" ]]; then
+		local module_ref
+		module_ref="$(normalize_module_ref "$module_ref_arg")" || return 1
+		_diff_one "$module_ref"
+	else
+		if [[ ! -d "$MANIFEST_DIR" ]] || [[ -z "$(ls -A "$MANIFEST_DIR" 2>/dev/null)" ]]; then
+			info "No deployed modules found (manifest dir empty or absent)"
+			return 0
+		fi
+
+		local symlink_count=0 foreign_count=0 regular_count=0 missing_count=0
+
+		while IFS= read -r -d '' mf; do
+			local mf_base
+			mf_base="$(basename "$mf")"
+			local module_ref="${mf_base//__//}"
+			_diff_one "$module_ref"
+			echo ""
+
+			# Tally counts from this module's manifest
+			while IFS= read -r target; do
+				[[ -z "$target" ]] && continue
+				if [[ ! -e "$target" && ! -L "$target" ]]; then
+					((missing_count++)) || true
+				elif [[ -L "$target" ]]; then
+					local dest
+					dest="$(readlink "$target")"
+					case "$dest" in
+					"${CONFIG_ROOT}"/*)
+						((symlink_count++)) || true
+						;;
+					*)
+						((foreign_count++)) || true
+						;;
+					esac
+				else
+					((regular_count++)) || true
+				fi
+			done <"$mf"
+		done < <(find "$MANIFEST_DIR" -maxdepth 1 -type f -print0 2>/dev/null)
+
+		info "Diff: ${symlink_count} symlinks, ${regular_count} drift (regular), ${foreign_count} foreign, ${missing_count} missing"
+	fi
+}
+
 main() {
 	local cmd="${1:-}"
 	case "$cmd" in
@@ -664,6 +885,17 @@ main() {
 		;;
 	secrets)
 		deploy_secrets
+		;;
+	doctor)
+		cmd_doctor
+		;;
+	status)
+		shift
+		cmd_status "${1:-}"
+		;;
+	diff)
+		shift
+		cmd_diff "${1:-}"
 		;;
 	undo)
 		shift

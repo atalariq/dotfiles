@@ -18,6 +18,10 @@ vim.pack.update() refreshes all registered plugins to latest HEAD.
 --   end
 -- end
 
+vim.api.nvim_create_user_command("PackUpdate", function()
+  vim.pack.update()
+end, { desc = "Update plugings with vim.pack.update()" })
+
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(ev)
     local name, kind = ev.data.spec.name, ev.data.kind
@@ -118,7 +122,6 @@ vim.pack.add({
   "https://github.com/folke/trouble.nvim",
   "https://github.com/saghen/blink.indent",
   "https://github.com/catgoose/nvim-colorizer.lua",
-  "https://github.com/stevearc/quicker.nvim",
   "https://github.com/HawkinsT/pathfinder.nvim",
   "https://github.com/chrisgrieser/nvim-origami",
   "https://github.com/monaqa/dial.nvim",
@@ -138,9 +141,6 @@ vim.pack.add({
   -- colorscheme
   { src = "https://github.com/neanias/everforest-nvim", name = "everforest" },
 }, { confirm = false })
-
--- ensure all plugins are installed (first run) or up-to-date
--- pack.update()
 
 -- load plugin configs
 require("plugins.treesitter")
@@ -199,33 +199,6 @@ require("img-clip").setup({
 
 vim.keymap.set("n", "<leader>p", "<cmd>PasteImage<CR>", { desc = "Paste image from clipboard" })
 
--- --- quicker ---------------------------------------------
-require("quicker").setup({
-  keys = {
-    {
-      ">",
-      function()
-        require("quicker").expand({ before = 2, after = 2, add_to_existing = true })
-      end,
-      desc = "Expand quickfix context",
-    },
-    {
-      "<",
-      function()
-        require("quicker").collapse()
-      end,
-      desc = "Collapse quickfix context",
-    },
-  },
-})
-
-vim.keymap.set("n", "<leader>q", function()
-  require("quicker").toggle()
-end, { desc = "Toggle quickfix" })
-vim.keymap.set("n", "<leader>l", function()
-  require("quicker").toggle({ loclist = true })
-end, { desc = "Toggle loclist" })
-
 -- --- dial ------------------------------------------------
 local augend = require("dial.augend")
 require("dial.config").augends:register_group({
@@ -268,19 +241,6 @@ vim.keymap.set("x", "g<C-x>", function()
   require("dial.map").manipulate("decrement", "gvisual")
 end)
 
--- --- typst-preview ---------------------------------------
-require("typst-preview").setup({
-  debug = false,
-  -- open_cmd = "/opt/brave-bin/brave --app=%s --profile-directory=Default --app-id=previewer",
-  invert_colors = "never",
-  follow_cursor = true,
-  dependencies_bin = {
-    tinymist = "/usr/bin/tinymist",
-    websocat = "/usr/bin/websocat",
-  },
-})
-
-vim.keymap.set("n", "<leader>ttp", "<cmd>TypstPreviewToggle<CR>", { desc = "Toggle typst preview" })
 -- --- zero-config setup --------------------------
 require("guess-indent").setup()
 require("blink.indent").setup()

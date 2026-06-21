@@ -2,8 +2,8 @@
 alias :Q exit
 alias :q exit
 
-alias cd='pushd'
-alias pd='popd'
+# alias cd='pushd'
+# alias pd='popd'
 
 # alias .. "cd .."
 # alias ... "cd ../.."

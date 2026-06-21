@@ -20,7 +20,10 @@ set -gx MANPAGER "nvim +Man!"
 
 # ── Common CLI behavior ────────────────────────────────
 set -gx RIPGREP_CONFIG_PATH "$HOME/.config/ripgrep/ripgreprc"
-set -gx FZF_DEFAULT_OPTS "--height=40% --layout=reverse --border"
+set -gx FZF_DEFAULT_OPTS    "--height=40% --layout=reverse --border"
+set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
+set -gx FZF_CTRL_T_COMMAND  $FZF_DEFAULT_COMMAND
+set -gx FZF_ALT_C_COMMAND   'fd --type d --hidden --follow --exclude .git'
 set -gx BAT_THEME "TwoDark"
 
 # ── XDG paths ──────────────────────────────────────────

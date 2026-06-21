@@ -54,6 +54,7 @@ main() {
   # Phase 1: Launch parallel services
   info "Starting shared services..."
   /usr/lib/xdg-desktop-portal --replace &
+  /usr/lib/xdg-desktop-portal-termfilechooser -r &
   noctalia &
   ok "noctalia shell"
 
@@ -64,7 +65,6 @@ main() {
 
   # text_expander --daemon &
   # ok "text_expander (espanso alternative)"
-
 
   # Phase 2: Clipboard (ordered: persist must be ready before watch)
   info "Starting clipboard history..."

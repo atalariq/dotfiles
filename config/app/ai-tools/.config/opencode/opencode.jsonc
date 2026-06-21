@@ -231,7 +231,8 @@
     "@franlol/opencode-md-table-formatter@latest",
     "@tarquinen/opencode-dcp@latest",
     "opencode-wakatime",
-    "opencode-goal-plugin"
+    "opencode-goal-plugin",
+    "/home/atalariq/Repos/superpowers"
   ],
   // ─── COMMANDS & INSTRUCTIONS ─────────────────────────────────────────────────
   "command": {

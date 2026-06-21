@@ -6,7 +6,6 @@
   "aururl": "https://aur.archlinux.org",
   "batchinstall": true,
   "bottomup": true,
-  "buildDir": "/tmp/yay",
   "cleanAfter": true,
   "cleanmenu": true,
   "combinedupgrade": true,
@@ -14,7 +13,7 @@
   "completionrefreshtime": 7,
   "devel": false,
   "diffmenu": true,
-  "editmenu": false,
+  "editmenu": true,
   "editor": "nvim",
   "makepkgbin": "makepkg",
   "makepkgconf": "/etc/makepkg.conf",
@@ -32,7 +31,7 @@
   "sortby": "votes",
   "sudobin": "sudo",
   "sudoloop": true,
-  "timeupdate": false,
+  "timeupdate": true,
   "upgrademenu": true,
   "useask": false
 }
