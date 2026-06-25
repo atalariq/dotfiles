@@ -11,3 +11,5 @@ tty|themes/tty/wana-{v}.sh|config/misc/scripts/.local/script/wana-tty-{v}.sh|.lo
 pywal|themes/pywal/wana-{v}.json|config/app/pywal/.config/wal/colorschemes/{v}/wana.json|-|-|-
 fzf|themes/fzf/wana-{v}.opts|config/app/dev-tools/.config/fzf/wana-{v}.opts|-|-|-
 bat|themes/bat/wana-{v}.tmTheme|config/app/dev-tools/.config/bat/themes/wana-{v}.tmTheme|-|-|-
+btop|themes/btop/wana-{v}.theme|config/app/system-tools/.config/btop/themes/wana-{v}.theme|.config/btop/themes/wana.theme|.config/btop/themes/wana-{v}.theme|true
+opencode|themes/opencode/wana.json|config/app/ai-tools/.config/opencode/themes/wana.json|-|-|-
