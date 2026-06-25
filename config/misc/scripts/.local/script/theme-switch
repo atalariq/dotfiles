@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+# theme-switch — apply the wana palette across apps by repointing per-app
+# `current` symlinks and nudging live-reloadable apps.
+#   theme-switch dark|light   # set variant
+#   theme-switch toggle       # flip current variant (default dark)
+#   theme-switch apply        # re-apply the saved variant (e.g. on login)
+# Reads $HOME-relative paths from the repo manifest; safe headless/server.
+set -eu
+
+DOTFILES="${DOTFILES_DIR:-$HOME/Repos/dotfiles}"
+MANIFEST="$DOTFILES/script/theme-manifest"
+STATE="$HOME/.cache/wana/variant"
+
+current_variant() { [ -r "$STATE" ] && cat "$STATE" || echo dark; }
+
+case "${1:-}" in
+  dark|light) variant="$1" ;;
+  toggle)     [ "$(current_variant)" = dark ] && variant=light || variant=dark ;;
+  apply|'')   variant="$(current_variant)" ;;
+  *) echo "usage: theme-switch dark|light|toggle|apply"; exit 64 ;;
+esac
+
+[ -r "$MANIFEST" ] || { echo "manifest not found: $MANIFEST"; exit 2; }
+
+mkdir -p "$(dirname "$STATE")"
+printf '%s\n' "$variant" > "$STATE"
+
+deferred=""
+while IFS='|' read -r name _src _dest home_current home_variant reload; do
+  case "$name" in ''|\#*) continue ;; esac
+  cur="$HOME/$home_current"
+  var="$HOME/$(echo "$home_variant" | sed "s/{v}/$variant/g")"
+  if [ ! -e "$var" ]; then
+    echo "skip $name: $var missing (run setup.sh use, then theme-sync)"
+    continue
+  fi
+  mkdir -p "$(dirname "$cur")"
+  ln -sfn "$var" "$cur"
+  cmd="$(echo "$reload" | sed -e "s|{cur}|$cur|g" -e "s|{var}|$var|g")"
+  if eval "$cmd" >/dev/null 2>&1; then
+    :
+  else
+    deferred="$deferred $name"
+  fi
+done < "$MANIFEST"
+
+echo "theme: $variant"
+[ -n "$deferred" ] && echo "next-launch only (not live-reloaded):$deferred"
+exit 0
