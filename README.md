@@ -135,8 +135,8 @@ AI tool configs are backed up under `config/app/ai-tools/`.
 | Terminal            | kitty                                 | —              |
 | Shell (login)       | bash                                  | zsh            |
 | Shell (interactive) | fish                                  | —              |
-| Multiplexer         | zellij                                | —              |
-| Editor              | Zed                                   | Neovim         |
+| Multiplexer         | herdr                                 | —              |
+| Editor              | Neovim                                | —              |
 | File manager        | yazi (TUI)                            | Nautilus (GUI) |
 | Launcher            | noctalia-shell                        | —              |
 | Media               | mpv                                   | mpd/ncmpcpp    |
