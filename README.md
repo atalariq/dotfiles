@@ -127,24 +127,24 @@ AI tool configs are backed up under `config/app/ai-tools/`.
 
 ## Tech stack
 
-| Layer               | Primary                               | Alternative    |
-| ------------------- | ------------------------------------- | -------------- |
-| OS                  | Arch Linux                            | macOS          |
-| WM                  | mangoWM                               | niri           |
-| Desktop shell       | Noctalia                              | —              |
-| Terminal            | kitty                                 | —              |
-| Shell (login)       | bash                                  | zsh            |
-| Shell (interactive) | fish                                  | —              |
-| Multiplexer         | herdr                                 | —              |
-| Editor              | Neovim                                | —              |
-| File manager        | yazi (TUI)                            | Nautilus (GUI) |
-| Launcher            | noctalia-shell                        | —              |
-| Media               | mpv                                   | mpd/ncmpcpp    |
-| Git TUI             | lazygit                               | —              |
-| Screenshots         | grimblast                             | —              |
-| Clipboard           | cliphist + wl-clipboard               | —              |
-| Theming             | wana palette (pywal/matugen optional) | —              |
-| Secrets             | SOPS + age                            | —              |
+| Layer               | Primary                               | Alternative     |
+| ------------------- | ------------------------------------- | --------------- |
+| OS                  | Arch Linux                            | macOS           |
+| WM                  | mangoWM                               | niri            |
+| Desktop shell       | Noctalia                              | —               |
+| Terminal            | kitty                                 | —               |
+| Shell (login)       | bash                                  | zsh             |
+| Shell (interactive) | fish                                  | —               |
+| Multiplexer         | tmux (server)                         | herdr (desktop) |
+| Editor              | Neovim                                | —               |
+| File manager        | yazi (TUI)                            | Nautilus (GUI)  |
+| Launcher            | noctalia-shell                        | —               |
+| Media               | mpv                                   | mpd/ncmpcpp     |
+| Git TUI             | lazygit                               | —               |
+| Screenshots         | grimblast                             | —               |
+| Clipboard           | cliphist + wl-clipboard               | —               |
+| Theming             | wana palette (pywal/matugen optional) | —               |
+| Secrets             | SOPS + age                            | —               |
 
 ## Architecture
 
