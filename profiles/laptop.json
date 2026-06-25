@@ -13,6 +13,7 @@
     "app/mpv",
     "app/nvim",
     "app/obs-studio",
+    "app/pywal",
     "app/system-tools",
     "app/yazi",
     "app/zed",
