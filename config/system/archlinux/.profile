@@ -31,3 +31,8 @@ if [ -z "${SSH_AUTH_SOCK:-}" ]; then
 
 # Added by Antigravity CLI installer
 export PATH="/home/atalariq/.local/bin:$PATH"
+
+# wana TTY palette — apply on Linux virtual console login
+if [ "$TERM" = "linux" ] && [ -r "$HOME/.local/script/wana-tty-current.sh" ]; then
+    . "$HOME/.local/script/wana-tty-current.sh"
+fi
