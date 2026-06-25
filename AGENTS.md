@@ -49,6 +49,22 @@ docs/           # Documentation (secrets.md, script-style.md, install-package.md
 
 ---
 
+## How to Add a Theme Target
+
+The wana palette drives app theming through a generate → vendor → switch pipeline.
+
+1. **wana repo:** add `render_<app>()` + `tools/templates/<app>` in `wana/tools/gen.py`; extend `tools/test_gen.py`; run `python3 tools/gen.py` and commit the generated `themes/<app>/`.
+2. **dotfiles:** add one row to `script/theme-manifest`:
+   `name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload`
+3. Run `./script/theme-sync` to vendor the files; commit them.
+4. Add the app's `include`/`import` of its `*current*` symlink; gitignore the runtime symlink.
+5. `theme-switch dark` to materialize symlinks; verify.
+
+Switch variants any time with `theme-switch {dark|light|toggle}`. `theme-sync --check`
+guards against drift between wana output and the vendored copies.
+
+---
+
 ## Deployment Commands
 
 ```bash

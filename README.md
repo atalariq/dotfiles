@@ -121,26 +121,30 @@ The Fish helper at `config/app/fish/.config/fish/conf.d/40-nvim.fish` exposes th
 
 AI tool configs are backed up under `config/app/ai-tools/`.
 
+## Theming
+
+- **Theming:** wana palette → `theme-switch dark|light|toggle`; regenerate with `script/theme-sync`.
+
 ## Tech stack
 
-| Layer               | Primary                 | Alternative    |
-| ------------------- | ----------------------- | -------------- |
-| OS                  | Arch Linux              | macOS          |
-| WM                  | mangoWM                 | niri           |
-| Desktop shell       | Noctalia                | —              |
-| Terminal            | kitty                   | —              |
-| Shell (login)       | bash                    | zsh            |
-| Shell (interactive) | fish                    | —              |
-| Multiplexer         | zellij                  | —              |
-| Editor              | Zed                     | Neovim         |
-| File manager        | yazi (TUI)              | Nautilus (GUI) |
-| Launcher            | noctalia-shell          | —              |
-| Media               | mpv                     | mpd/ncmpcpp    |
-| Git TUI             | lazygit                 | —              |
-| Screenshots         | grimblast               | —              |
-| Clipboard           | cliphist + wl-clipboard | —              |
-| Theming             | Noctalia + pywal        | —              |
-| Secrets             | SOPS + age              | —              |
+| Layer               | Primary                               | Alternative    |
+| ------------------- | ------------------------------------- | -------------- |
+| OS                  | Arch Linux                            | macOS          |
+| WM                  | mangoWM                               | niri           |
+| Desktop shell       | Noctalia                              | —              |
+| Terminal            | kitty                                 | —              |
+| Shell (login)       | bash                                  | zsh            |
+| Shell (interactive) | fish                                  | —              |
+| Multiplexer         | zellij                                | —              |
+| Editor              | Zed                                   | Neovim         |
+| File manager        | yazi (TUI)                            | Nautilus (GUI) |
+| Launcher            | noctalia-shell                        | —              |
+| Media               | mpv                                   | mpd/ncmpcpp    |
+| Git TUI             | lazygit                               | —              |
+| Screenshots         | grimblast                             | —              |
+| Clipboard           | cliphist + wl-clipboard               | —              |
+| Theming             | wana palette (pywal/matugen optional) | —              |
+| Secrets             | SOPS + age                            | —              |
 
 ## Architecture
 

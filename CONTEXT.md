@@ -39,6 +39,14 @@ When a module's target directory does not yet exist in `$HOME`, bootstrap may li
 
 `config/desktop/*/` modules may include autostart scripts that launch shared applications when a window manager or Wayland session starts. WM-specific startup items live in each WM's own config; the autostart layer handles ordering and readiness checks for shared services.
 
+## Theming
+
+`../wana` is the ratified palette and single source of truth. `wana/tools/gen.py`
+renders per-app theme files; `script/theme-sync` vendors them into module paths
+(committed, no runtime dependency); `theme-switch {dark|light|toggle}` repoints
+per-app `current` symlinks and nudges live apps. pywal and matugen remain
+opt-in dynamic modes and never overwrite the vendored wana themes.
+
 ## Controller
 
 A **controller** is a module that manages or coordinates other modules. Currently rare; most modules are self-contained.
