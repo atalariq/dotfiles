@@ -36,3 +36,11 @@ export PATH="/home/atalariq/.local/bin:$PATH"
 if [ "$TERM" = "linux" ] && [ -r "$HOME/.local/script/wana-tty-current.sh" ]; then
     . "$HOME/.local/script/wana-tty-current.sh"
 fi
+
+# wana: apply active variant to bat + fzf (login/bash)
+_wana_variant=dark
+[ -r "$HOME/.cache/wana/variant" ] && _wana_variant="$(cat "$HOME/.cache/wana/variant")"
+export BAT_THEME="wana-$_wana_variant"
+export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --border"
+_wana_fzf="$HOME/.config/fzf/wana-$_wana_variant.opts"
+[ -r "$_wana_fzf" ] && export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS $(cat "$_wana_fzf")"
