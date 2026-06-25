@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+# theme-sync — regenerate wana themes and vendor them into this repo.
+#   theme-sync          # regenerate (runs wana gen.py) and copy per manifest
+#   theme-sync --check  # exit 1 if any vendored file is stale (no writes)
+# Requires wana checked out (dev-time only). Override its path with WANA_DIR.
+set -eu
+
+DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
+WANA="${WANA_DIR:-$HOME/Repos/wana}"
+MANIFEST="$DOTFILES/script/theme-manifest"
+CHECK=0
+[ "${1:-}" = "--check" ] && CHECK=1
+
+[ -d "$WANA" ] || { echo "wana not found at $WANA (set WANA_DIR)"; exit 2; }
+
+if [ "$CHECK" -eq 1 ]; then
+  python3 "$WANA/tools/gen.py" --check
+else
+  python3 "$WANA/tools/gen.py"
+fi
+
+stale=0
+while IFS='|' read -r name src dest _cur _var _reload; do
+  case "$name" in ''|\#*) continue ;; esac
+  for v in dark light; do
+    s="$WANA/$(echo "$src"  | sed "s/{v}/$v/g")"
+    d="$DOTFILES/$(echo "$dest" | sed "s/{v}/$v/g")"
+    [ -f "$s" ] || { echo "MISSING wana output: $s"; exit 3; }
+    if [ "$CHECK" -eq 1 ]; then
+      if ! cmp -s "$s" "$d"; then echo "STALE: $d"; stale=1; fi
+    else
+      mkdir -p "$(dirname "$d")"
+      cp "$s" "$d"
+      echo "vendored $name/$v -> ${d#"$DOTFILES"/}"
+    fi
+  done
+done < "$MANIFEST"
+
+[ "$CHECK" -eq 1 ] && [ "$stale" -eq 1 ] && { echo "Run: script/theme-sync"; exit 1; }
+[ "$CHECK" -eq 1 ] && echo "OK: vendored themes up to date"
+exit 0
