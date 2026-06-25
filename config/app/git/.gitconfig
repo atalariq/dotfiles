@@ -4,7 +4,7 @@
 email = atalariq.dev@outlook.com
 name = Atalariq Barra Hadinugraha
 username = atalariq
-signingkey = 82653D343C6C81D2
+signingkey = /home/atalariq/.ssh/atalariq.dev_signing_ed25519
 [core]
 editor = nvim
 excludesfile = /home/atalariq/.gitignore_global
@@ -36,3 +36,5 @@ autoSetupRemote = true
 algorithm = histogram
 [merge]
 conflictstyle = zdiff3
+[gpg]
+format = ssh

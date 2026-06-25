@@ -55,7 +55,7 @@ fish_add_path --path "$ANDROID_HOME/platform-tools"
 
 fish_add_path --path "$GOBIN"
 fish_add_path --path "$CARGO_HOME/bin"
-fish_add_path --path "$PNPM_HOME"
+fish_add_path --path "$PNPM_HOME/bin"
 fish_add_path --path "$BUN_INSTALL/bin"
 fish_add_path --path "$DENO_INSTALL/bin"
 

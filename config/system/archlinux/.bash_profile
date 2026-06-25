@@ -28,7 +28,7 @@ fi
 # SSH agent (systemd user service) — enter passphrase once per session
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 ssh-add -l >/dev/null 2>&1 || ssh-add ~/.ssh/atalariq.dev_ed25519
-ssh-add -l >/dev/null 2>&1 || ssh-add ~/.ssh/atalariq26_ed25519
+ssh-add -l >/dev/null 2>&1 || ssh-add ~/.ssh/atalariq.dev_signing_ed25519
 
 # Added by Antigravity CLI installer
 export PATH="/home/atalariq/.local/bin:$PATH"
