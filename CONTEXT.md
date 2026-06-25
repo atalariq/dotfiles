@@ -47,7 +47,9 @@ renders per-app theme files; `script/theme-sync` vendors them into module paths
 per-app `current` symlinks and nudges live apps. pywal and matugen remain
 opt-in dynamic modes and never overwrite the vendored wana themes.
 
-Targets covered by the wana pipeline: kitty, alacritty, TTY, pywal, fzf, bat, delta, btop, lazygit, opencode, starship. Noctalia templating covers desktop GUI apps and yazi. nvim (everforest), yazi-flavor, atuin, and herdr are intentionally not wana-generated (see the A2 spec).
+Targets covered by the wana pipeline: kitty, alacritty, TTY, pywal, fzf, bat, delta, btop, lazygit, opencode, starship, tmux, herdr. Noctalia templating covers desktop GUI apps and yazi. nvim (everforest), yazi-flavor, and atuin are intentionally not wana-generated (see the A2 spec).
+
+The `app/tmux` module is the primary multiplexer (TTY/SSH/server, plugin-free); herdr is the desktop-GUI multiplexer. Both are wana theme targets — tmux via a Class A symlink, herdr via a Class C in-place block.
 
 ## Controller
 
