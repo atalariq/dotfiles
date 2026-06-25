@@ -7,3 +7,30 @@ git:
     - useExternalDiffGitConfig: true
 gui:
   nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - "#7abb87"
+      - bold
+    inactiveBorderColor:
+      - "#a89984"
+    searchingActiveBorderColor:
+      - "#fabd2f"
+      - bold
+    optionsTextColor:
+      - "#80b7f0"
+    selectedLineBgColor:
+      - "#3c3836"
+    inactiveViewSelectedLineBgColor:
+      - "#32302f"
+    cherryPickedCommitFgColor:
+      - "#282828"
+    cherryPickedCommitBgColor:
+      - "#8ec07c"
+    markedBaseCommitFgColor:
+      - "#282828"
+    markedBaseCommitBgColor:
+      - "#fabd2f"
+    unstagedChangesColor:
+      - "#fe8b89"
+    defaultFgColor:
+      - "#ebdbb2"
