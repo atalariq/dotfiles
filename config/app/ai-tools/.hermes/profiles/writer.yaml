@@ -1,0 +1,31 @@
+model:
+  provider: opencode-go
+  default: deepseek-v4-flash
+providers: {}
+fallback_providers:
+- api_mode: chat_completions
+  base_url: https://api.deepseek.com/v1
+  model: deepseek-v4-pro
+  provider: deepseek
+- api_mode: chat_completions
+  base_url: https://opencode.ai/zen/go/v1
+  model: deepseek-v4-pro
+  provider: opencode-go
+- api_mode: chat_completions
+  base_url: https://openrouter.ai/api/v1
+  model: deepseek/deepseek-chat
+  provider: openrouter
+- api_mode: chat_completions
+  base_url: https://openrouter.ai/api/v1
+  model: deepseek/deepseek-v4-pro
+  provider: openrouter
+- api_mode: chat_completions
+  base_url: https://openrouter.ai/api/v1
+  model: qwen/qwen3.7-plus
+  provider: openrouter
+credential_pool_strategies: {}
+onboarding:
+  seen:
+    tool_progress_prompt: true
+agent:
+  reasoning_effort: low
