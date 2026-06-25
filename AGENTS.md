@@ -63,6 +63,8 @@ The wana palette drives app theming through a generate → vendor → switch pip
 Switch variants any time with `theme-switch {dark|light|toggle}`. `theme-sync --check`
 guards against drift between wana output and the vendored copies.
 
+**App-theming ownership:** the wana pipeline owns portable CLI/TUI apps (terminals, bat, fzf, btop, lazygit, opencode, starship, …). Noctalia's templating owns desktop-only GUI apps (gtk/qt/compositor/zathura/telegram/cava) and yazi. Keep them disjoint — if you add a wana target for an app Noctalia also templates, disable that template in `~/.local/state/noctalia/settings.toml` `[theme.templates]`.
+
 ---
 
 ## Deployment Commands
