@@ -6,7 +6,6 @@ workspace "fun"     // 4
 // ===== Spawn to specific workspace on startup
 window-rule {
   match app-id="kitty"
-  match app-id="dev.zed.Zed"
 
   open-on-workspace "code"
 }
