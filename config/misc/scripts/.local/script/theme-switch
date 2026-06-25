@@ -28,6 +28,7 @@ printf '%s\n' "$variant" > "$STATE"
 deferred=""
 while IFS='|' read -r name _src _dest home_current home_variant reload; do
   case "$name" in ''|\#*) continue ;; esac
+  case "$home_current" in '-') continue ;; esac
   cur="$HOME/$home_current"
   var="$HOME/$(echo "$home_variant" | sed "s/{v}/$variant/g")"
   if [ ! -e "$var" ]; then
