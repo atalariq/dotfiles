@@ -2,8 +2,8 @@ os:
   editPreset: 'nvim'
 git:
   pagers:
-    - pager: delta --dark --paging=never
-    - pager: delta --dark --paging=never --side-by-side
+    - pager: delta --paging=never
+    - pager: delta --paging=never --side-by-side
     - useExternalDiffGitConfig: true
 gui:
   nerdFontsVersion: "3"
