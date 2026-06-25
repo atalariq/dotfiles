@@ -1,4 +1,4 @@
 [general]
 import = [
-    "~/.config/alacritty/themes/noctalia.toml"
+    "~/.config/alacritty/themes/wana-current.toml"
 ]

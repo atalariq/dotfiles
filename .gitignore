@@ -48,3 +48,8 @@ config/app/dev-tools/.config/herdr/session.json
 config/app/yazi/.config/yazi/plugins/
 config/app/obs-studio/.config/obs-studio/basic/profiles/Untitled/
 config/app/obs-studio/.config/obs-studio/basic/scenes/Untitled.json
+
+# wana theme runtime symlinks (managed by theme-switch, not tracked)
+config/app/kitty/.config/kitty/current-theme.conf
+config/app/alacritty/.config/alacritty/themes/wana-current.toml
+config/misc/scripts/.local/script/wana-tty-current.sh
