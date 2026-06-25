@@ -15,6 +15,7 @@
     "app/obs-studio",
     "app/pywal",
     "app/system-tools",
+    "app/tmux",
     "app/yazi",
     "desktop/mango",
     "misc/fonts",
