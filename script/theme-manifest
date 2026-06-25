@@ -8,3 +8,6 @@
 kitty|themes/kitty/wana-{v}.conf|config/app/kitty/.config/kitty/themes/wana-{v}.conf|.config/kitty/current-theme.conf|.config/kitty/themes/wana-{v}.conf|kitty @ set-colors --all --configured {cur}
 alacritty|themes/alacritty/wana-{v}.toml|config/app/alacritty/.config/alacritty/themes/wana-{v}.toml|.config/alacritty/themes/wana-current.toml|.config/alacritty/themes/wana-{v}.toml|touch $HOME/.config/alacritty/alacritty.toml
 tty|themes/tty/wana-{v}.sh|config/misc/scripts/.local/script/wana-tty-{v}.sh|.local/script/wana-tty-current.sh|.local/script/wana-tty-{v}.sh|sh {cur}
+pywal|themes/pywal/wana-{v}.json|config/app/pywal/.config/wal/colorschemes/{v}/wana.json|-|-|-
+fzf|themes/fzf/wana-{v}.opts|config/app/dev-tools/.config/fzf/wana-{v}.opts|-|-|-
+bat|themes/bat/wana-{v}.tmTheme|config/app/dev-tools/.config/bat/themes/wana-{v}.tmTheme|-|-|-
