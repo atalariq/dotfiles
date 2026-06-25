@@ -54,3 +54,4 @@ config/app/kitty/.config/kitty/current-theme.conf
 config/app/alacritty/.config/alacritty/themes/wana-current.toml
 config/misc/scripts/.local/script/wana-tty-current.sh
 config/app/system-tools/.config/btop/themes/wana.theme
+config/app/tmux/.config/tmux/themes/wana-current.conf

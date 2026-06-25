@@ -2,6 +2,7 @@
   "name": "lab",
   "modules": [
     "app/fish",
+    "app/tmux",
     "app/yazi"
   ]
 }
