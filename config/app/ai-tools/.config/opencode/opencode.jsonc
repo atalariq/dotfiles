@@ -54,7 +54,7 @@
         "apiKey": "{env:OPENROUTER_API_KEY}",
         "baseURL": "https://openrouter.ai/api/v1"
       }
-    },
+    }
   },
   // ─── CUSTOM AGENTS ───────────────────────────────────────────────────────────
   "agent": {
@@ -62,7 +62,7 @@
     // Qwen3.7 Max: reasoning terdalam di Go + read-only (tidak bisa edit file)
     "plan": {
       "description": "PRD, specs, architecture breakdown, task decomposition",
-      "model": "opencode-go/qwen3.7-max",
+      "model": "opencode-go/kimi-k2.6",
       "prompt": "You are a senior software architect. Before any output, produce an exhaustive plan: Understand (goals, constraints, assumptions) → Decompose (numbered stages with inputs/outputs/risks) → Critique (top 3 failure modes, gaps) → Revise → Handoff block. Be verbose in planning. Never skip phases. Output PLAN only — do not write code.",
       "tools": {
         "write": false,
@@ -73,27 +73,27 @@
     // Kimi K2.6: best sustained multi-step + tool call consistency di Go
     "build": {
       "description": "Long-running agentic coding, multi-file edits, sustained tasks",
-      "model": "opencode-go/kimi-k2.6",
+      "model": "opencode-go/kimi-k2.7-code",
       "prompt": "You are a senior engineer executing a provided plan. Use tools immediately — never describe actions, just do them. Follow the plan stage by stage. On blockers: stop, report explicitly, wait for instruction. Write idiomatic TypeScript or Go. Always run tests after edits."
     },
     // /agent reviewer — untuk code review, PR review
     // GLM-5.1: best coding quality + SWE-Pro di Go, read-only
     "review": {
       "description": "Code review, PR review, security/perf audit",
-      "model": "opencode-go/glm-5.1",
+      "model": "opencode-go/glm-5.2",
       "prompt": "You are a senior code reviewer. Review for: correctness, idiomatic style (TS/Go conventions), security (injection, auth, secrets), performance hotspots, and test coverage gaps. Output structured findings: [CRITICAL] > [WARNING] > [SUGGESTION]. Be concise and specific. Do not rewrite code unless asked.",
       "tools": {
         "write": false,
         "edit": false
       }
-    },
+    }
     // /agent quick — untuk fix cepat, debug singkat, explain
     // MiniMax M3: SWE-Pro #2 di Go (59%), paling available (3200 req/5hr)
     // "quick": {
     //   "description": "Quick fixes, debug, explain, single-file tasks",
     //   "model": "opencode-go/minimax-m3",
     //   "prompt": "You are a focused engineer. Be concise. Identify root cause, fix it, explain why in 1-2 lines. Prefer minimal diffs."
-    // },
+    // }
     // // /agent db — untuk task PostgreSQL: schema, query, migration
     // // Qwen3.7 Plus: vision + reasoning, murah, cukup untuk DB tasks
     // "db": {
@@ -128,10 +128,7 @@
     "mnemosyne": {
       "enabled": true,
       "type": "local",
-      "command": [
-        "mnemosyne",
-        "mcp"
-      ]
+      "command": ["mnemosyne", "mcp"]
     },
     // Sequential Thinking: eksternalisasi reasoning untuk complex problems
     // Ringan, no external API, sangat berguna untuk agentic multi-step
@@ -161,11 +158,7 @@
     "chrome-devtools": {
       "enabled": false,
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ]
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
     },
     // Typst: document generation — enable kalau perlu laporan/paper
     "typst": {
@@ -195,11 +188,7 @@
     "remotion": {
       "enabled": false,
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@remotion/mcp@latest"
-      ]
+      "command": ["npx", "-y", "@remotion/mcp@latest"]
     }
   },
   // ─── COMPACTION ──────────────────────────────────────────────────────────────
@@ -240,11 +229,11 @@
       "description": "Set a session-scoped goal and auto-continue until complete.",
       "template": "$ARGUMENTS",
       "agent": "build"
-    },
+    }
   },
   "instructions": [
     // "/home/atalariq/.config/opencode/instructions/RULES.md",
-    "/home/atalariq/.config/opencode/instructions/SHELL_STRATEGY.md",
+    "/home/atalariq/.config/opencode/instructions/SHELL_STRATEGY.md"
   ],
   // ─── LSP & FORMATTER ─────────────────────────────────────────────────────────
   "lsp": true,
@@ -271,7 +260,7 @@
         "effect": "allow",
         "action": "provider.use",
         "resource": "openrouter"
-      },
+      }
     ]
   }
 }

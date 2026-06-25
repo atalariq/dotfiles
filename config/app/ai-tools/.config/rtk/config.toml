@@ -29,9 +29,9 @@ max_files = 20
 max_file_size = 1048576
 
 [telemetry]
-enabled = true
-consent_given = true
-consent_date = "2026-05-26T05:32:06.487850880+00:00"
+enabled = false
+consent_given = false
+consent_date = "2026-06-25T13:09:56.241505874+00:00"
 
 [hooks]
 exclude_commands = []

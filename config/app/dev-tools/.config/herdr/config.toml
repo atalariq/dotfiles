@@ -4,11 +4,11 @@ onboarding = false
 # Built-in themes: catppuccin, terminal, tokyo-night, dracula, nord,
 #                  gruvbox, one-dark, solarized, kanagawa, rose-pine,
 #                  vesper
-name = "gruvbox"
+name = "terminal"
 
 # Follow host terminal light/dark appearance and switch Herdr UI themes.
 # Existing manual behavior is unchanged unless this is true.
-auto_switch = true
+# auto_switch = true
 # dark_name = "catppuccin"
 # light_name = "catppuccin-latte"
 
@@ -60,83 +60,97 @@ prefix = "ctrl+b"
 
 # Prefix-mode actions
 help = "prefix+?"
-settings = "prefix+s"
+settings = ["prefix+s", "prefix+,"]
 detach = "prefix+q"
 reload_config = "prefix+shift+r"
 open_notification_target = "prefix+o"
+
 # Workspace management (prefix)
 workspace_picker = "prefix+w"
 goto = "prefix+g"
+
 new_workspace = "prefix+shift+n"
+rename_workspace = "prefix+shift+w"
+close_workspace = "prefix+shift+d"
+
 new_worktree = "prefix+shift+g"
 # open_worktree = ""    # optional, unset by default
 # remove_worktree = ""  # optional, unset by default; opens confirmation
-rename_workspace = "prefix+shift+w"
-close_workspace = "prefix+shift+d"
+
 # Workspace navigation (direct, prefix-less)
-previous_workspace = "ctrl+alt+,"
-next_workspace = "ctrl+alt+."
-# previous_agent = ""     # optional, unset by default
-# next_agent = ""         # optional, unset by default
-# focus_agent = ""        # optional indexed binding, e.g. "prefix+alt+1..9"
-# remote_image_paste = "ctrl+v" # only active in herdr --remote; empty disables raw-key image paste
+next_workspace = ["ctrl+alt+.", "alt+shift+j"]
+previous_workspace = ["ctrl+alt+,", "alt+shift+k"]
+switch_workspace = "prefix+shift+1..9"   # optional indexed binding, e.g. "prefix+shift+1..9"
+
+previous_agent = "alt+shift+p"     # optional, unset by default
+next_agent = "alt+shift+n"         # optional, unset by default
+focus_agent = "prefix+alt+1..9" # optional indexed binding, e.g. "prefix+alt+1..9"
+remote_image_paste = "ctrl+alt+v" # only active in herdr --remote; empty disables raw-key image paste
+
 # Tabs (de-emphasized, still available)
-new_tab = "prefix+c"
-# rename_tab = "prefix+shift+t"
-previous_tab = "prefix+p"
-next_tab = "prefix+n"
-# switch_tab = "prefix+1..9"
-# switch_workspace = ""   # optional indexed binding, e.g. "prefix+shift+1..9"
+new_tab = ["prefix+c", "prefix+t"]
+rename_tab = "prefix+shift+t"
 close_tab = "prefix+shift+x"
+
+next_tab = ["prefix+n", "alt+shift+l"]
+previous_tab = ["prefix+p", "alt+shift+h"]
+switch_tab = "prefix+1..9"
+
+
 # Pane management (prefix)
 rename_pane = "prefix+shift+p"
 edit_scrollback = "prefix+e"
+
 # Pane navigation (direct, prefix-less)
-focus_pane_left = "ctrl+alt+h"
-focus_pane_down = "ctrl+alt+j"
-focus_pane_up = "ctrl+alt+k"
-focus_pane_right = "ctrl+alt+l"
+focus_pane_left  = ["prefix+h", "alt+h"]
+focus_pane_down  = ["prefix+j", "alt+j"]
+focus_pane_up    = ["prefix+k", "alt+k"]
+focus_pane_right = ["prefix+l", "alt+l"]
+
 cycle_pane_next = "prefix+tab"
 cycle_pane_previous = "prefix+shift+tab"
 # last_pane = ""          # optional, unset by default; bind e.g. "prefix+tab" for global back-and-forth
+close_pane = "prefix+x"
+
 split_vertical = "prefix+v"
 split_horizontal = "prefix+minus"
-close_pane = "prefix+x"
+
 zoom = "prefix+z"       # legacy alias: fullscreen
 resize_mode = "prefix+r"
+
 # Sidebar
 toggle_sidebar = "prefix+b"
 
 # Navigate-mode movement. These local shortcuts win while navigate mode is open.
 # They are independent from focus_pane_*. Do not include prefix+, esc, enter, tab, or 1..9 here.
-# navigate_workspace_up = "up"
-# navigate_workspace_down = "down"
-# navigate_pane_left = "h"      # left arrow always focuses the pane to the left
-# navigate_pane_down = "j"
-# navigate_pane_up = "k"
-# navigate_pane_right = "l"     # right arrow always focuses the pane to the right
+navigate_workspace_up = "up"
+navigate_workspace_down = "down"
+navigate_pane_left = "h"      # left arrow always focuses the pane to the left
+navigate_pane_down = "j"
+navigate_pane_up = "k"
+navigate_pane_right = "l"     # right arrow always focuses the pane to the right
 
 # Custom commands use the same binding syntax.
 # type = "shell" runs detached in the background.
 # type = "pane" opens a temporary pane and closes it when the command exits.
-# [[keys.command]]
-# key = "prefix+alt+g"
-# type = "pane"
-# command = "lazygit"
+[[keys.command]]
+key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
 
 # Legacy indexed shortcut config is still parsed for compatibility.
 # Prefer switch_tab, switch_workspace, and focus_agent for new configs.
-[keys.indexed]
-# tabs = ""       # e.g. "ctrl" makes ctrl+1..9 switch tabs directly
-workspaces = "ctrl+shift" # ctrl+shift+1..9 jump to workspace N directly
-# agents = ""     # e.g. "alt" makes alt+1..9 focus agent rows directly
+# [keys.indexed]
+# # tabs = ""       # e.g. "ctrl" makes ctrl+1..9 switch tabs directly
+# workspaces = "ctrl+shift" # ctrl+shift+1..9 jump to workspace N directly
+# agents = "ctrl+alt"     # e.g. "alt" makes alt+1..9 focus agent rows directly
 
 # [worktrees]
 # directory = "~/.herdr/worktrees"
 
 [ui]
 # Sidebar width (auto-scaled based on workspace names, this sets the default)
-sidebar_width = 26
+sidebar_width = 27
 
 # Minimum sidebar width when expanded (columns)
 sidebar_min_width = 18
@@ -170,24 +184,24 @@ confirm_close = true
 
 # Ask for a tab name before creating a new tab.
 # Set false to create tabs immediately with generated names.
-# prompt_new_tab_name = true
+prompt_new_tab_name = false
 
 # Draw borders around split panes.
-# pane_borders = true
+pane_borders = true
 
 # Keep split panes visually separated instead of sharing divider borders.
 pane_gaps = true
 
 # Show detected/reported agent labels in split pane borders when no manual pane name is set.
-# show_agent_labels_on_pane_borders = false
+show_agent_labels_on_pane_borders = true
 
 # Agent panel ordering: "spaces" (grouped by space) or "priority" (attention queue).
 # "workspaces" is accepted as an alias for "spaces".
-# agent_panel_sort = "spaces"
+agent_panel_sort = "spaces"
 
 # Accent color for highlights, borders, and navigation UI.
 # Accepts: hex (#89b4fa), named colors (cyan, blue, magenta), or rgb(r,g,b)
-# accent = "cyan"
+accent = "cyan"
 
 # Background notification popup delivery
 [ui.toast]
@@ -199,11 +213,11 @@ delivery = "herdr"
 # delay_seconds = 1
 
 [ui.toast.herdr]
-# position = "bottom-right"
+position = "bottom-right"
 
 [ui.toast.clipboard]
-# enabled = true
-# position = "bottom-center"
+enabled = true
+position = "bottom-center"
 
 # Play sounds when agents change state in background workspaces
 [ui.sound]
@@ -216,7 +230,7 @@ enabled = false
 # Per-agent overrides: default | on | off
 # By default, droid is muted.
 # [ui.sound.agents]
-# droid = "off"
+droid = "off"
 
 [session]
 # Resume supported AI-agent panes into their native conversation sessions after
@@ -231,7 +245,7 @@ resume_agents_on_restore = true
 # wins) to survive idle network/NAT timeouts. Set false to run plain ssh against
 # your ssh config unchanged — this does not force keepalive off, it only stops
 # herdr from adding its own.
-# manage_ssh_config = true
+manage_ssh_config = true
 
 [experimental]
 # Allow launching herdr from inside a herdr-managed pane.
