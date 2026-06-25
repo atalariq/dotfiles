@@ -1,0 +1,10 @@
+# Theme target map for theme-sync (vendoring) and theme-switch (runtime).
+# Columns are pipe-delimited:
+#   name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload
+# {v}   = variant (dark|light)
+# home_* paths are $HOME-relative (no leading slash)
+# reload tokens: {cur} = abs current symlink, {var} = abs resolved variant file
+# reload runs via `eval ... 2>/dev/null || true` (missing apps are tolerated)
+kitty|themes/kitty/wana-{v}.conf|config/app/kitty/.config/kitty/themes/wana-{v}.conf|.config/kitty/current-theme.conf|.config/kitty/themes/wana-{v}.conf|kitty @ set-colors --all --configured {cur}
+alacritty|themes/alacritty/wana-{v}.toml|config/app/alacritty/.config/alacritty/themes/wana-{v}.toml|.config/alacritty/themes/wana-current.toml|.config/alacritty/themes/wana-{v}.toml|touch $HOME/.config/alacritty/alacritty.toml
+tty|themes/tty/wana-{v}.sh|config/misc/scripts/.local/script/wana-tty-{v}.sh|.local/script/wana-tty-current.sh|.local/script/wana-tty-{v}.sh|sh {cur}
