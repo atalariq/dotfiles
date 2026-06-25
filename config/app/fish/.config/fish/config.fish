@@ -72,3 +72,8 @@ end
 
 # Added by Antigravity CLI installer
 set -gx PATH "/home/atalariq/.local/bin" $PATH
+
+# wana TTY palette — apply on Linux virtual console login
+if test "$TERM" = linux; and test -r "$HOME/.local/script/wana-tty-current.sh"
+    sh "$HOME/.local/script/wana-tty-current.sh"
+end
