@@ -1,34 +1,17 @@
-#!/bin/bash
+#!/bin/sh
+# Sunset/sunrise hook: delegate theming to theme-switch, keep brightness nudge.
+#   night-theme-switcher dark|light
+set -eu
+OPT="${1:-}"
 
-OPT=${1}
-case $OPT in
-  dark)
-    # pywal
-    wal --vte --theme catppuccin-mocha
-
-    # neovim theme
-    nvim --remote --server /run/user/1000/nvim* --remote-send ":set background=dark<CR>"
-    nvim --remote --server /run/user/1000/nvim* --remote-send ":colorscheme catppuccin-mocha<CR>"
-    
-    # gnome brightness
-    gdbus call --session --dest org.gnome.SettingsDaemon.Power \
-      --object-path /org/gnome/SettingsDaemon/Power \
-      --method org.freedesktop.DBus.Properties.Set \
-      org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 30>"
-    ;;
-  light)
-    # pywal
-    # wal --vte -l --theme catppuccin-latte
-    wal --vte -l --theme gruvbox
-
-    # neovim theme
-    nvim --remote --server /run/user/1000/nvim* --remote-send ":set background=light<CR>"
-    nvim --remote --server /run/user/1000/nvim* --remote-send ":colorscheme gruvbox<CR>"
-
-    # gnome brightness
-    gdbus call --session --dest org.gnome.SettingsDaemon.Power \
-      --object-path /org/gnome/SettingsDaemon/Power \
-      --method org.freedesktop.DBus.Properties.Set \
-      org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 20>"
-    ;;
+case "$OPT" in
+  dark)  "$HOME/.local/script/theme-switch" dark;  bright=30 ;;
+  light) "$HOME/.local/script/theme-switch" light; bright=20 ;;
+  *) echo "usage: night-theme-switcher dark|light"; exit 64 ;;
 esac
+
+# GNOME screen brightness (no-op outside GNOME)
+gdbus call --session --dest org.gnome.SettingsDaemon.Power \
+  --object-path /org/gnome/SettingsDaemon/Power \
+  --method org.freedesktop.DBus.Properties.Set \
+  org.gnome.SettingsDaemon.Power.Screen Brightness "<int32 $bright>" >/dev/null 2>&1 || true
