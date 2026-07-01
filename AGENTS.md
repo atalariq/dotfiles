@@ -55,17 +55,22 @@ The wana palette drives app theming through a generate → vendor → switch pip
 
 1. **wana repo:** add `render_<app>()` + `tools/templates/<app>` in `wana/tools/gen.py`; extend `tools/test_gen.py`; run `python3 tools/gen.py` and commit the generated `themes/<app>/`.
 2. **dotfiles:** add one row to `script/theme-manifest`:
-   `name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload`
+   `name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload | mode`
+   Leave `mode` blank for a whole-file target (Class A/B). Use `mode=patch` for a
+   Class C target — one whose `repo_dest` is a hand-authored file that only
+   embeds a generated fragment; wrap that fragment in pre-existing
+   `# wana:begin` / `# wana:end` markers (added once, by hand) and `theme-sync`
+   will replace only what's between them.
 3. Run `./script/theme-sync` to vendor the files; commit them.
 4. Add the app's `include`/`import` of its `*current*` symlink; gitignore the runtime symlink.
 5. `theme-switch dark` to materialize symlinks; verify.
 
 Switch variants any time with `theme-switch {dark|light|toggle}`. `theme-sync --check`
-guards against drift between wana output and the vendored copies.
+guards against drift between wana output and the vendored copies (Class C included).
 
 **App-theming ownership:** the wana pipeline owns portable CLI/TUI apps (terminals, bat, fzf, btop, lazygit, opencode, starship, tmux, herdr, …). Noctalia's templating owns desktop-only GUI apps (gtk/qt/compositor/zathura/telegram/cava) and yazi. Keep them disjoint — if you add a wana target for an app Noctalia also templates, disable that template in `~/.local/state/noctalia/settings.toml` `[theme.templates]`.
 
-**Multiplexers:** `app/tmux` is the primary multiplexer (TTY/SSH/server, plugin-free); herdr is the desktop-GUI multiplexer. Both are wana theme targets — tmux as a Class A symlink, herdr as a Class C in-place block.
+**Multiplexers:** `app/tmux` is the primary multiplexer (TTY/SSH/server, plugin-free); herdr is the desktop-GUI multiplexer. Both are wana theme targets — tmux as a Class A symlink, herdr as a Class C in-place block (`mode=patch`).
 
 ---
 
@@ -94,7 +99,7 @@ conventional commit → `git push`. Full workflow + fresh-VPS bootstrap in
 `docs/sync.md`.
 
 A `profiles/<host>.local.json` (gitignored) overrides the base profile of the
-same name — used *instead of* it, for a machine-only module set. Git commit
+same name — used _instead of_ it, for a machine-only module set. Git commit
 signing/credentials are likewise device-local: `app/git/.gitconfig` is portable
 and unsigned by default, pulling machine specifics from an untracked
 `~/.gitconfig.local` via `[include]`.

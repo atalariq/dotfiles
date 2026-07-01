@@ -27,6 +27,7 @@
     "app/pywal",
     "app/ripgrep",
     "app/rtk",
+    "app/starship",
     "app/tirith",
     "app/tmux",
     "app/vim",

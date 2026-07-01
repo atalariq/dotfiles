@@ -19,14 +19,41 @@ else
   python3 "$WANA/tools/gen.py"
 fi
 
+# Class C targets (mode=patch): a generated block lives inside an otherwise
+# hand-authored file, delimited by "# wana:begin" / "# wana:end" markers
+# already present in the dest file. Replaces only what's between them.
+patch_merge() {
+  # $1 = generated source file, $2 = dest file with markers -> writes $3
+  awk -v genfile="$1" '
+    BEGIN { found = 0 }
+    /^# wana:begin/ { print; while ((getline line < genfile) > 0) print line; skip=1; found=1; next }
+    /^# wana:end/   { skip=0; print; next }
+    { if (!skip) print }
+    END { exit(found ? 0 : 1) }
+  ' "$2" > "$3"
+}
+
 stale=0
-while IFS='|' read -r name src dest _cur _var _reload; do
+while IFS='|' read -r name src dest _cur _var _reload mode; do
   case "$name" in ''|\#*) continue ;; esac
   for v in dark light; do
     s="$WANA/$(echo "$src"  | sed "s/{v}/$v/g")"
     d="$DOTFILES/$(echo "$dest" | sed "s/{v}/$v/g")"
     [ -f "$s" ] || { echo "MISSING wana output: $s"; exit 3; }
-    if [ "$CHECK" -eq 1 ]; then
+    if [ "$mode" = "patch" ]; then
+      tmp="$(mktemp)"
+      if ! patch_merge "$s" "$d" "$tmp"; then
+        echo "ERROR: no wana:begin/end markers in $d (add them once manually)"
+        rm -f "$tmp"; exit 4
+      fi
+      if [ "$CHECK" -eq 1 ]; then
+        if ! cmp -s "$tmp" "$d"; then echo "STALE: $d"; stale=1; fi
+        rm -f "$tmp"
+      else
+        mv "$tmp" "$d"
+        echo "vendored $name/$v -> ${d#"$DOTFILES"/}"
+      fi
+    elif [ "$CHECK" -eq 1 ]; then
       if ! cmp -s "$s" "$d"; then echo "STALE: $d"; stale=1; fi
     else
       mkdir -p "$(dirname "$d")"

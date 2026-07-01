@@ -1,8 +1,4 @@
 {
   "name": "lab",
-  "modules": [
-    "app/fish",
-    "app/tmux",
-    "app/yazi"
-  ]
+  "modules": ["app/fish", "app/starship-plain", "app/tmux", "app/yazi"]
 }
