@@ -9,9 +9,9 @@ local linters = {
     append_args = {
       "--no-cache",
       "--config",
-      'global.disable = [ "MD022", "MD032", "MD064" ]',
-      "--config",
-      "MD013.line-length = 120",
+      'global.disable = [ "MD013", "MD022", "MD032", "MD064" ]',
+      -- "--config",
+      -- "MD013.line-length = 120",
     },
   },
 }

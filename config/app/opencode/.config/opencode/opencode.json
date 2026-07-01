@@ -1,0 +1,15 @@
+{
+  "mcp": {
+    "pencil": {
+      "command": [
+        "/home/atalariq/.local/bin/pencil-mcp-server",
+        "--app",
+        "desktop",
+        "--agent",
+        "openCodeCLI"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  }
+}

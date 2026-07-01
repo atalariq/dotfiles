@@ -45,7 +45,6 @@ if ! shopt -oq posix; then
   fi
 fi
 
-
 # pnpm
 export PNPM_HOME="/home/atalariq/.local/share/pnpm"
 case ":$PATH:" in
@@ -53,8 +52,6 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
-
-
 
 # Added by Antigravity CLI installer
 export PATH="/home/atalariq/.local/bin:$PATH"

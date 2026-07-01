@@ -28,7 +28,6 @@ if [ -z "${SSH_AUTH_SOCK:-}" ]; then
     done
   fi
 
-
 # Added by Antigravity CLI installer
 export PATH="/home/atalariq/.local/bin:$PATH"
 
