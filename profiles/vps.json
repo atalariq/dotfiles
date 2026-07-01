@@ -8,6 +8,7 @@
     "app/fzf",
     "app/git",
     "app/ripgrep",
+    "app/starship-plain",
     "app/tmux",
     "app/vim",
     "app/yazi",

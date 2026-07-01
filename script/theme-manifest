@@ -1,10 +1,13 @@
 # Theme target map for theme-sync (vendoring) and theme-switch (runtime).
 # Columns are pipe-delimited:
-#   name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload
+#   name | wana_src{v} | repo_dest{v} | home_current | home_variant{v} | reload | mode
 # {v}   = variant (dark|light)
 # home_* paths are $HOME-relative (no leading slash)
 # reload tokens: {cur} = abs current symlink, {var} = abs resolved variant file
 # reload runs via `eval ... 2>/dev/null || true` (missing apps are tolerated)
+# mode: blank/omitted = whole-file copy (default). "patch" = Class C target —
+#   repo_dest is a hand-authored file; only the block between pre-existing
+#   "# wana:begin" / "# wana:end" markers is replaced with wana_src's content.
 kitty|themes/kitty/wana-{v}.conf|config/app/kitty/.config/kitty/themes/wana-{v}.conf|.config/kitty/current-theme.conf|.config/kitty/themes/wana-{v}.conf|kitty @ set-colors --all --configured {cur}
 alacritty|themes/alacritty/wana-{v}.toml|config/app/alacritty/.config/alacritty/themes/wana-{v}.toml|.config/alacritty/themes/wana-current.toml|.config/alacritty/themes/wana-{v}.toml|touch $HOME/.config/alacritty/alacritty.toml
 tty|themes/tty/wana-{v}.sh|config/misc/scripts/.local/script/wana-tty-{v}.sh|.local/script/wana-tty-current.sh|.local/script/wana-tty-{v}.sh|sh {cur}
@@ -14,3 +17,6 @@ bat|themes/bat/wana-{v}.tmTheme|config/app/dev-tools/.config/bat/themes/wana-{v}
 btop|themes/btop/wana-{v}.theme|config/app/system-tools/.config/btop/themes/wana-{v}.theme|.config/btop/themes/wana.theme|.config/btop/themes/wana-{v}.theme|true
 opencode|themes/opencode/wana.json|config/app/ai-tools/.config/opencode/themes/wana.json|-|-|-
 tmux|themes/tmux/wana-{v}.conf|config/app/tmux/.config/tmux/themes/wana-{v}.conf|.config/tmux/themes/wana-current.conf|.config/tmux/themes/wana-{v}.conf|tmux source-file {cur} 2>/dev/null
+starship|themes/starship/wana.toml|config/app/starship/.config/starship.toml|-|-|-|patch
+starship-plain|themes/starship/wana.toml|config/app/starship-plain/.config/starship.toml|-|-|-|patch
+herdr|themes/herdr/wana.toml|config/app/herdr/.config/herdr/config.toml|-|-|-|patch
