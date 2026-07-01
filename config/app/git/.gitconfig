@@ -1,27 +1,19 @@
 # vim: ft=toml
+# Portable base config. Device-specific bits (signing key, credential helpers)
+# live in ~/.gitconfig.local — see the [include] at the bottom. A machine without
+# that file still works; commits are just unsigned.
 
 [user]
 email = atalariq.dev@outlook.com
 name = Atalariq Barra Hadinugraha
 username = atalariq
-signingkey = /home/atalariq/.ssh/atalariq.dev_signing_ed25519
 [core]
 editor = nvim
-excludesfile = /home/atalariq/.gitignore_global
+excludesfile = ~/.gitignore_global
 [init]
 defaultBranch = main
 [http]
 postBuffer = 524288000
-[commit]
-gpgsign = true
-[tag]
-gpgSign = true
-[credential]
-helper = /usr/lib/git-core/git-credential-libsecret
-[credential "https://github.com"]
-helper = !/usr/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-helper = !/usr/bin/gh auth git-credential
 [pull]
 rebase = false
 [fetch]
@@ -38,3 +30,5 @@ algorithm = histogram
 conflictstyle = zdiff3
 [gpg]
 format = ssh
+[include]
+path = ~/.gitconfig.local
