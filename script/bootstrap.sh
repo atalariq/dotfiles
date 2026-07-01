@@ -568,9 +568,23 @@ adopt_module() {
 	symlink_module "$module_ref"
 }
 
+# Prefer a device-local override profile when present. `<name>.local.json` is
+# gitignored (*.local.*) so each machine can pin its own module set without
+# touching the tracked profile. Replace semantics — the .local file is used
+# instead of the base, not merged.
+resolve_profile() {
+	local name="$1"
+	if [[ -f "${PROFILES_DIR}/${name}.local.json" ]]; then
+		echo "${PROFILES_DIR}/${name}.local.json"
+	else
+		echo "${PROFILES_DIR}/${name}.json"
+	fi
+}
+
 undo_profile() {
 	local name="$1"
-	local profile="${PROFILES_DIR}/${name}.json"
+	local profile
+	profile="$(resolve_profile "$name")"
 	[[ -f "$profile" ]] || {
 		err "Profile not found: $profile"
 		return 1
@@ -597,13 +611,15 @@ print('\n'.join(mods))
 
 deploy_profile() {
 	local name="$1"
-	local profile="${PROFILES_DIR}/${name}.json"
+	local profile
+	profile="$(resolve_profile "$name")"
 
 	if [[ ! -f "$profile" ]]; then
 		err "Profile not found: $profile"
 		return 1
 	fi
 
+	[[ "$profile" == *.local.json ]] && info "Using device-local profile: ${profile##*/}"
 	info "Deploying profile: $name"
 	local failed=0
 

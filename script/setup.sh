@@ -138,7 +138,7 @@ main() {
 		deploy_json_config "$arg"
 		;;
 	*)
-		if [[ -f "${DOTFILES_DIR}/profiles/${arg}.json" ]]; then
+		if [[ -f "${DOTFILES_DIR}/profiles/${arg}.json" || -f "${DOTFILES_DIR}/profiles/${arg}.local.json" ]]; then
 			"$BOOTSTRAP" "${flags[@]}" profile "$arg"
 		else
 			usage
