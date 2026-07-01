@@ -6,9 +6,11 @@ A **module** is the unit of deployment. It lives under `config/<category>/<name>
 
 Modules are addressed as `<category>/<name>` in CLI commands (e.g. `app/fish`, `desktop/mango`).
 
+Modules are **atomic**: one tool per module (`app/bat`, `app/fzf`, `app/claude`, …), so a profile can pick exactly the tools a machine needs. There are no multi-tool bundles.
+
 ## Profile
 
-A **profile** is a `profiles/<name>.json` file with a flat `modules` array declaring which modules to deploy together on a machine. Example:
+A **profile** is a `profiles/<name>.json` file with a flat `modules` array declaring which modules to deploy together on a machine. If a `profiles/<name>.local.json` exists it takes priority and is used *instead of* the base (replace, not merge); `*.local.*` is gitignored, making it a per-device override. Example:
 
 ```json
 {
@@ -50,6 +52,10 @@ opt-in dynamic modes and never overwrite the vendored wana themes.
 Targets covered by the wana pipeline: kitty, alacritty, TTY, pywal, fzf, bat, delta, btop, lazygit, opencode, starship, tmux, herdr. Noctalia templating covers desktop GUI apps and yazi. nvim (everforest), yazi-flavor, and atuin are intentionally not wana-generated (see the A2 spec).
 
 The `app/tmux` module is the primary multiplexer (TTY/SSH/server, plugin-free); herdr is the desktop-GUI multiplexer. Both are wana theme targets — tmux via a Class A symlink, herdr via a Class C in-place block.
+
+## Cross-Machine Sync
+
+One repo, one `main` branch, many machines. Per-device differences live in **profiles** (which modules) and **`system/<os>`** modules (Arch/Ubuntu/macOS shell config), never in per-machine branches. Each machine `git pull --rebase`s, deploys its own profile, commits, and pushes. See `docs/sync.md`.
 
 ## Controller
 

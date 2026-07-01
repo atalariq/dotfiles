@@ -1,0 +1,16 @@
+{
+  "name": "vps",
+  "modules": [
+    "app/atuin",
+    "app/bat",
+    "app/fd",
+    "app/fish",
+    "app/fzf",
+    "app/git",
+    "app/ripgrep",
+    "app/tmux",
+    "app/vim",
+    "app/yazi",
+    "system/ubuntu"
+  ]
+}
