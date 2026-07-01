@@ -59,10 +59,20 @@ Machine-specific JSON profiles live in `profiles/`. Each profile declares deploy
 }
 ```
 
-| Profile       | For                                      |
-| ------------- | ---------------------------------------- |
-| `laptop.json` | Personal laptop (full)                   |
-| `lab.json`    | Lab machine (minimal shell/editor tools) |
+| Profile       | For                                        |
+| ------------- | ------------------------------------------ |
+| `laptop.json` | Personal laptop, Arch (full)               |
+| `vps.json`    | Ubuntu server (lean shell/editor/CLI tools) |
+| `lab.json`    | Lab machine (minimal shell/editor tools)   |
+
+Modules are **atomic** — one tool per module (`app/bat`, `app/fzf`, `app/claude`,
+…), so a profile picks exactly the tools a machine needs. See `docs/sync.md` for
+the cross-machine workflow.
+
+**Device-local override:** if `profiles/<name>.local.json` exists it is used
+*instead of* `profiles/<name>.json`. `*.local.*` is gitignored, so a machine can
+pin its own module set without touching the shared profile — `./setup.sh <name>`
+picks the `.local` variant automatically.
 
 You can also pass a custom JSON config:
 
@@ -81,6 +91,17 @@ git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
 cd ~/Repos/dotfiles
 ./setup.sh laptop
 ```
+
+On Ubuntu/Debian, swap the package step and use the lean profile:
+
+```bash
+sudo apt update && sudo apt install -y git python3 fish
+git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
+cd ~/Repos/dotfiles
+./setup.sh profile vps
+```
+
+See `docs/sync.md` for the full fresh-machine + cross-device sync workflow.
 
 ## Download only what you need
 
@@ -117,9 +138,13 @@ The `app/nvim` module lives in this repo at `config/app/nvim` and owns two `NVIM
 
 The Fish helper at `config/app/fish/.config/fish/conf.d/40-nvim.fish` exposes the selector and aliases for those real profiles only.
 
+For servers that ship only `vim`/`vi`, the `app/vim` module provides a plain,
+plugin-free `~/.vimrc` as the universal editor floor.
+
 ## AI tooling
 
-AI tool configs are backed up under `config/app/ai-tools/`.
+AI tool configs are individual modules: `app/claude`, `app/codex`, `app/opencode`,
+`app/hermes`, `app/rtk`, `app/tirith`. Pick per machine in the profile.
 
 ## Theming
 
@@ -129,7 +154,7 @@ AI tool configs are backed up under `config/app/ai-tools/`.
 
 | Layer               | Primary                               | Alternative     |
 | ------------------- | ------------------------------------- | --------------- |
-| OS                  | Arch Linux                            | macOS           |
+| OS                  | Arch Linux                            | Ubuntu / macOS  |
 | WM                  | mangoWM                               | niri            |
 | Desktop shell       | Noctalia                              | —               |
 | Terminal            | kitty                                 | —               |
@@ -164,6 +189,8 @@ AI tool configs are backed up under `config/app/ai-tools/`.
 | `docs/script-style.md`    | Conventions for writing shell scripts |
 | `docs/secrets.md`         | SOPS/age secrets setup guide          |
 | `docs/install-package.md` | Package and tool installation guide   |
+| `docs/sync.md`            | Cross-machine sync workflow           |
+| `docs/yazi.md`            | Yazi setup + plugin install           |
 
 ## Dependencies
 

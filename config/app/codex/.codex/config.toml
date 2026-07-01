@@ -1,0 +1,60 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+
+[tui]
+status_line = [ "model-with-reasoning", "current-dir", "git-branch", "context-used", "five-hour-limit", "run-state" ]
+status_line_use_colors = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[mcp_servers.context7]
+command = "npx"
+args = [ "-y", "@upstash/context7-mcp", "--api-key", "REDACTED_SET_LOCALLY" ]
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_PERSONAL_ACCESS_TOKEN"
+
+[mcp_servers.tirith-gateway]
+command = "tirith"
+args = [ "gateway", "run", "--upstream-bin", "tirith", "--upstream-arg", "mcp-server", "--config", "/home/atalariq/.config/tirith/gateway.yaml" ]
+
+[mcp_servers.tirith-gateway.tools.tirith_check_command]
+approval_mode = "approve"
+
+[mcp_servers.mnemosyne]
+command = "mnemosyne"
+args = [ "mcp" ]
+
+[mcp_servers.pencil]
+command = "/home/atalariq/.local/bin/pencil-mcp-server"
+args = [ "--app", "desktop", "--agent", "codexCLI" ]
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.5"
+"gpt-5.4" = "gpt-5.5"
+
+[plugins."codex-security@openai-curated"]
+enabled = true
+
+[plugins."expo@openai-curated"]
+enabled = true
+
+[plugins."remotion@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."superpowers@personal"]
+enabled = true
+
+[features]
+hooks = true
+
+[projects."/home/atalariq/Repos/awesome-browser"]
+trust_level = "trusted"
+
+[hooks.state."superpowers@personal:hooks/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:62acbaff2b2f55f41971e21a164990aaa53c96919baa0a5eae2eb5db73b9e6e6"

@@ -2,6 +2,27 @@
 
 Short doc for the repo-managed Yazi setup.
 
+## Fresh machine: installing plugins
+
+Two plugin groups, handled differently:
+
+- **Vendored (committed in-repo):** `confirm-quit`, `folder-rules.yazi` — these
+  are self-written, ship in the repo, and work straight from a clone. Everything
+  else under `plugins/` is git-ignored (see root `.gitignore`).
+- **Upstream (pinned, not vendored):** listed in
+  `config/app/yazi/.config/yazi/package.toml` (mediainfo, ouch, lazygit,
+  recycle-bin, restore, starship). Install them after cloning:
+
+  ```bash
+  cd ~/.config/yazi     # or wherever the module is linked
+  ya pkg install        # older yazi: `ya pack -i`
+  ```
+
+If an upstream plugin is missing, `init.lua`'s `require`/`setup` for it fails and
+Yazi errors on startup — that is exactly the VPS failure this split fixes. Run
+`ya pkg install` on any new machine before launching Yazi. Update pins with
+`ya pkg upgrade` (older: `ya pack -u`), then commit the changed `package.toml`.
+
 ## Philosophy
 
 Keep Yazi good at file navigation first.

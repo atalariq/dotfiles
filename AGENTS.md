@@ -8,10 +8,10 @@ Primary reference for AI agents and humans working in this repo. For concept def
 
 ```text
 config/
-  app/          # Application configs (kitty, fish, nvim, yazi, …)
+  app/          # Atomic application configs — one tool per module (kitty, fish, nvim, vim, bat, fzf, claude, …)
   desktop/      # WM/compositor configs (mango, niri, wal, …)
   misc/         # Scripts, fonts, browser startpage
-  system/       # OS-level config (archlinux, mac)
+  system/       # OS-level shell config, one module per OS (archlinux, ubuntu, mac)
 profiles/       # Machine profiles (*.json)
 script/
   bootstrap.sh  # Validated symlink farm (core deploy logic)
@@ -84,6 +84,20 @@ guards against drift between wana output and the vendored copies.
 ```
 
 ---
+
+## Cross-Machine Sync
+
+One repo, one `main` branch. Per-device differences live in profiles (which
+modules) and `system/<os>` modules (Arch/Ubuntu/macOS shell), never in
+per-machine branches: `git pull --rebase` → `./setup.sh profile <host>` →
+conventional commit → `git push`. Full workflow + fresh-VPS bootstrap in
+`docs/sync.md`.
+
+A `profiles/<host>.local.json` (gitignored) overrides the base profile of the
+same name — used *instead of* it, for a machine-only module set. Git commit
+signing/credentials are likewise device-local: `app/git/.gitconfig` is portable
+and unsigned by default, pulling machine specifics from an untracked
+`~/.gitconfig.local` via `[include]`.
 
 ## Secrets Workflow
 

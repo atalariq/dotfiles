@@ -40,21 +40,44 @@ herdr-agent-state.js
 user.ini
 mimeapps.list
 
-config/app/dev-tools/.config/herdr/session.json
+config/app/herdr/.config/herdr/session.json
 .claude/worktrees/
 .claude/plans/
 
+# ai tools: track config, ignore runtime/session state (was config/app/ai-tools/.gitignore)
+config/app/claude/.claude/projects/
+config/app/claude/.claude/todos/
+config/app/claude/.claude/shell-snapshots/
+config/app/claude/.claude/statsig/
+config/app/claude/.claude/history.jsonl
+config/app/rtk/.config/rtk/history/
+config/app/rtk/.config/rtk/tee/
+config/app/tirith/.tirith/cache/
+config/app/hermes/.hermes/.env
+config/app/hermes/.hermes/auth.json
+config/app/hermes/.hermes/sessions/
+config/app/hermes/.hermes/logs/
+config/app/hermes/.hermes/skills/
+config/app/hermes/.hermes/memories/
+
+# gh: track settings, never the OAuth token in hosts.yml
+config/app/gh/.config/gh/hosts.yml
+
 # Third-party plugins and untracked defaults
-config/app/yazi/.config/yazi/plugins/
+config/app/yazi/.config/yazi/plugins/*
+!config/app/yazi/.config/yazi/plugins/confirm-quit/
+!config/app/yazi/.config/yazi/plugins/confirm-quit/**
+!config/app/yazi/.config/yazi/plugins/folder-rules.yazi/
+!config/app/yazi/.config/yazi/plugins/folder-rules.yazi/**
 config/app/obs-studio/.config/obs-studio/basic/profiles/Untitled/
 config/app/obs-studio/.config/obs-studio/basic/scenes/Untitled.json
-/config/app/dev-tools/.config/herdr/release-notes.json
-/config/app/dev-tools/.config/herdr/session-history.json
+/config/app/herdr/.config/herdr/release-notes.json
+/config/app/herdr/.config/herdr/session-history.json
 
 # wana theme runtime symlinks (managed by theme-switch, not tracked)
 config/app/kitty/.config/kitty/current-theme.conf
 config/app/alacritty/.config/alacritty/themes/wana-current.toml
 config/misc/scripts/.local/script/wana-tty-current.sh
-config/app/system-tools/.config/btop/themes/wana.theme
+config/app/btop/.config/btop/themes/wana.theme
 config/app/tmux/.config/tmux/themes/wana-current.conf
-/config/app/ai-tools/.config/opencode/opencode-notifier-state.json
+/config/app/opencode/.config/opencode/opencode-notifier-state.json

@@ -1,0 +1,167 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read",
+      "Edit",
+      "Write",
+      "MultiEdit",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -fr /)",
+      "Bash(rm -fr /*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf /etc:*)",
+      "Bash(rm -rf /usr:*)",
+      "Bash(rm -rf /var:*)",
+      "Bash(rm -rf /boot:*)",
+      "Bash(rm -rf /bin:*)",
+      "Bash(rm -rf /lib:*)",
+      "Bash(sudo rm:*)",
+      "Bash(mkfs:*)",
+      "Bash(rtk mkfs:*)",
+      "Bash(dd of=/dev/:*)",
+      "Bash(chmod -R 777 /:*)",
+      "Bash(curl * | bash)",
+      "Bash(curl * | sh)",
+      "Bash(wget * | sh)",
+      "Bash(wget * | bash)",
+      "Bash(eval *)",
+      "Bash(rtk proxy:*)",
+      "Bash(git push --force)",
+      "Bash(git push -f)",
+      "Bash(git push --force-with-lease)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(rtk rm:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod:*)",
+      "Bash(chown:*)",
+      "Bash(rtk chmod:*)",
+      "Bash(rtk chown:*)",
+      "Bash(dd:*)",
+      "Bash(truncate:*)",
+      "Bash(shred:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(killall:*)",
+      "Bash(systemctl:*)",
+      "Bash(reboot:*)",
+      "Bash(shutdown:*)",
+      "Bash(poweroff:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)",
+      "Bash(pacman -S:*)",
+      "Bash(pacman -R:*)",
+      "Bash(yay:*)",
+      "Bash(paru:*)"
+    ],
+    "additionalDirectories": [
+      "~/Repos"
+    ]
+  },
+  "model": "opus",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(cat | jq -r '.tool_input.file_path // empty'); [ -z \"$FILE\" ] && exit 0; EXT=\"${FILE##*.}\"; case \"$EXT\" in ts|tsx|js|jsx|json|css|html|md) command -v prettier &>/dev/null && prettier --write \"$FILE\" 2>/dev/null ;; py) command -v ruff &>/dev/null && ruff format \"$FILE\" 2>/dev/null ;; go) command -v gofmt &>/dev/null && gofmt -w \"$FILE\" 2>/dev/null ;; rs) command -v rustfmt &>/dev/null && rustfmt \"$FILE\" 2>/dev/null ;; rb) command -v rubocop &>/dev/null && rubocop -a \"$FILE\" 2>/dev/null ;; sh|bash) command -v shfmt &>/dev/null && shfmt -w \"$FILE\" 2>/dev/null ;; esac; exit 0"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v mnemosyne &>/dev/null && nohup mnemosyne sleep >/dev/null 2>&1 & exit 0"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/atalariq/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' 'Done — needs input' -t 4000 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": false,
+    "superpowers@superpowers-dev": true,
+    "cloudflare@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "obsidian@obsidian-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "superpowers-dev": {
+      "source": {
+        "source": "directory",
+        "path": "/home/atalariq/Repos/superpowers"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "obsidian-skills": {
+      "source": {
+        "source": "github",
+        "repo": "kepano/obsidian-skills"
+      }
+    }
+  },
+  "skipWorkflowUsageWarning": true,
+  "theme": "auto",
+  "editorMode": "normal",
+  "verbose": false
+}
