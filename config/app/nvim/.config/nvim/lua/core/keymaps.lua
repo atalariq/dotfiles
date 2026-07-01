@@ -77,7 +77,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 -- cd to project root of the current file (markers), fallback to file dir
 map("n", "<leader>cd", function()
   local markers =
-    { ".git", ".hg", ".svn", "Makefile", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", ".luarc.json" }
+    { "Makefile", "package.json", "Cargo.toml", "go.mod", "pyproject.toml", ".luarc.json", ".git", ".hg", ".svn" }
   local root = vim.fs.root(0, markers)
   if not root then
     local fname = vim.api.nvim_buf_get_name(0)

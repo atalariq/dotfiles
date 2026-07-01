@@ -54,5 +54,5 @@ alias brave /opt/brave-bin/brave-browser
 alias chrome /opt/google/chrome/google-chrome
 alias browser brave
 
-alias drop "ripdrag --and-exit --basename --no-click --resizable --all"
+alias drop "ripdrag --basename --resizable --all --no-click --and-exit "
 alias drag "ripdrag --basename --resizable --all --target"

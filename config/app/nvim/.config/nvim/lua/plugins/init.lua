@@ -181,6 +181,7 @@ require("fyler").setup({
 
 -- vim.opt.autochdir = true
 vim.keymap.set("n", "<leader>e", "<cmd>Fyler<cr>", { desc = "Open Fyler View" })
+vim.keymap.set("n", "<leader>E", "<cmd>cd %:p:h<cr><cmd>Fyler<cr>", { desc = "Open Fyler View" })
 
 -- --- img-clip --------------------------------------------
 require("img-clip").setup({
