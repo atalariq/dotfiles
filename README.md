@@ -196,8 +196,8 @@ AI tool configs are individual modules: `app/claude`, `app/codex`, `app/opencode
 
 ### Required
 
-- `bash` — bootstrap and scripts
-- `python3` — profile parsing and JSON validation during bootstrap
+- `sh` (POSIX) — bootstrap and deployment scripts
+- `python3` — profile parsing, path resolution, and JSON validation during bootstrap
 
 ### Optional
 
