@@ -1,2 +1,6 @@
 [tools]
+agy = "latest"
+claude-code = "latest"
+codex = "latest"
 node = "lts"
+opencode = "latest"
