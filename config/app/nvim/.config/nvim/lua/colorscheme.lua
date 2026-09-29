@@ -2,14 +2,11 @@
 
 vim.o.background = "dark"
 
-local ok, everforest = pcall(require, "everforest")
+local ok, _ = pcall(require, "wana")
+
 if ok then
-  everforest.setup({
-    background = "medium", -- "soft", "medium" (default), or "hard".
-    transparent_background_level = 2, -- 0 (default), 1, or 2
-    ui_contrast = "high", -- "high" or "low" (default).
-  })
-  everforest.load()
+  vim.o.background = "dark" -- or "light"
+  vim.cmd.colorscheme("wana")
 else
   vim.notify("everforest not found, falling back to habamax", vim.log.levels.WARN)
   vim.cmd("colorscheme habamax")
