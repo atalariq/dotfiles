@@ -10,6 +10,7 @@ username = atalariq
 [core]
 editor = nvim
 excludesfile = ~/.gitignore_global
+autocrlf = input
 [init]
 defaultBranch = main
 [http]
@@ -26,6 +27,7 @@ autostash = true
 autoSetupRemote = true
 [diff]
 algorithm = histogram
+	external = difft
 [merge]
 conflictstyle = zdiff3
 [gpg]
