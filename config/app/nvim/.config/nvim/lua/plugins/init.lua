@@ -108,6 +108,7 @@ vim.pack.add({
   "https://github.com/HawkinsT/pathfinder.nvim",
   "https://github.com/chrisgrieser/nvim-origami",
   "https://github.com/monaqa/dial.nvim",
+  "https://github.com/stevearc/quicker.nvim",
 
   -- writing / docs
   "https://github.com/HakonHarnes/img-clip.nvim",
@@ -122,7 +123,7 @@ vim.pack.add({
   -- "https://github.com/iwe-org/iwe.nvim",
 
   -- colorscheme
-  { src = "https://github.com/neanias/everforest-nvim", name = "everforest" },
+  { src = "https://github.com/atalariq/wana.nvim", name = "wana" },
 }, { confirm = false })
 
 -- load plugin configs
@@ -224,6 +225,34 @@ end)
 vim.keymap.set("x", "g<C-x>", function()
   require("dial.map").manipulate("decrement", "gvisual")
 end)
+
+-- --- quicker ------------------------------------
+
+vim.keymap.set("n", "<leader>q", function()
+  require("quicker").toggle()
+end, { desc = "Toggle quickfix" })
+vim.keymap.set("n", "<leader>l", function()
+  require("quicker").toggle({ loclist = true })
+end, { desc = "Toggle loclist" })
+
+require("quicker").setup({
+  keys = {
+    {
+      ">",
+      function()
+        require("quicker").expand({ before = 2, after = 2, add_to_existing = true })
+      end,
+      desc = "Expand quickfix context",
+    },
+    {
+      "<",
+      function()
+        require("quicker").collapse()
+      end,
+      desc = "Collapse quickfix context",
+    },
+  },
+})
 
 -- --- zero-config setup --------------------------
 require("guess-indent").setup()
