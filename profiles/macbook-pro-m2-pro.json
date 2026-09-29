@@ -1,0 +1,24 @@
+{
+  "name": "macbook-pro-m2-pro",
+  "modules": [
+    "app/bat",
+    "app/claude",
+    "app/codex",
+    "app/fd",
+    "app/fish",
+    "app/fzf",
+    "app/gh",
+    "app/git",
+    "app/kitty",
+    "app/lazygit",
+    "app/mise",
+    "app/nvim",
+    "app/opencode",
+    "app/ripgrep",
+    "app/rtk",
+    "app/starship",
+    "app/yazi",
+    "app/yt-dlp",
+    "system/mac"
+  ]
+}
