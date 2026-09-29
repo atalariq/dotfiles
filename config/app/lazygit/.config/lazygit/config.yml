@@ -1,10 +1,13 @@
 os:
   editPreset: 'nvim'
 git:
-  pagers:
-    - pager: delta --paging=never
-    - pager: delta --paging=never --side-by-side
-    - useExternalDiffGitConfig: true
+  diffRenderers:
+    - command: >-
+        delta --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - type: extDiff
+      command: difft --color=always --context={{diffContext}}
+    - type: rawGit
+      name: default
 gui:
   nerdFontsVersion: "3"
   theme:
