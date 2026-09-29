@@ -33,26 +33,25 @@ alias root "sudo -i"
 alias su "sudo -i"
 
 # ── Modern replacements ────────────────────────────────
-if command -q eza
-    alias ll "eza --icons --group-directories-first -lgh"
-    alias lla "eza --icons --group-directories-first -algh"
-    alias ls "eza --icons --group-directories-first"
-    alias lsa "eza --icons --group-directories-first -a"
-    alias lt "eza --icons --group-directories-first -T"
-    alias tree "eza --icons --group-directories-first -T"
-else
-    alias ll "ls -lah"
-    alias la "ls -A"
+alias ll "eza --icons --group-directories-first -lgh"
+alias lla "eza --icons --group-directories-first -algh"
+alias ls "eza --icons --group-directories-first"
+alias lsa "eza --icons --group-directories-first -a"
+alias lt "eza --icons --group-directories-first -T"
+alias tree "eza --icons --group-directories-first -T"
+
+alias cat "bat --paging=never"
+
+# --- Arch Linux Specific ----------------------------------
+if test -f /etc/os-release
+    if string match -q "*Arch Linux*" (cat /etc/os-release)
+        # browser
+        alias brave /opt/brave-bin/brave-browser
+        alias chrome /opt/google/chrome/google-chrome
+        alias browser brave
+
+        # ripdrag
+        alias drop "ripdrag --basename --resizable --all --no-click --and-exit "
+        alias drag "ripdrag --basename --resizable --all --target"
+    end
 end
-
-if command -q bat
-    alias cat "bat --paging=never"
-end
-
-# browser
-alias brave /opt/brave-bin/brave-browser
-alias chrome /opt/google/chrome/google-chrome
-alias browser brave
-
-alias drop "ripdrag --basename --resizable --all --no-click --and-exit "
-alias drag "ripdrag --basename --resizable --all --target"
