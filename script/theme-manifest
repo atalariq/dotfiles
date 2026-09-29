@@ -17,6 +17,8 @@ bat|themes/bat/wana-{v}.tmTheme|config/app/bat/.config/bat/themes/wana-{v}.tmThe
 btop|themes/btop/wana-{v}.theme|config/app/btop/.config/btop/themes/wana-{v}.theme|.config/btop/themes/wana.theme|.config/btop/themes/wana-{v}.theme|true
 opencode|themes/opencode/wana.json|config/app/opencode/.config/opencode/themes/wana.json|-|-|-
 tmux|themes/tmux/wana-{v}.conf|config/app/tmux/.config/tmux/themes/wana-{v}.conf|.config/tmux/themes/wana-current.conf|.config/tmux/themes/wana-{v}.conf|tmux source-file {cur} 2>/dev/null
+yazi|themes/yazi/wana-{v}.yazi/flavor.toml|config/app/yazi/.config/yazi/flavors/wana-{v}.yazi/flavor.toml|-|-|-
+yazi-tmtheme|themes/yazi/wana-{v}.yazi/tmtheme.xml|config/app/yazi/.config/yazi/flavors/wana-{v}.yazi/tmtheme.xml|-|-|-
 starship|themes/starship/wana.toml|config/app/starship/.config/starship.toml|-|-|-|patch
 starship-plain|themes/starship/wana.toml|config/app/starship-plain/.config/starship.toml|-|-|-|patch
 herdr|themes/herdr/wana.toml|config/app/herdr/.config/herdr/config.toml|-|-|-|patch
