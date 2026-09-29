@@ -233,7 +233,7 @@ enabled = false
 # Per-agent overrides: default | on | off
 # By default, droid is muted.
 # [ui.sound.agents]
-droid = "off"
+# droid = "off"
 
 [session]
 # Resume supported AI-agent panes into their native conversation sessions after
