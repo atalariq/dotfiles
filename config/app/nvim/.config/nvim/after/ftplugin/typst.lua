@@ -10,10 +10,10 @@ require("typst-preview").setup({
   -- open_cmd = "/opt/brave-bin/brave --app=%s --profile-directory=Default --app-id=previewer",
   invert_colors = "never",
   follow_cursor = true,
-  dependencies_bin = {
-    tinymist = "/usr/bin/tinymist",
-    websocat = "/usr/bin/websocat",
-  },
+  -- dependencies_bin = {
+  --   tinymist = "tinymist",
+  --   websocat = "websocat",
+  -- },
 })
 
 vim.keymap.set("n", "<leader>ttp", "<cmd>TypstPreviewToggle<CR>", { desc = "Toggle typst preview" })
