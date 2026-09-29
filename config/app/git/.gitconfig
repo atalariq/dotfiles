@@ -27,7 +27,7 @@ autostash = true
 autoSetupRemote = true
 [diff]
 algorithm = histogram
-	external = difft
+external = difft
 [merge]
 conflictstyle = zdiff3
 [gpg]

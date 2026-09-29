@@ -114,25 +114,9 @@ sops updatekeys secrets/secrets.yaml   # Rotate keys
 ./setup.sh secrets                     # Deploy (link to ~/.config/sops/ and ~/.local/script/)
 ```
 
----
-
-## Commit Conventions
-
-Conventional Commits: `<type>(<scope>): <description>`
-
-Examples: `feat(nvim):`, `refactor(fish):`, `fix(bootstrap):`, `docs:`, `chore:`
-
-Append when AI-assisted:
-
-```
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
-```
-
----
-
 ## Standing Rule
 
-**On any significant change — new module, moved/retired module, new command, changed layout — update `CONTEXT.md`, `AGENTS.md`, `CLAUDE.md`, and `README.md` (if user-facing).**
+**On any significant change — new module, moved/retired module, new command, changed layout — update `CONTEXT.md`, `AGENTS.md`, and `README.md` (if user-facing).**
 
 ---
 
