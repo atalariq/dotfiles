@@ -1,0 +1,37 @@
+{
+  "theme": {
+    "name": "wana",
+    "mode": "system"
+  },
+  "diffs": {
+    "wrap": "word",
+    "view": "auto",
+    "tree": true,
+    "single": false
+  },
+  "session": {
+    "sidebar": "auto",
+    "scrollbar": true,
+    "thinking": "show",
+    "markdown": "rendered",
+    "grouping": "auto"
+  },
+  "animations": false,
+  "tabs": {
+    "enabled": true,
+    "scope": "cwd"
+  },
+  "scroll": {
+    "speed": 2,
+    "acceleration": false
+  },
+  "prompt": {
+    "paste": "compact"
+  },
+  "attention": {
+    "enabled": true
+  },
+  "debug": {
+    "turn_tokens": false
+  }
+}

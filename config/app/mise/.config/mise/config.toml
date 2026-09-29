@@ -33,7 +33,11 @@ yazi = "26.9.1"
 zoxide = "0.10.0"
 
 # Agentic Tools
+agy = "latest"
+claude-code = "latest"
 codegraph = "1.6.0"
+codex = "latest"
+opencode = "latest"
 rtk = "latest"
 
 

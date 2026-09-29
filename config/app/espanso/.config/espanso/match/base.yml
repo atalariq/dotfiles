@@ -23,6 +23,13 @@ matches:
         type: date
         params:
           format: "%Y-%m-%d"
+  - trigger: ":ddate"
+    replace: "{{date}}"
+    vars:
+      - name: date
+        type: date
+        params:
+          format: "%Y%m%d"
   # Shell command
   - trigger: ":ip"
     replace: "{{ip}}"

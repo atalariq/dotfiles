@@ -11,16 +11,17 @@ __wayland_set_env() {
 }
 
 # automatically login to WM
-if [[ -z $DISPLAY && $(tty) == /dev/tty1 && $XDG_SESSION_TYPE == tty ]]; then
+if [[ -z $DISPLAY && $(tty) == /dev/tty2 && $XDG_SESSION_TYPE == tty ]]; then
   __wayland_set_env
 
   XDG_CURRENT_DESKTOP=mango exec mango
-elif [[ -z $DISPLAY && $(tty) == /dev/tty2 && $XDG_SESSION_TYPE == tty ]]; then
+elif [[ -z $DISPLAY && $(tty) == /dev/tty1 && $XDG_SESSION_TYPE == tty ]]; then
   __wayland_set_env
   export XDG_CURRENT_DESKTOP=GNOME
 
   # exec dbus-run-session -- gnome-shell --display-server --wayland
-  XDG_CURRENT_DESKTOP=GNOME exec dbus-run-session gnome-session --session=gnome-wayland
+  # XDG_CURRENT_DESKTOP=GNOME exec dbus-run-session gnome-session --session=gnome-wayland
+  exec start-cosmic
 elif [[ -z $DISPLAY && $(tty) == /dev/tty3 && $XDG_SESSION_TYPE == tty ]]; then
   ~/.local/script/server-mode
 fi
