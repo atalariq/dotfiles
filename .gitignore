@@ -91,3 +91,4 @@ config/app/fish/.config/fish/completions/vikunja-cli.fish
 # Local scratch TODOs
 /TODO.md
 /TODO-MISE.md
+/config/app/herdr/.config/herdr/.plugins.lock
