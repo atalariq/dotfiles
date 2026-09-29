@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+DOTFILES_DIR="$(CDPATH= cd -- "${SCRIPT_DIR}/.." && pwd)"
 BOOTSTRAP="${SCRIPT_DIR}/bootstrap.sh"
 
 usage() {
-	cat <<EOF
+	cat <<'EOF'
 setup — dotfiles deployment wrapper
 
 Usage:
@@ -47,20 +47,16 @@ EOF
 }
 
 deploy_json_config() {
-	local json_file="$1"
+	json_file="$1"
 
-	if [[ ! -f "$json_file" ]]; then
+	if [ ! -f "$json_file" ]; then
 		echo "error: JSON config not found: $json_file" >&2
 		exit 1
 	fi
 
-	local failed=0
+	failed=0
 
-	while IFS= read -r module_ref; do
-		[[ -z "$module_ref" ]] && continue
-		"$BOOTSTRAP" use "$module_ref" || ((failed++))
-	done < <(
-		python3 - "$json_file" <<'PY'
+	for module_ref in $(python3 - "$json_file" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -84,9 +80,16 @@ system = data.get("system")
 if isinstance(system, str) and system.strip():
     print(f"system/{system.strip()}")
 PY
-	)
+	); do
+		[ -z "$module_ref" ] && continue
+		if [ -n "$FLAGS" ]; then
+			"$BOOTSTRAP" $FLAGS use "$module_ref" || failed=$((failed + 1))
+		else
+			"$BOOTSTRAP" use "$module_ref" || failed=$((failed + 1))
+		fi
+	done
 
-	if ((failed > 0)); then
+	if [ "$failed" -gt 0 ]; then
 		echo "Setup finished with $failed failures" >&2
 		exit 1
 	fi
@@ -95,51 +98,74 @@ PY
 }
 
 main() {
-	# Collect flags to forward to bootstrap, leaving positional args intact
-	local flags=()
-	local pos_args=()
-	local _a
-	for _a in "$@"; do
-		case "$_a" in
-		--dry-run | --force) flags+=("$_a") ;;
-		*) pos_args+=("$_a") ;;
+	FLAGS=""
+	has_pos=""
+
+	# Filter flags and collect positional arguments
+	for a in "$@"; do
+		case "$a" in
+		--dry-run | --force)
+			FLAGS="${FLAGS}${FLAGS:+ }$a"
+			;;
+		*)
+			if [ -z "$has_pos" ]; then
+				set -- "$a"
+				has_pos="1"
+			else
+				set -- "$@" "$a"
+			fi
+			;;
 		esac
 	done
 
-	local arg="${pos_args[0]:-}"
-
-	if [[ -z "$arg" ]]; then
+	if [ -z "$has_pos" ]; then
 		usage
 	fi
+
+	arg="$1"
 
 	# Short form: if the first non-flag arg contains '/' and is not a known
 	# subcommand, treat it as: setup use <arg>
 	case "$arg" in
 	lab | personal | use | undo | restow | adopt | profile | secrets | doctor | status | diff | *.json) ;;
-	*)
-		if [[ "$arg" == */* ]]; then
-			pos_args=("use" "${pos_args[@]}")
-			arg="use"
-		fi
+	*/*)
+		set -- "use" "$@"
+		arg="use"
 		;;
 	esac
 
 	case "$arg" in
 	lab)
-		"$BOOTSTRAP" "${flags[@]}" profile lab
+		if [ -n "$FLAGS" ]; then
+			"$BOOTSTRAP" $FLAGS profile lab
+		else
+			"$BOOTSTRAP" profile lab
+		fi
 		;;
 	personal)
-		"$BOOTSTRAP" "${flags[@]}" profile laptop
+		if [ -n "$FLAGS" ]; then
+			"$BOOTSTRAP" $FLAGS profile laptop
+		else
+			"$BOOTSTRAP" profile laptop
+		fi
 		;;
 	use | undo | restow | adopt | profile | secrets | doctor | status | diff)
-		"$BOOTSTRAP" "${flags[@]}" "${pos_args[@]}"
+		if [ -n "$FLAGS" ]; then
+			"$BOOTSTRAP" $FLAGS "$@"
+		else
+			"$BOOTSTRAP" "$@"
+		fi
 		;;
 	*.json)
 		deploy_json_config "$arg"
 		;;
 	*)
-		if [[ -f "${DOTFILES_DIR}/profiles/${arg}.json" || -f "${DOTFILES_DIR}/profiles/${arg}.local.json" ]]; then
-			"$BOOTSTRAP" "${flags[@]}" profile "$arg"
+		if [ -f "${DOTFILES_DIR}/profiles/${arg}.json" ] || [ -f "${DOTFILES_DIR}/profiles/${arg}.local.json" ]; then
+			if [ -n "$FLAGS" ]; then
+				"$BOOTSTRAP" $FLAGS profile "$arg"
+			else
+				"$BOOTSTRAP" profile "$arg"
+			fi
 		else
 			usage
 		fi
@@ -148,3 +174,4 @@ main() {
 }
 
 main "$@"
+

@@ -1,3 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Convenience shim — forwards to script/setup.sh
-exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/script/setup.sh" "$@"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+exec "${SCRIPT_DIR}/script/setup.sh" "$@"
