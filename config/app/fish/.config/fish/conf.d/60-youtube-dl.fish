@@ -1,5 +1,3 @@
-command -q yt-dlp  || return 1
-
 abbr yt "yt-dlp"
 
 # List all Format

@@ -5,7 +5,7 @@ abbr -a v "nvim"
 abbr -a e "nvim"
 abbr -a se "sudoedit"
 
-#? rm/trash
+#? rm/trash - requires glib installed (Linux/Macos)
 abbr rmm "rm -rv"
 abbr rm "gio trash"
 abbr trl "gio trash --list"
@@ -46,46 +46,26 @@ abbr -a gstp "git stash pop"
 
 abbr -a lg lazygit
 
-# ── Package managers ──────────────────────────────────
-abbr -a ni "npm install"
-abbr -a nr "npm run"
-abbr -a nx "npx"
-abbr -a pi "pnpm install"
-abbr -a pa "pnpm add"
-abbr -a pr "pnpm run"
-abbr -a px "pnpm dlx"
-abbr -a bi "bun install"
-abbr -a br "bun run"
-abbr -a bx "bunx"
+if test (uname) = Linux
+  # ── System ─────────────────────────────────────────────
+  abbr -a jctl "journalctl -xeu"
+  abbr -a ports "ss -tulpn"
+  abbr -a path "printf '%s\n' $PATH"
 
-# ── Docker ─────────────────────────────────────────────
-abbr -a d "docker"
-abbr -a dc "docker compose"
-abbr -a dcb "docker compose build"
-abbr -a dcd "docker compose down"
-abbr -a dcl "docker compose logs -f"
-abbr -a dcu "docker compose up"
-abbr -a dcud "docker compose up -d"
-abbr -a dps "docker ps"
+  # ── Systemctl ──────────────────────────────────────────
+  abbr -a sc "sudo systemctl"
+  abbr -a scr "sudo systemctl restart"
+  abbr -a sce "sudo systemctl enable"
+  abbr -a scd "sudo systemctl disable"
+  abbr -a scss "sudo systemctl status"
+  abbr -a scst "sudo systemctl start"
+  abbr -a scsp "sudo systemctl stop"
 
-# ── System ─────────────────────────────────────────────
-abbr -a jctl "journalctl -xeu"
-abbr -a ports "ss -tulpn"
-abbr -a path "printf '%s\n' $PATH"
-
-# ── Systemctl ──────────────────────────────────────────
-abbr -a sc "sudo systemctl"
-abbr -a scr "sudo systemctl restart"
-abbr -a sce "sudo systemctl enable"
-abbr -a scd "sudo systemctl disable"
-abbr -a scss "sudo systemctl status"
-abbr -a scst "sudo systemctl start"
-abbr -a scsp "sudo systemctl stop"
-
-abbr -a scu "systemctl --user"
-abbr -a scur "systemctl --user restart"
-abbr -a scue "systemctl --user enable"
-abbr -a scud "systemctl --user disable"
-abbr -a scuss "systemctl --user status"
-abbr -a scust "systemctl --user start"
-abbr -a scusp "systemctl --user stop"
+  abbr -a scu "systemctl --user"
+  abbr -a scur "systemctl --user restart"
+  abbr -a scue "systemctl --user enable"
+  abbr -a scud "systemctl --user disable"
+  abbr -a scuss "systemctl --user status"
+  abbr -a scust "systemctl --user start"
+  abbr -a scusp "systemctl --user stop"
+end
