@@ -20,15 +20,13 @@ local linters_by_ft = {
   sh = { "shellcheck" },
   bash = { "shellcheck" },
   fish = { "fish" },
-  dockerfile = { "hadolint" },
   yaml = { "yamllint" },
-  python = { "ruff" },
-  go = { "golangcilint" },
-  lua = { "selene" },
-  sql = { "sqlfluff" },
-  -- markdown = { "vale", "rumdl" },
   markdown = { "rumdl" },
-  ["_"] = { "typos" },
+  javascript = { "oxlint" },
+  javascriptreact = { "oxlint" },
+  typescript = { "oxlint" },
+  typescriptreact = { "oxlint" },
+  -- ["_"] = { "typos" },
 }
 
 for name, linter in pairs(linters) do

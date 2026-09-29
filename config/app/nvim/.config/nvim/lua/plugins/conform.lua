@@ -4,29 +4,6 @@ local root_has = require("core.utils").root_has
 vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 vim.g.autoformat_enabled = vim.g.autoformat_enabled ~= false
 
-local function js_formatter(bufnr)
-  if root_has(bufnr, { "biome.json", "biome.jsonc" }) then
-    return { "biome" }
-  end
-  return { "prettier" }
-end
-
-local function markdown_formatter(bufnr)
-  if
-    root_has(bufnr, {
-      ".prettierrc",
-      ".prettierrc.json",
-      ".prettierrc.yaml",
-      ".prettierrc.yml",
-      "prettier.config.js",
-      "prettier.config.mjs",
-    })
-  then
-    return { "prettier" }
-  end
-  return { "rumdl" }
-end
-
 conform.formatters.vale =
   { append_args = { "--config", vim.fn.expand("~/.config/vale/.vale.ini"), "--output", "JSON" } }
 
@@ -68,27 +45,22 @@ conform.setup({
   },
   formatters_by_ft = {
     bash = { "shfmt" },
-    css = { "prettier" },
-    dart = { "dart_format" },
+    css = { "oxfmt", "prettier", stop_after_first = true },
     go = { "goimports", "gofumpt" },
-    html = { "prettier" },
-    java = { "google-java-format" },
-    javascript = js_formatter,
-    javascriptreact = js_formatter,
-    json = { "biome", "prettier", stop_after_first = true },
-    jsonc = { "biome", "prettier", stop_after_first = true },
-    kotlin = { "ktlint" },
+    html = { "oxfmt", "prettier", stop_after_first = true },
+    javascript = { "oxfmt", "prettier", stop_after_first = true },
+    javascriptreact = { "oxfmt", "prettier", stop_after_first = true },
+    json = { "oxfmt", "prettier", stop_after_first = true },
+    jsonc = { "oxfmt", "prettier", stop_after_first = true },
     lua = { "stylua" },
-    markdown = markdown_formatter,
-    mysql = { "pg_format" },
-    plsql = { "pg_format" },
-    scss = { "prettier" },
+    markdown = { "rumdl", "oxfmt", stop_after_first = true },
     sh = { "shfmt" },
-    sql = { "pg_format" },
-    typescript = js_formatter,
-    typescriptreact = js_formatter,
+    toml = { "tombi", "oxfmt", stop_after_first = true },
+    typescript = { "oxfmt", "prettier", stop_after_first = true },
+    typescriptreact = { "oxfmt", "prettier", stop_after_first = true },
     typst = { "typstyle" },
-    yaml = { "yamlfmt" },
+    yaml = { "yamlfmt", "oxfmt", stop_after_first = true },
+    zsh = { "shfmt" },
   },
 })
 

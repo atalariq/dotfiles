@@ -25,26 +25,6 @@ end, { desc = "Update plugings with vim.pack.update()" })
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(ev)
     local name, kind = ev.data.spec.name, ev.data.kind
-    if name == "nvim-treesitter" and kind == "install" then
-      if not ev.data.active then
-        vim.cmd.packadd("nvim-treesitter")
-      end
-      -- Ensure basic parsers are installed
-      local parsers = {
-        "bash",
-        "diff",
-        "ini",
-        "lua",
-        "luadoc",
-        "markdown",
-        "markdown_inline",
-        "query",
-        "vim",
-        "vimdoc",
-      }
-
-      require("nvim-treesitter").install(parsers):wait(60000)
-    end
     if name == "nvim-treesitter" and kind == "update" then
       if not ev.data.active then
         vim.cmd.packadd("nvim-treesitter")
@@ -68,19 +48,22 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 vim.pack.add({
   -- core
-  "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/NMAC427/guess-indent.nvim",
-
-  -- LSP / format / lint / dap
+  "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/neovim/nvim-lspconfig",
+
+  -- Format (./conform.lua) / Lint (./lint.lua)
   "https://github.com/stevearc/conform.nvim",
   "https://github.com/mfussenegger/nvim-lint",
+
+  -- Debug (./debug.lua)
   "https://github.com/mfussenegger/nvim-dap",
   { src = "https://github.com/igorlfs/nvim-dap-view", version = vim.version.range("1.*") },
 
-  -- Language-specific
+  -- Language-specific (../../after/ftplugin/*)
   "https://github.com/folke/lazydev.nvim",
   "https://github.com/ray-x/go.nvim",
+  "https://github.com/olrtg/nvim-emmet",
 
   -- completion
   "https://github.com/saghen/blink.cmp",
@@ -135,8 +118,8 @@ vim.pack.add({
 
   -- misc
   "https://github.com/nvim-lua/plenary.nvim",
-  "https://github.com/wakatime/vim-wakatime",
-  "https://github.com/iwe-org/iwe.nvim",
+  -- "https://github.com/wakatime/vim-wakatime",
+  -- "https://github.com/iwe-org/iwe.nvim",
 
   -- colorscheme
   { src = "https://github.com/neanias/everforest-nvim", name = "everforest" },
@@ -147,7 +130,7 @@ require("plugins.treesitter")
 require("plugins.lsp")
 require("plugins.conform")
 require("plugins.lint")
-require("plugins.dap")
+require("plugins.debug")
 require("plugins.gitsigns")
 require("plugins.fzf")
 require("plugins.mini")
@@ -193,7 +176,7 @@ require("img-clip").setup({
   },
   filetypes = {
     typst = {
-      template = [[#img("$FILE_PATH", caption: [$CURSOR])]],
+      template = [[#image("$FILE_PATH")]],
     },
   },
 })

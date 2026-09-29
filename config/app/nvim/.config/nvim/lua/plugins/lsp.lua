@@ -25,10 +25,39 @@ if go_ok then
 end
 
 local servers = {
-  bashls = { _cmd = "bash-language-server" },
-  gopls = { _cmd = "gopls" },
-  rust_analyzer = { _cmd = "rust-analyzer" },
   basedpyright = { _cmd = "basedpyright" },
+  bashls = { _cmd = "bash-language-server" },
+  clangd = { _cmd = "clangd" },
+  cssls = { _cmd = "vscode-css-language-server" },
+  gopls = { _cmd = "gopls" },
+  -- harper_ls = {
+  --   _cmd = "harper-ls",
+  --   cmd = { "harper-ls", "--stdio" },
+  --   filetypes = { "markdown", "text", "tex", "typst" },
+  -- },
+  html = { _cmd = "vscode-html-language-server" },
+  jsonls = { _cmd = "vscode-json-language-server" },
+  marksman = { _cmd = "marksman" },
+  oxlint = { _cmd = "oxlint" },
+  rust_analyzer = { _cmd = "rust-analyzer" },
+  tailwindcss = { _cmd = "tailwindcss-language-server" },
+  tinymist = { _cmd = "tinymist" },
+  tombi = { _cmd = "tombi" },
+  emmet_language_server = {
+    _cmd = "emmet-language-server",
+    filetypes = {
+      "css",
+      "eruby",
+      "html",
+      "javascript",
+      "javascriptreact",
+      "less",
+      "sass",
+      "scss",
+      "pug",
+      "typescriptreact",
+    },
+  },
   vtsls = {
     _cmd = "vtsls",
     settings = {
@@ -38,31 +67,6 @@ local servers = {
       },
     },
   },
-  eslint = { _cmd = "eslint-language-server" },
-  tailwindcss = { _cmd = "tailwindcss-language-server" },
-  html = { _cmd = "vscode-html-language-server" },
-  cssls = { _cmd = "vscode-css-language-server" },
-  jsonls = { _cmd = "vscode-json-language-server" },
-  yamlls = { _cmd = "yaml-language-server" },
-  dockerls = { _cmd = "docker-langserver" },
-  jdtls = { _cmd = "jdtls" },
-  phpactor = { _cmd = "phpactor" },
-  tinymist = { _cmd = "tinymist" },
-  texlab = { _cmd = "texlab" },
-  marksman = { _cmd = "marksman" },
-  -- sqls = { _cmd = "sqls" },
-  postgres_lsp = { _cmd = "postgres-language-server" },
-  clangd = { _cmd = "clangd" },
-  systemd_ls = { _cmd = "systemd-lsp" },
-  tombi = { _cmd = "tombi" },
-  just = { _cmd = "just-lsp" },
-  kotlin_lsp = {
-    _cmd = "kotlin-lsp",
-    cmd = { "kotlin-lsp", "--stdio" },
-  },
-  -- lua_ls = {
-  --   _cmd = "lua-language-server",
-  -- },
 }
 
 for name, server in pairs(servers) do

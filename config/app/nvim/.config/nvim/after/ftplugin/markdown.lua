@@ -18,7 +18,13 @@ vim.keymap.set("n", "<leader>tlp", "<cmd>MarkdownPreview<CR>", { desc = "Toggle 
 
 -- --- render-markdown -------------------------------------
 require("render-markdown").setup({
+  enabled = false,
+  preset = "obsidian",
   render_modes = { "n", "c" }, -- nonaktif saat insert
+  completions = { lsp = { enabled = true } },
   anti_conceal = { enabled = true },
   latex = { enabled = false },
+  nested = false,
 })
+
+vim.keymap.set("n", "<leader>tm", "<cmd>RenderMarkdown buf_toggle<CR>", { desc = "Toggle markdown renderer" })
