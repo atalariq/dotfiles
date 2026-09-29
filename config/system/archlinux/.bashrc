@@ -55,3 +55,9 @@ esac
 
 # Added by Antigravity CLI installer
 export PATH="/home/atalariq/.local/bin:$PATH"
+
+# Pi
+export PATH="/home/atalariq/.local/share/mise/installs/node/24.16.0/bin:$PATH"
+
+# Lerd
+export PATH="/home/atalariq/.local/share/lerd/bin:$PATH"
