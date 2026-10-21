@@ -48,7 +48,7 @@ in {
         message = "Invalid dotfiles manifest version or application selection"; }
     ];
     home.packages = lib.unique (lib.concatMap
-      (a: map (p: pkgs.${p}) manifest.apps.${a}.packages) selected);
+      (a: map (p: lib.getAttrFromPath (lib.splitString "." p) pkgs) manifest.apps.${a}.packages) selected);
     home.sessionVariables.XDG_CONFIG_HOME = cfg.configHome;
     home.activation.dotfilesPreflight = lib.hm.dag.entryBefore [ "writeBoundary" ] ''
       test -f ${validation}

@@ -29,7 +29,7 @@ if status is-interactive
         mise activate fish | source
     end
 
-    if not set -q SSH_AUTH_SOCK
+    if not set -q SSH_AUTH_SOCK; and command -q ssh-agent
         eval (ssh-agent -c) > /dev/null
     end
 
@@ -40,4 +40,9 @@ end
 # wana TTY palette — apply on Linux virtual console login
 if test "$TERM" = linux; and test -r "$HOME/.local/script/wana-tty-current.sh"
     sh "$HOME/.local/script/wana-tty-current.sh"
+end
+
+# Machine preferences load after the shared configuration.
+if test -f $__fish_config_dir/config.local.fish
+    source $__fish_config_dir/config.local.fish
 end

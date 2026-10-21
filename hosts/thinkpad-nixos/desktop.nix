@@ -4,7 +4,6 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   programs.mango.enable = true;
-  programs.niri.enable = true;
 
   hardware.graphics.enable = true;
 
@@ -14,10 +13,12 @@
     enable = true;
     useTextGreeter = true;
     settings.default_session = {
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions --cmd mango";
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd mango";
       user = "greeter";
     };
   };
+  # Preserve the running graphical session when login-manager settings change.
+  systemd.services.greetd.restartIfChanged = false;
   services.displayManager.defaultSession = "mango";
 
   hardware.bluetooth.enable = true;

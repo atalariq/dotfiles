@@ -1,75 +1,67 @@
-# Validation record — 21 October 2026
+# Restoration verification — 22 October 2026
 
-## Machine and preservation
+## Passed on this ThinkPad
 
-Executed on x86_64-linux, NixOS, ThinkPad X13 Gen 2a AMD (`20XH005GUS`),
-approximately 16 GB RAM. Nix 2.34.9. Existing hardware configuration was copied
-byte-for-byte: SHA-256
-`de26785c49cfae2ec26f62efdf4d626aa4f81d5f5c043300bb355592d7a05ed3`.
-Both system stateVersion and the new HM compatibility baseline are `26.05`.
-Original `/etc/nixos` files and the user's pre-existing legacy modifications
-were preserved. No real-home links, login shell, system profile, activation,
-firmware update, enrollment, boot selection or running service was changed.
+- Full filtered `./dot build --host thinkpad-nixos` succeeded. Output:
+  `/nix/store/38vsg2sxrkfslmqmhiaigplfs514lizi-nixos-system-thinkpad-nixos-26.11.20261015.fe13242`.
+- `python3 -B -m unittest discover -s tests -v`: 20 tests, all passed.
+  Includes idempotency, direct edits, conflicts, foreign/owned ancestor symlinks,
+  backups, temporary homes, HM interoperability and activation refusal/failure.
+- Native Mango parser passed against the original split configuration as a build
+  dependency and against the live original source. `mmsg dispatch reload_config`
+  returned success; Mango PID 102392 and Noctalia PID 102421 were unchanged.
+- 37 Fish files parsed with fish --no-execute. Native Yazi and Noctalia TOML parsed.
+- Original Neovim vim.pack configuration started in an isolated HOME using copied
+  existing plugins. Ten tree-sitter parsers compiled after adding tree-sitter and
+  the C toolchain. The obsolete live_server import was changed to kitehost.
+- Original Yazi started in an isolated HOME. Single-tab quit and multiple-tab
+  confirmation/quit passed with the corrected synchronous plugin entry and
+  main-thread asynchronous dialog. No Yazi errors were logged.
+- Closure comparison removes Niri 26.04, its service and portal config. Mango
+  portals remain wlr for screencast/screenshots and gtk for the general backend.
+- Built greetd unit contains X-RestartIfChanged=false. It must remain running
+  through activation; changed login command takes effect on its next start.
+- Original /etc/nixos/configuration.nix and captured host copy are identical.
+  Hardware SHA256 in both locations:
+  `de26785c49cfae2ec26f62efdf4d626aa4f81d5f5c043300bb355592d7a05ed3`.
+  system.stateVersion remains 26.05. Flake pins were not updated.
+- Native links were migrated after archiving conflicts. Obsolete placeholders,
+  Niri sources/deployed config and old setup scripts were archived then removed.
 
-## Passed
+## Activation status
 
-- `python3 -B -m unittest discover -s tests -v`: **19 tests passed**, no skips.
-  Tests use temporary homes/checkouts, including checkout/config paths with spaces.
-  They cover Nix-free installation, idempotency, direct edits, local overrides,
-  copied Fish startup without optional tools, plan/doctor non-mutation, collisions,
-  broken/foreign/intermediary symlinks, backups, unsafe ancestors, invalid manifests,
-  partial failure/retry, stale-link reporting, unsupported app-scoped full apply,
-  HM/helper interoperability, build failure and activation refusal.
-- NixOS integrated Home Manager evaluation and full system build succeeded.
-  The final build also runs Mango and Niri configuration validators as dependencies.
-- Standalone Home Manager activation package built for a fixture home on
-  x86_64-linux; its activation script was **not run**. The shared native-link
-  helper's check/apply interoperability was exercised only in disposable homes.
-- Home Manager derivation evaluation passed for **x86_64-linux, aarch64-linux,
-  aarch64-darwin**. This is evaluation evidence, not runtime evidence for remote OSes.
-- Laravel and Android dev shells built on x86_64-linux.
-- Laravel smoke check passed: PHP 8.4.26, Composer 2.10.3, Node 22.23.3;
-  bcmath, intl, PDO MySQL, PDO SQLite, zip, mbstring and openssl were loaded.
-- Android smoke check passed: OpenJDK 17.0.20.1, adb 37.0.0, `/dev/kvm` exists.
-  No emulator, device pairing, SDK installation or Android build was run.
-- Native Niri config passed `niri validate -c apps/niri/config.kdl` using Niri 26.04.
-- Native Mango config passed `mango -p -c apps/mango/config.conf` using the
-  exact flake-pinned Mango package. Validation caught old spellings of startup,
-  border and gap options; these were corrected before delivery.
-- libfprint 1.94.100 hardware database includes `usb:v27C6p6594*`.
-  Evaluated `security.pam.services.login.fprintAuth` is true.
-- Noctalia package is 5.3.0. Native configuration/IPC APIs were verified against
-  its pinned documentation. Native TOML syntax and `git diff --check` passed.
+The restored native links and Mango reload are applied. The operator activated
+`/nix/store/yq593fczvscaww6r12nqdqy9s6dad9bj-nixos-system-thinkpad-nixos-26.11.20261015.fe13242`.
+/run/current-system and the system profile both resolve to that output.
+Home Manager is active with Result=success. System and user failed-unit lists
+are empty. Mango and Noctalia retain their original PIDs. Live `dot doctor`
+passes with all selected commands available and mappings owned.
 
-## Limits and pending runtime checks
+The later 38vsg2 output above contains only the aria2c diagnostic-command name
+correction and comment updates. Packages and system settings are unchanged;
+it is built but was not activated. No additional switch was requested.
 
-- Intel macOS Nix evaluation was attempted and correctly failed: pinned Nixpkgs
-  26.11 dropped x86_64-darwin. Intel Macs retain the config-only/manual path;
-  this delivery does not silently add an older package universe.
-- macOS, non-NixOS Linux, ARM Linux and WSL runtime activation were not tested.
-  No remote target machine was available. There is no native Windows adapter.
-- Camera `13d3:5439` and video0/video1 were detected; capture quality, microphone,
-  browser permissions, suspend/resume, battery behavior, external displays,
-  Bluetooth and fingerprint enrollment/unlock require post-approval runtime tests.
-- SDK platform/image/license downloads and project Composer/npm/Gradle dependencies
-  are intentionally not installed globally. No sample app build is claimed.
-- Neovim is a native plugin-free baseline. No plugin lockfile was invented and
-  no existing plugin setup was silently imported.
-- The real-home plan reports existing Fish/Yazi/Bat ancestor symlinks and
-  Neovim/Starship/Mango conflicts. Deployment remains pending explicit migration
-  and activation approval. See `dotfiles-v1.md` for backup and recovery instructions.
-- Two independent review agents were attempted but both hit the account usage
-  limit. The primary agent completed the spec/correctness review directly;
-  independent review is not claimed.
+Logs: /tmp/dotfiles-restoration-final-build.log and
+/tmp/dotfiles-restoration-final-tests.log. Temporary logs are not durable artifacts;
+reproduce using the commands above. Backup details are in restoring-original-configs.md.
 
-## Build evidence
+## Earlier validation retained
 
-Build-only logs are under `/tmp/dotfiles-*-build.log` and
-`/tmp/dotfiles-delivery-build.log` for this session. These logs are temporary;
-regenerate through `./dot build --host thinkpad-nixos` as needed. The root lock
-retains the original Nixpkgs/Mango/Noctalia pins and adds a real resolved Home
-Manager pin. No apply/update command was used against the real home.
+The preceding integration built Laravel and Android shells on x86_64-linux:
+PHP 8.4/Composer/Node22 with the required PHP extensions; JDK17/adb with /dev/kvm.
+Standalone HM built on x86_64-linux and evaluated on aarch64-linux/aarch64-darwin.
+These results predate this restoration; remote-platform runtime is not claimed.
+Intel macOS remains config-only because the pinned Nixpkgs dropped x86_64-darwin.
 
-Final `./dot build --host thinkpad-nixos` output:
-`/nix/store/6p1q0iprqc54mgwsjllk1gmcrvhfv9hh-nixos-system-thinkpad-nixos-26.11.20261015.fe13242`.
-This output was built successfully and never activated.
+## Remaining physical/runtime checks
+
+Camera capture, fingerprint enrollment/unlock, suspend/resume, battery behavior,
+external displays and Bluetooth/audio require real use. The camera enumerates as
+uvcvideo and libfprint's hardware database includes the detected 27c6:6594 reader;
+this does not establish successful enrollment or capture. SDK/image/license and
+project dependency downloads remain user/project state. No Android application,
+video recording, screenshot, firmware update or fingerprint enrollment was run.
+
+Two independent review agents were attempted earlier and both hit usage limits.
+The primary agent reviewed the specification, preservation boundaries, ownership
+and version changes directly; an independent review is not claimed.

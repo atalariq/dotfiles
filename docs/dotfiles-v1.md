@@ -2,7 +2,7 @@
 
 ## Boundaries
 
-`apps/` is native configuration, usable by manual copy without Nix or sibling
+`config/` holds the original native configuration, usable by manual copy without Nix or sibling
 apps. `apps/manifest.json` contains IDs, baseline selection, packages, required
 commands and mappings. `bootstrap/dot.py` validates the entire manifest before
 linking anything. Home Manager calls the same code through `hm-links.py` at
@@ -14,9 +14,10 @@ A Home Manager build also validates the manifest against the source snapshot.
 At activation, preflight validates the actual live checkout again. Foreign
 files are rejected even if their contents happen to match. Validated direct
 links and links through a store intermediary are both recognized by their
-resolved source. Directory links are used only for Neovim, whose runtime
-state lives under XDG data/state/cache. Fish and other mixed trees use file
-links, retaining unmanaged local override files.
+resolved source. Directory links cover config-only trees such as Neovim, Yazi and Fish functions/
+completions/conf.d. Mixed roots retain file mappings and unmanaged local state.
+An existing ancestor link is accepted only when it resolves to the exact declared
+source tree; foreign ancestor links remain conflicts.
 
 `nix/` composes package selection and HM. `hosts/thinkpad-nixos/` contains the
 actual machine configuration captured from `/etc/nixos`, not a reusable
@@ -47,7 +48,7 @@ supports it (see each folder README).
 
 `--home /absolute/path` and `--config-home /absolute/path` support disposable
 homes and alternate config roots. Otherwise HOME and XDG_CONFIG_HOME are
-used. Symlinked target ancestors are rejected rather than silently traversed.
+used. Foreign symlinked target ancestors are rejected rather than silently traversed.
 `--app` is repeatable and only allowed together with `--config-only`.
 
 Plan reports static intent and conflicts, not a computed closure diff. Doctor
@@ -64,66 +65,22 @@ host.json. Application files still link to the ORIGINAL checkout string.
 Prefer `./dot build` over a raw `path:` flake build of a dirty working tree;
 raw path inputs can copy ignored local files into the public Nix store.
 
-## Review before activation on this laptop
+## ThinkPad integration and activation
 
-No real config links, login shells, Nix profiles or running services were changed
-during implementation. `/etc/nixos` remains the prior source and rollback
-reference; the new canonical composition is this repository's root flake.
-Do not accidentally rebuild `/etc/nixos` expecting these changes.
+The canonical source is this checkout's root flake. `/etc/nixos` is preserved
+as the original source reference. Existing hardware, disk UUIDs, boot options
+and system.stateVersion 26.05 remain unchanged.
 
-The proposed new generation includes:
+The system selects Mango with Noctalia 5.3.0, greetd/tuigreet authenticated login,
+PipeWire/portals, libinput, Bluetooth, GNOME Keyring, fprintd, fwupd, AMD firmware,
+power-profiles-daemon, 25% zram, fstrim, Android Studio, KVM and rootless Podman.
+Niri is removed. greetd has restartIfChanged=false: a configuration switch must
+preserve the running login session. A changed greeter command takes effect on
+its next start; do not restart it during an active desktop session.
 
-- A password/fingerprint-capable greetd/tuigreet session chooser, replacing TTY
-  autologin and unconditional Mango startup. Choose Mango or Niri at login.
-- Noctalia 5.3.0 started once by the selected compositor. Native `noctalia msg`
-  bindings replace old Quickshell-era CLI assumptions. GUI state is not managed.
-- fprintd, redistributable firmware/AMD microcode, fwupd, libinput, Bluetooth,
-  GNOME Keyring, compositor-specific portals and the existing PipeWire setup.
-- Existing power-profiles-daemon retained as the single power policy service;
-  no TLP/governor/experimental sleep tweaks. zram at 25% RAM and fstrim enabled.
-- Android Studio and KVM group access; systemd supplies USB uaccess rules for
-  adb. Rootless Podman is available without replacing the Docker command.
-- The portable HM baseline plus new native Mango/Niri/Noctalia configs.
-
-Existing disk UUIDs, bootloader options, users and system.stateVersion `26.05`
-are preserved. The hardware file is byte-identical to the original. The prior
-latest-kernel choice remains; no hibernation/resume or partition changes were added.
-
-Run `./dot plan --host thinkpad-nixos` and review the live conflict list. At
-inspection time Fish, Yazi and Bat had symlinked ancestor directories; Neovim,
-Starship and Mango had foreign mapped objects. These are intentionally not
-automatically adopted. The new Neovim baseline is plugin-free; custom plugins,
-LSP setup and old keybindings remain in the legacy tree and are not silently
-imported into the new baseline.
-
-After approval to migrate the deployed configs, move only those six conflicting
-objects into a fresh, private backup directory (do not delete their targets).
-One explicit procedure, to be run by the operator after review, is:
-
-```sh
-python3 - <<'PY'
-from pathlib import Path
-import os, tempfile
-root = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
-backup = Path(tempfile.mkdtemp(prefix='dotfiles-before-v1-', dir=Path.home()))
-for relative in ('fish', 'yazi', 'bat', 'nvim', 'starship.toml', 'mango/config.conf'):
-    source = root / relative
-    if os.path.lexists(source):
-        target = backup / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        source.rename(target)
-        print(source, '->', target)
-print('Backup:', backup)
-PY
-./dot plan --host thinkpad-nixos
-./dot apply --host thinkpad-nixos
-```
-
-Before that move, inspect personal overrides and recover wanted native overrides
-into the corresponding new locations, following each app's README. Keep legacy
-Fish functions/secrets loaders opt-in; do not copy them blindly. Backup locations
-retain all originals. If current conflicts differ from the recorded six objects,
-review and adjust the migration list first. No migration command has been run.
+Original configs have been restored with archived conflicts. See
+[restoration record](restoring-original-configs.md). Native links are live, so
+configuration edits can affect running applications independently of Nix.
 
 Full apply builds first, prints the immutable output and (for NixOS) the closure
 diff, then requires the exact text `activate HOST`. Refusal/EOF leaves the active
@@ -134,9 +91,9 @@ requires confirmation after its build. Do not run this command from a root shell
 
 ## Laptop verification after approved activation
 
-Runtime checks are intentionally pending until activation is approved:
+Hardware-dependent checks still require actual use:
 
-1. Log into each compositor; verify Noctalia, audio, microphone, brightness,
+1. Log into Mango; verify Noctalia, audio, microphone, brightness,
    notifications, Bluetooth, Wi-Fi, screen sharing and an external display.
 2. Run `fprintd-enroll` as your regular user and then `fprintd-verify`. Enrollment
    requires your physical finger and changes device state; it was not run.

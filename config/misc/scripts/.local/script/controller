@@ -27,7 +27,7 @@ Options:
   -h, --help     Show this help
   -v, --version  Show version
 
-Dependencies: qs (noctalia-shell), playerctl, kbdlight
+Dependencies: noctalia v5, playerctl, brightnessctl (Linux) or kbdlight (macOS)
 EOF
     exit 0
 }
@@ -62,7 +62,19 @@ do_brightness() {
 
 do_kbdlight() {
     case "${1:-}" in
-        up|down) kbdlight "$1" 1 ;;
+        up|down)
+            if command -v brightnessctl >/dev/null 2>&1; then
+                case "$1" in
+                    up) brightnessctl --device='*kbd_backlight' set 1+ ;;
+                    down) brightnessctl --device='*kbd_backlight' set 1- ;;
+                esac
+            elif command -v kbdlight >/dev/null 2>&1; then
+                kbdlight "$1" 1
+            else
+                err "keyboard backlight: brightnessctl or kbdlight is required"
+                return 1
+            fi
+            ;;
         *) err "kbdlight: expected up|down"; exit 1 ;;
     esac
 }

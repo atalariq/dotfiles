@@ -1,73 +1,28 @@
-# Dotfiles v1 migration — current workflow
+# Repository working rules
 
-For work in `apps/`, `bootstrap/`, `nix/`, `hosts/`, `devshells/`, or the root flake,
-read `docs/dotfiles-v1.md` and `docs/migrate-to-nix.spec.md`. The user's current
-scope extends the spec's old slice-1 prompt through the baseline, real ThinkPad
-integration, Mango/Niri + Noctalia v5, and Laravel/Android development shells.
+The owner's original `config/app`, `config/desktop/mango`, and `config/misc`
+files are authoritative. Preserve their themes, keybindings, functions and
+plugins. Mango is the only selected compositor. `apps/noctalia` contains new
+Noctalia v5 preferences; `apps/manifest.json` owns mappings and package selection.
+`hosts/<name>/host.json` owns current host selection. `profiles/` is retained
+as the original module inventory, not an input to the new CLI.
 
-Native files in `apps/` are authoritative. `apps/manifest.json` owns application
-IDs, package lists and links. Both the CLI and Home Manager use the same Python
-validation/linking boundary. Run `python3 -B -m unittest discover -s tests -v`
-after changing it. Use `./dot build` for build-only validation. Activation and
-changes to the real user's deployed files require explicit approval. Preserve
-the captured hardware configuration and stateVersion.
+For deployment changes read `docs/dotfiles-v1.md`; for the migration requirements
+read `docs/migrate-to-nix.spec.md` together with the owner's later instructions.
+The approved scope includes ThinkPad integration and Laravel/Android shells.
+Use `./dot build` for filtered build-only validation. Preserve the captured
+hardware configuration and stateVersion. Activation requires owner approval;
+keep greetd.restartIfChanged=false to preserve the running graphical session.
 
-Legacy `config/`, `profiles/`, and `setup.sh` are retained for recovery. Treat
-the guide below as legacy-only; do not use its deployment commands on v1 apps.
-Some legacy paths are LIVE symlink targets: inspect before editing them.
+The CLI and Home Manager share `bootstrap/dot.py` validation/link ownership.
+After changing that boundary run `python3 -B -m unittest discover -s tests -v`.
+Native links resolve to the live checkout: inspect before editing. Runtime
+state and credentials stay outside deployment. Back up conflicts and prove
+ownership before retiring deployed links. Keep rollback backups outside Git.
 
----
-
-# AGENTS.md — Dotfiles Repo Guide
-
-Primary reference for AI agents and humans working in this repo. For concept definitions, see `CONTEXT.md`.
-
----
-
-## Repo Layout
-
-```text
-config/
-  app/          # Atomic application configs — one tool per module (kitty, fish, nvim, vim, bat, fzf, claude, …)
-  desktop/      # WM/compositor configs (mango, niri, wal, …)
-  misc/         # Scripts, fonts, browser startpage
-  system/       # OS-level shell config, one module per OS (archlinux, ubuntu, mac)
-profiles/       # Machine profiles (*.json)
-script/
-  bootstrap.sh  # Validated symlink farm (core deploy logic)
-  setup.sh      # Entry point: parses args, delegates to bootstrap.sh
-setup.sh        # Repo-root shim → forwards to script/setup.sh
-secrets/        # SOPS/age encrypted secrets + POSIX loader
-docs/           # Documentation (secrets.md, script-style.md, install-package.md)
-```
-
----
-
-## How to Add a Module
-
-1. Create `config/<category>/<name>/` with files mirroring their `$HOME` target paths
-2. Add the module to relevant `profiles/*.json`
-3. Preview: `./setup.sh --dry-run use <category>/<name>`
-4. Deploy: `./setup.sh use <category>/<name>`
-
----
-
-## How to Move a Module
-
-1. `git mv config/<old-category>/<old-name> config/<new-category>/<new-name>`
-2. Update all `profiles/*.json` references
-3. `./setup.sh undo <old-category>/<old-name>; ./setup.sh use <new-category>/<new-name>`
-   (or `./setup.sh restow <new-category>/<new-name>` if only renamed within same path)
-
----
-
-## How to Retire a Module
-
-1. `./setup.sh undo <category>/<module>` — remove symlinks from `$HOME`
-2. `git rm -r config/<category>/<module>/`
-3. Remove from all `profiles/*.json`
-
----
+For layout/module/command changes update README.md, CONTEXT.md and this file.
+When replacing native files from external storage, keep manifest source paths
+stable; add mappings for new files when the parent is not a directory link.
 
 ## How to Add a Theme Target
 
@@ -94,50 +49,11 @@ guards against drift between wana output and the vendored copies (Class C includ
 
 ---
 
-## Deployment Commands
+## Secrets
 
-```bash
-./setup.sh profile <name>               # Deploy a whole profile
-./setup.sh use <category>/<module>      # Deploy a single module
-./setup.sh undo <category>/<module>     # Remove a module's symlinks
-./setup.sh restow <category>/<module>   # Re-link (undo + use)
-./setup.sh adopt <category>/<module>    # Pull existing $HOME files into repo
-./setup.sh secrets                      # Link secrets/ to ~/.config/sops/ and ~/.local/script/
-./setup.sh undo profile <name>          # Roll back an entire profile
-./setup.sh --dry-run ...                # Preview actions without touching files
-./setup.sh --force ...                  # Non-interactive (auto-overwrite conflicts)
-```
+Read `docs/secrets.md` before changing SOPS/age integration. Retain encrypted
+sources and local key ownership. Deploy only the manifest's explicit sources;
+keep decrypted values, local overrides and caches outside the Nix snapshot.
 
----
-
-## Cross-Machine Sync
-
-One repo, one `main` branch. Per-device differences live in profiles (which
-modules) and `system/<os>` modules (Arch/Ubuntu/macOS shell), never in
-per-machine branches: `git pull --rebase` → `./setup.sh profile <host>` →
-conventional commit → `git push`. Full workflow + fresh-VPS bootstrap in
-`docs/sync.md`.
-
-A `profiles/<host>.local.json` (gitignored) overrides the base profile of the
-same name — used _instead of_ it, for a machine-only module set. Git commit
-signing/credentials are likewise device-local: `app/git/.gitconfig` is portable
-and unsigned by default, pulling machine specifics from an untracked
-`~/.gitconfig.local` via `[include]`.
-
-## Secrets Workflow
-
-See `docs/secrets.md`. Short version:
-
-```bash
-sops secrets/secrets.yaml              # Edit secrets
-sops updatekeys secrets/secrets.yaml   # Rotate keys
-./setup.sh secrets                     # Deploy (link to ~/.config/sops/ and ~/.local/script/)
-```
-
-## Standing Rule
-
-**On any significant change — new module, moved/retired module, new command, changed layout — update `CONTEXT.md`, `AGENTS.md`, and `README.md` (if user-facing).**
-
----
-
-If AGENTS.md grows too large, split detailed topics into separate files under `docs/` and link from here.
+The old setup.sh/bootstrap.sh deployment has been retired. Historical docs
+mentioning it do not describe the supported deployment command.

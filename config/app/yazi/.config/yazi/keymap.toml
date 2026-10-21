@@ -5,7 +5,6 @@
 [mgr]
 prepend_keymap = [
   { on = "!", for = "unix", run = 'shell "$SHELL" --block', desc = "Open $SHELL here" },
-  { on = "q", run = "close", desc = "Exit the process" },
   { on = "<A-q>", run = "close", desc = "Close the current tab, or quit if it's last" },
 
   # Operation
@@ -21,7 +20,7 @@ prepend_keymap = [
   { on = ["g", "r"], run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"', desc = "Go to git root folder" },
   # { on = "y", run = ['shell -- for path in %s; do echo "file://$path"; done | wl-copy -t text/uri-list', "yank"] },
 
-  # --- ./plugins/confirm-quit/main.lua
+  # --- ./plugins/confirm-quit.yazi/main.lua
   { on = "q", run = "plugin confirm-quit", desc = "Confirm before quitting if multiple tabs are open" },
 
   # --- https://github.com/boydaihungst/mediainfo

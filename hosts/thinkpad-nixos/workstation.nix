@@ -30,14 +30,17 @@
     android-studio
     usbutils pciutils v4l-utils
     libsecret
+    satty ripdrag gpu-screen-recorder
+    (tesseract.override { enableLanguages = [ "eng" "ind" ]; })
   ];
   system.extraDependencies = [ (pkgs.runCommand "validate-native-desktops" {} ''
     export HOME="$TMPDIR/home"
     export XDG_CACHE_HOME="$HOME/.cache"
     export XDG_RUNTIME_DIR="$TMPDIR/runtime"
     mkdir -p "$HOME" "$XDG_RUNTIME_DIR"
-    ${config.programs.mango.package}/bin/mango -p -c ${../../apps/mango/config.conf}
-    ${config.programs.niri.package}/bin/niri validate -c ${../../apps/niri/config.kdl}
+    mkdir -p "$HOME/.config"
+    cp -R ${../../config/desktop/mango/.config/mango} "$HOME/.config/mango"
+    ${config.programs.mango.package}/bin/mango -p -c "$HOME/.config/mango/config.conf"
     touch "$out"
   '') ];
 }

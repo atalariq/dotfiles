@@ -258,7 +258,7 @@ require("quicker").setup({
 require("guess-indent").setup()
 require("blink.indent").setup()
 require("colorizer").setup()
-require("live_server").setup()
+require("kitehost").setup()
 require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
 require("origami").setup()

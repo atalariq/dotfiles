@@ -23,8 +23,8 @@ Launches applications that every WM needs, with ordering:
 
 Usage: $SCRIPT_NAME [--help|--version]
 
-This script is called by WM configs (mango exec-once, niri spawn-sh-at-startup).
-WM-specific startup items (xdg-desktop-portal-wlr, window rules) stay in WM configs.
+This script is called by Mango exec_once.
+NixOS owns portal services; compositor-specific window rules stay in Mango configs.
 EOF
   exit 0
 }
@@ -53,15 +53,15 @@ main() {
 
   # Phase 1: Launch parallel services
   info "Starting shared services..."
-  /usr/lib/xdg-desktop-portal --replace &
-  /usr/lib/xdg-desktop-portal-termfilechooser -r &
+  # XDG portals are managed by systemd/DBus on NixOS.
+  # Portal backend is selected by the compositor-specific NixOS configuration.
   noctalia &
   ok "noctalia shell"
 
   sleep 1
 
-  /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-  ok "gnome polkit"
+  # Noctalia provides the native Polkit agent.
+  ok "Noctalia polkit agent"
 
   # text_expander --daemon &
   # ok "text_expander (espanso alternative)"

@@ -44,7 +44,7 @@ alias cat "bat --paging=never"
 
 # --- Arch Linux Specific ----------------------------------
 if test -f /etc/os-release
-    if string match -q "*Arch Linux*" (cat /etc/os-release)
+    if string match -q "*Arch Linux*" (command cat /etc/os-release)
         # browser
         alias brave /opt/brave-bin/brave-browser
         alias chrome /opt/google/chrome/google-chrome

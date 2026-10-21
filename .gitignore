@@ -65,8 +65,8 @@ config/app/gh/.config/gh/hosts.yml
 
 # Third-party plugins and untracked defaults
 config/app/yazi/.config/yazi/plugins/*
-!config/app/yazi/.config/yazi/plugins/confirm-quit/
-!config/app/yazi/.config/yazi/plugins/confirm-quit/**
+!config/app/yazi/.config/yazi/plugins/confirm-quit.yazi/
+!config/app/yazi/.config/yazi/plugins/confirm-quit.yazi/**
 !config/app/yazi/.config/yazi/plugins/folder-rules.yazi/
 !config/app/yazi/.config/yazi/plugins/folder-rules.yazi/**
 config/app/obs-studio/.config/obs-studio/basic/profiles/Untitled/
@@ -99,5 +99,5 @@ __pycache__/
 /result
 /result-*
 *.dot-backup-*
-!/apps/nvim/lazy-lock.json
-!/apps/nvim/nvim-pack-lock.json
+!/config/app/nvim/.config/nvim/lazy-lock.json
+!/config/app/nvim/.config/nvim/nvim-pack-lock.json

@@ -22,42 +22,86 @@
       ],
       "links": [
         {
-          "source": "apps/fish/config.fish",
+          "source": "config/app/fish/.config/fish/config.fish",
           "root": "config",
           "target": "fish/config.fish",
           "kind": "file"
+        },
+        {
+          "source": "config/app/fish/.config/fish/conf.d",
+          "root": "config",
+          "target": "fish/conf.d",
+          "kind": "directory"
+        },
+        {
+          "source": "config/app/fish/.config/fish/functions",
+          "root": "config",
+          "target": "fish/functions",
+          "kind": "directory"
+        },
+        {
+          "source": "config/app/fish/.config/fish/completions",
+          "root": "config",
+          "target": "fish/completions",
+          "kind": "directory"
         }
       ]
     },
     "nvim": {
       "packages": [
-        "neovim"
+        "neovim",
+        "tree-sitter",
+        "stdenv.cc",
+        "curl"
       ],
       "commands": [
-        "nvim"
+        "nvim",
+        "tree-sitter",
+        "cc",
+        "curl"
       ],
       "links": [
         {
-          "source": "apps/nvim",
+          "source": "config/app/nvim/.config/nvim",
           "root": "config",
           "target": "nvim",
           "kind": "directory"
+        },
+        {
+          "source": "config/app/nvim/.config/nvim-minimal/init.lua",
+          "root": "config",
+          "target": "nvim-minimal/init.lua",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/nvim/.config/vale/.vale.ini",
+          "root": "config",
+          "target": "vale/.vale.ini",
+          "kind": "file"
         }
       ]
     },
     "yazi": {
       "packages": [
-        "yazi"
+        "yazi",
+        "ouch",
+        "mediainfo",
+        "ffmpeg",
+        "imagemagick"
       ],
       "commands": [
-        "yazi"
+        "yazi",
+        "ouch",
+        "mediainfo",
+        "ffprobe",
+        "magick"
       ],
       "links": [
         {
-          "source": "apps/yazi/yazi.toml",
+          "source": "config/app/yazi/.config/yazi",
           "root": "config",
-          "target": "yazi/yazi.toml",
-          "kind": "file"
+          "target": "yazi",
+          "kind": "directory"
         }
       ]
     },
@@ -79,9 +123,15 @@
       ],
       "links": [
         {
-          "source": "apps/bat/config",
+          "source": "config/app/bat/.config/bat/themes/wana-dark.tmTheme",
           "root": "config",
-          "target": "bat/config",
+          "target": "bat/themes/wana-dark.tmTheme",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/bat/.config/bat/themes/wana-light.tmTheme",
+          "root": "config",
+          "target": "bat/themes/wana-light.tmTheme",
           "kind": "file"
         }
       ]
@@ -104,7 +154,7 @@
       ],
       "links": [
         {
-          "source": "apps/starship/starship.toml",
+          "source": "config/app/starship/.config/starship.toml",
           "root": "config",
           "target": "starship.toml",
           "kind": "file"
@@ -118,7 +168,14 @@
       "commands": [
         "fd"
       ],
-      "links": []
+      "links": [
+        {
+          "source": "config/app/fd/.config/fd/ignore",
+          "root": "config",
+          "target": "fd/ignore",
+          "kind": "file"
+        }
+      ]
     },
     "ripgrep": {
       "packages": [
@@ -127,7 +184,14 @@
       "commands": [
         "rg"
       ],
-      "links": []
+      "links": [
+        {
+          "source": "config/app/ripgrep/.config/ripgrep/ripgreprc",
+          "root": "config",
+          "target": "ripgrep/ripgreprc",
+          "kind": "file"
+        }
+      ]
     },
     "git": {
       "packages": [
@@ -138,9 +202,15 @@
       ],
       "links": [
         {
-          "source": "apps/git/config",
-          "root": "config",
-          "target": "git/config",
+          "source": "config/app/git/.gitconfig",
+          "root": "home",
+          "target": ".gitconfig",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/git/.gitignore_global",
+          "root": "home",
+          "target": ".gitignore_global",
           "kind": "file"
         }
       ]
@@ -154,25 +224,87 @@
       ],
       "links": [
         {
-          "source": "apps/mango/config.conf",
+          "source": "config/desktop/mango/.config/mango/autostart.conf",
+          "root": "config",
+          "target": "mango/autostart.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/binds.conf",
+          "root": "config",
+          "target": "mango/binds.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/config.conf",
           "root": "config",
           "target": "mango/config.conf",
           "kind": "file"
-        }
-      ]
-    },
-    "niri": {
-      "packages": [],
-      "commands": [
-        "niri",
-        "noctalia",
-        "kitty"
-      ],
-      "links": [
+        },
         {
-          "source": "apps/niri/config.kdl",
+          "source": "config/desktop/mango/.config/mango/gestures.conf",
           "root": "config",
-          "target": "niri/config.kdl",
+          "target": "mango/gestures.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/noctalia.conf",
+          "root": "config",
+          "target": "mango/noctalia.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/rules.conf",
+          "root": "config",
+          "target": "mango/rules.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/scratchpad.conf",
+          "root": "config",
+          "target": "mango/scratchpad.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/script/get_focus_info",
+          "root": "config",
+          "target": "mango/script/get_focus_info",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/script/launcher-clipboard",
+          "root": "config",
+          "target": "mango/script/launcher-clipboard",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/script/macro.sh",
+          "root": "config",
+          "target": "mango/script/macro.sh",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/script/shot",
+          "root": "config",
+          "target": "mango/script/shot",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/script/shot-simple",
+          "root": "config",
+          "target": "mango/script/shot-simple",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/mango/tags.conf",
+          "root": "config",
+          "target": "mango/tags.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/desktop/mango/.config/xdg-desktop-portal/mango-portals.conf",
+          "root": "config",
+          "target": "xdg-desktop-portal/mango-portals.conf",
           "kind": "file"
         }
       ]
@@ -187,6 +319,684 @@
           "source": "apps/noctalia/config.toml",
           "root": "config",
           "target": "noctalia/config.toml",
+          "kind": "file"
+        }
+      ]
+    },
+    "aria2": {
+      "packages": [
+        "aria2"
+      ],
+      "commands": [
+        "aria2c"
+      ],
+      "links": [
+        {
+          "source": "config/app/aria2/.config/aria2/aria2.conf",
+          "root": "config",
+          "target": "aria2/aria2.conf",
+          "kind": "file"
+        }
+      ]
+    },
+    "btop": {
+      "packages": [
+        "btop"
+      ],
+      "commands": [
+        "btop"
+      ],
+      "links": [
+        {
+          "source": "config/app/btop/.config/btop/btop.conf",
+          "root": "config",
+          "target": "btop/btop.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/btop/.config/btop/themes/wana-dark.theme",
+          "root": "config",
+          "target": "btop/themes/wana-dark.theme",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/btop/.config/btop/themes/wana-light.theme",
+          "root": "config",
+          "target": "btop/themes/wana-light.theme",
+          "kind": "file"
+        }
+      ]
+    },
+    "fzf": {
+      "packages": [
+        "fzf"
+      ],
+      "commands": [
+        "fzf"
+      ],
+      "links": [
+        {
+          "source": "config/app/fzf/.config/fzf/wana-dark.opts",
+          "root": "config",
+          "target": "fzf/wana-dark.opts",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/fzf/.config/fzf/wana-light.opts",
+          "root": "config",
+          "target": "fzf/wana-light.opts",
+          "kind": "file"
+        }
+      ]
+    },
+    "gh": {
+      "packages": [
+        "gh"
+      ],
+      "commands": [
+        "gh"
+      ],
+      "links": [
+        {
+          "source": "config/app/gh/.config/gh/config.yml",
+          "root": "config",
+          "target": "gh/config.yml",
+          "kind": "file"
+        }
+      ]
+    },
+    "htop": {
+      "packages": [
+        "htop"
+      ],
+      "commands": [
+        "htop"
+      ],
+      "links": [
+        {
+          "source": "config/app/htop/.config/htop/.gitignore",
+          "root": "config",
+          "target": "htop/.gitignore",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/htop/.config/htop/htoprc",
+          "root": "config",
+          "target": "htop/htoprc",
+          "kind": "file"
+        }
+      ]
+    },
+    "kitty": {
+      "packages": [
+        "kitty"
+      ],
+      "commands": [
+        "kitty"
+      ],
+      "links": [
+        {
+          "source": "config/app/kitty/.config/kitty/dark-theme.auto.conf",
+          "root": "config",
+          "target": "kitty/dark-theme.auto.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/kittens/file_previewer.py",
+          "root": "config",
+          "target": "kitty/kittens/file_previewer.py",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/kitty.conf",
+          "root": "config",
+          "target": "kitty/kitty.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/light-theme.auto.conf",
+          "root": "config",
+          "target": "kitty/light-theme.auto.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/no-preference-theme.auto.conf",
+          "root": "config",
+          "target": "kitty/no-preference-theme.auto.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/sessions/template.kitty",
+          "root": "config",
+          "target": "kitty/sessions/template.kitty",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/everforest.conf",
+          "root": "config",
+          "target": "kitty/themes/everforest.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/everforest_dark.conf",
+          "root": "config",
+          "target": "kitty/themes/everforest_dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/everforest_light.conf",
+          "root": "config",
+          "target": "kitty/themes/everforest_light.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/flexoki_dark.conf",
+          "root": "config",
+          "target": "kitty/themes/flexoki_dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/flexoki_light.conf",
+          "root": "config",
+          "target": "kitty/themes/flexoki_light.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/gruvbox_dark.conf",
+          "root": "config",
+          "target": "kitty/themes/gruvbox_dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/gruvbox_light.conf",
+          "root": "config",
+          "target": "kitty/themes/gruvbox_light.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/rose-pine_dark.conf",
+          "root": "config",
+          "target": "kitty/themes/rose-pine_dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/rose-pine_light.conf",
+          "root": "config",
+          "target": "kitty/themes/rose-pine_light.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/wana-dark.conf",
+          "root": "config",
+          "target": "kitty/themes/wana-dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/kitty/.config/kitty/themes/wana-light.conf",
+          "root": "config",
+          "target": "kitty/themes/wana-light.conf",
+          "kind": "file"
+        }
+      ]
+    },
+    "lazygit": {
+      "packages": [
+        "lazygit"
+      ],
+      "commands": [
+        "lazygit"
+      ],
+      "links": [
+        {
+          "source": "config/app/lazygit/.config/lazygit/config.yml",
+          "root": "config",
+          "target": "lazygit/config.yml",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/lazygit/.config/lazygit/rose-pine-dawn.yml",
+          "root": "config",
+          "target": "lazygit/rose-pine-dawn.yml",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/lazygit/.config/lazygit/rose-pine-moon.yml",
+          "root": "config",
+          "target": "lazygit/rose-pine-moon.yml",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/lazygit/.config/lazygit/rose-pine.yml",
+          "root": "config",
+          "target": "lazygit/rose-pine.yml",
+          "kind": "file"
+        }
+      ]
+    },
+    "mise": {
+      "packages": [
+        "mise"
+      ],
+      "commands": [
+        "mise"
+      ],
+      "links": [
+        {
+          "source": "config/app/mise/.config/mise/config.toml",
+          "root": "config",
+          "target": "mise/config.toml",
+          "kind": "file"
+        }
+      ]
+    },
+    "mpd": {
+      "packages": [
+        "mpd"
+      ],
+      "commands": [
+        "mpd"
+      ],
+      "links": [
+        {
+          "source": "config/app/mpd/.config/cava/config",
+          "root": "config",
+          "target": "cava/config",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/bar_spectrum.frag",
+          "root": "config",
+          "target": "cava/shaders/bar_spectrum.frag",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/eye_of_phi.frag",
+          "root": "config",
+          "target": "cava/shaders/eye_of_phi.frag",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/northern_lights.frag",
+          "root": "config",
+          "target": "cava/shaders/northern_lights.frag",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/pass_through.vert",
+          "root": "config",
+          "target": "cava/shaders/pass_through.vert",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/spectrogram.frag",
+          "root": "config",
+          "target": "cava/shaders/spectrogram.frag",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/shaders/winamp_line_style_spectrum.frag",
+          "root": "config",
+          "target": "cava/shaders/winamp_line_style_spectrum.frag",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/themes/noctalia",
+          "root": "config",
+          "target": "cava/themes/noctalia",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/themes/solarized_dark",
+          "root": "config",
+          "target": "cava/themes/solarized_dark",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/cava/themes/tricolor",
+          "root": "config",
+          "target": "cava/themes/tricolor",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/lyricspot/settings.json",
+          "root": "config",
+          "target": "lyricspot/settings.json",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/mpd/mpd.conf",
+          "root": "config",
+          "target": "mpd/mpd.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/album-art/config",
+          "root": "config",
+          "target": "ncmpcpp/album-art/config",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/album-art/cover_art.sh",
+          "root": "config",
+          "target": "ncmpcpp/album-art/cover_art.sh",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/album-art/fallback.png",
+          "root": "config",
+          "target": "ncmpcpp/album-art/fallback.png",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/album-art/ncmpcpp",
+          "root": "config",
+          "target": "ncmpcpp/album-art/ncmpcpp",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/bindings",
+          "root": "config",
+          "target": "ncmpcpp/bindings",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/ncmpcpp/config",
+          "root": "config",
+          "target": "ncmpcpp/config",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/rmpc/config.ron",
+          "root": "config",
+          "target": "rmpc/config.ron",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpd/.config/rmpc/theme.ron",
+          "root": "config",
+          "target": "rmpc/theme.ron",
+          "kind": "file"
+        }
+      ]
+    },
+    "mpv": {
+      "packages": [
+        "mpv"
+      ],
+      "commands": [
+        "mpv"
+      ],
+      "links": [
+        {
+          "source": "config/app/mpv/.config/mpv/fonts/Material-Design-Iconic-Font.ttf",
+          "root": "config",
+          "target": "mpv/fonts/Material-Design-Iconic-Font.ttf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/fonts/fluent-system-icons.ttf",
+          "root": "config",
+          "target": "mpv/fonts/fluent-system-icons.ttf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/fonts/material-design-icons.ttf",
+          "root": "config",
+          "target": "mpv/fonts/material-design-icons.ttf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/input.conf",
+          "root": "config",
+          "target": "mpv/input.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/mpv.conf",
+          "root": "config",
+          "target": "mpv/mpv.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/script-opts/modernz.conf",
+          "root": "config",
+          "target": "mpv/script-opts/modernz.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/script-opts/thumbfast.conf",
+          "root": "config",
+          "target": "mpv/script-opts/thumbfast.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/scripts/autosub.lua",
+          "root": "config",
+          "target": "mpv/scripts/autosub.lua",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/scripts/modernz.lua",
+          "root": "config",
+          "target": "mpv/scripts/modernz.lua",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/mpv/.config/mpv/scripts/thumbfast.lua",
+          "root": "config",
+          "target": "mpv/scripts/thumbfast.lua",
+          "kind": "file"
+        }
+      ]
+    },
+    "rtk": {
+      "packages": [
+        "rtk"
+      ],
+      "commands": [
+        "rtk"
+      ],
+      "links": [
+        {
+          "source": "config/app/rtk/.config/rtk/config.toml",
+          "root": "config",
+          "target": "rtk/config.toml",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/rtk/.config/rtk/filters.toml",
+          "root": "config",
+          "target": "rtk/filters.toml",
+          "kind": "file"
+        }
+      ]
+    },
+    "tirith": {
+      "packages": [
+        "tirith"
+      ],
+      "commands": [
+        "tirith"
+      ],
+      "links": [
+        {
+          "source": "config/app/tirith/.config/tirith/gateway.yaml",
+          "root": "config",
+          "target": "tirith/gateway.yaml",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/tirith/.tirith/policy.yaml",
+          "root": "home",
+          "target": ".tirith/policy.yaml",
+          "kind": "file"
+        }
+      ]
+    },
+    "tmux": {
+      "packages": [
+        "tmux"
+      ],
+      "commands": [
+        "tmux"
+      ],
+      "links": [
+        {
+          "source": "config/app/tmux/.config/tmux/themes/wana-dark.conf",
+          "root": "config",
+          "target": "tmux/themes/wana-dark.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/tmux/.config/tmux/themes/wana-light.conf",
+          "root": "config",
+          "target": "tmux/themes/wana-light.conf",
+          "kind": "file"
+        },
+        {
+          "source": "config/app/tmux/.config/tmux/tmux.conf",
+          "root": "config",
+          "target": "tmux/tmux.conf",
+          "kind": "file"
+        }
+      ]
+    },
+    "yt-dlp": {
+      "packages": [
+        "yt-dlp"
+      ],
+      "commands": [
+        "yt-dlp"
+      ],
+      "links": [
+        {
+          "source": "config/app/yt-dlp/.config/yt-dlp/config",
+          "root": "config",
+          "target": "yt-dlp/config",
+          "kind": "file"
+        }
+      ]
+    },
+    "scripts": {
+      "packages": [
+        "bash",
+        "wl-clipboard",
+        "wl-clip-persist",
+        "cliphist",
+        "playerctl",
+        "grim",
+        "slurp",
+        "libnotify",
+        "jq",
+        "imagemagick"
+      ],
+      "commands": [
+        "bash",
+        "wl-paste",
+        "cliphist",
+        "playerctl"
+      ],
+      "links": [
+        {
+          "source": "config/misc/scripts/.local/script/autostart",
+          "root": "home",
+          "target": ".local/script/autostart",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/clipboard",
+          "root": "home",
+          "target": ".local/script/clipboard",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/clipboard-delete-fzf",
+          "root": "home",
+          "target": ".local/script/clipboard-delete-fzf",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/controller",
+          "root": "home",
+          "target": ".local/script/controller",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/dnscrypt-toggle",
+          "root": "home",
+          "target": ".local/script/dnscrypt-toggle",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/import-gsettings",
+          "root": "home",
+          "target": ".local/script/import-gsettings",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/jellyfin-start-server",
+          "root": "home",
+          "target": ".local/script/jellyfin-start-server",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/night-theme-switcher",
+          "root": "home",
+          "target": ".local/script/night-theme-switcher",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/noctalia-autostart",
+          "root": "home",
+          "target": ".local/script/noctalia-autostart",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/rsync-backup",
+          "root": "home",
+          "target": ".local/script/rsync-backup",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/server-mode",
+          "root": "home",
+          "target": ".local/script/server-mode",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/server-status",
+          "root": "home",
+          "target": ".local/script/server-status",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/template.sh",
+          "root": "home",
+          "target": ".local/script/template.sh",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/theme-switch",
+          "root": "home",
+          "target": ".local/script/theme-switch",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/vimv",
+          "root": "home",
+          "target": ".local/script/vimv",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/wana-tty-dark.sh",
+          "root": "home",
+          "target": ".local/script/wana-tty-dark.sh",
+          "kind": "file"
+        },
+        {
+          "source": "config/misc/scripts/.local/script/wana-tty-light.sh",
+          "root": "home",
+          "target": ".local/script/wana-tty-light.sh",
           "kind": "file"
         }
       ]

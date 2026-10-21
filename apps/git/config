@@ -1,6 +1,0 @@
-[init]
-	defaultBranch = main
-[fetch]
-	prune = true
-[include]
-	path = config.local.git

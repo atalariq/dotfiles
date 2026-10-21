@@ -8,7 +8,29 @@
   "exclude": [],
   "include": [
     "mango",
-    "niri",
-    "noctalia"
+    "noctalia",
+    "aria2",
+    "bat",
+    "btop",
+    "fd",
+    "fish",
+    "fzf",
+    "gh",
+    "git",
+    "htop",
+    "kitty",
+    "lazygit",
+    "mise",
+    "mpd",
+    "mpv",
+    "nvim",
+    "ripgrep",
+    "rtk",
+    "starship",
+    "tirith",
+    "tmux",
+    "yazi",
+    "yt-dlp",
+    "scripts"
   ]
 }

@@ -49,10 +49,25 @@ def no_symlink_ancestors(path):
             raise Invalid(f"Non-directory ancestor: {parent}")
 
 
+
+def validated_target_ancestors(target, source):
+    for parent in reversed(target.parents):
+        if parent.is_symlink():
+            depth = len(target.relative_to(parent).parts)
+            expected = source.parents[depth - 1] if depth <= len(source.parents) else None
+            if expected is None or parent.resolve(strict=True) != expected.resolve(strict=True):
+                raise Invalid(f"Foreign symlinked ancestor: {parent}; migrate this directory explicitly first")
+        elif parent.exists() and not parent.is_dir():
+            raise Invalid(f"Non-directory ancestor: {parent}")
+
+
 def owned(target, source):
     try:
-        return target.is_symlink() and target.resolve(strict=True) == source.resolve(strict=True)
-    except (OSError, RuntimeError):
+        linked = target.is_symlink() or any(p.is_symlink() for p in target.parents)
+        if linked:
+            validated_target_ancestors(target, source)
+        return linked and target.resolve(strict=True) == source.resolve(strict=True)
+    except (OSError, RuntimeError, Invalid):
         return False
 
 
@@ -78,13 +93,13 @@ def mappings(repo, manifest, home, config, selected, check_targets=True):
         for key in ('packages', 'commands', 'links'):
             if not isinstance(data.get(key), list):
                 raise Invalid(f'{app}: {key} must be a list')
-        if any(not isinstance(p, str) or not re.fullmatch(r'[a-zA-Z0-9_+-]+', p)
+        if any(not isinstance(p, str) or not re.fullmatch(r'[a-zA-Z0-9_+-]+(?:\.[a-zA-Z0-9_+-]+)*', p)
                for p in data['packages'] + data['commands']):
             raise Invalid(f'{app}: invalid package or command')
         for link in data['links']:
             src = relative(link['source'])
-            if src.parts[:2] != ('apps', app):
-                raise Invalid(f'{app}: source must be inside apps/{app}')
+            if not (src.parts[:2] == ('apps', app) or src.parts[:3] in [('config', category, app) for category in ('app', 'desktop', 'misc')]):
+                raise Invalid(f'{app}: source must be inside its declared native application/module')
             source = repo / str(src)
             no_symlink_ancestors(source)
             if source.is_symlink() or not source.exists():
@@ -106,7 +121,7 @@ def mappings(repo, manifest, home, config, selected, check_targets=True):
             targets.append(target)
             if app in selected:
                 if check_targets:
-                    no_symlink_ancestors(target)
+                    validated_target_ancestors(target, source)
                 result.append((app, source, target))
     return result
 
@@ -158,7 +173,7 @@ def link_configs(home, links, backup):
     completed = []
     try:
         for _, source, target in links:
-            no_symlink_ancestors(target)
+            validated_target_ancestors(target, source)
             if owned(target, source):
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -199,6 +214,19 @@ def snapshot(repo, destination):
                                      '*.dot-backup-*', '.git')
     for folder in ('apps', 'bootstrap', 'nix', 'hosts', 'devshells'):
         shutil.copytree(repo / folder, destination / folder, ignore=ignored, symlinks=True)
+    manifest = read_json(repo / 'apps/manifest.json')
+    for data in manifest['apps'].values():
+        for link in data['links']:
+            relative_source = relative(link['source'])
+            if relative_source.parts[0] != 'config':
+                continue
+            original = repo / str(relative_source)
+            target = destination / str(relative_source)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if link['kind'] == 'directory':
+                shutil.copytree(original, target, ignore=ignored, symlinks=True)
+            else:
+                shutil.copy2(original, target)
     for filename in ('flake.nix', 'flake.lock'):
         shutil.copy2(repo / filename, destination / filename)
     # A host override is an explicit public Nix input; never use it for secrets.
@@ -283,6 +311,8 @@ def main():
     parser.add_argument('--config-home', default=os.environ.get('XDG_CONFIG_HOME'))
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
+    if (repo / 'REVIEW_ONLY').exists() and args.command in ('apply', 'update'):
+        raise Invalid('Review candidate only: deploy from the real repository after approval')
     if args.app and not args.config_only:
         raise Invalid('--app is only supported with --config-only; a system rebuild cannot isolate one app')
     if args.backup and (args.command != 'apply' or not args.config_only):
@@ -299,9 +329,9 @@ def main():
     # Validate sources and targets before any mutation or Nix operation.
     links = mappings(repo, manifest, home, config, selected, check_targets=False)
     hazards = {}
-    for _, _, target in links:
+    for _, source, target in links:
         try:
-            no_symlink_ancestors(target)
+            validated_target_ancestors(target, source)
         except Invalid as exc:
             hazards[target] = str(exc)
     print(f'Host: {name}; apps: {", ".join(selected)}')

@@ -9,7 +9,7 @@ require("starship"):setup({
 	-- Whether to place flags after the starship prompt. False means the flags will be placed before the prompt.
 	flags_after_prompt = true,
 	-- Custom starship configuration file to use
-	config_file = "~/.config/starship_full.toml", -- Default: nil
+	config_file = nil, -- Use the existing XDG Starship config; no missing starship_full.toml dependency.
 	-- Whether to enable support for starship's right prompt (i.e. `starship prompt --right`).
 	show_right_prompt = false,
 	-- Whether to hide the count widget, in case you want only your right prompt to show up. Only has

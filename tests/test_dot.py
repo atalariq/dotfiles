@@ -20,6 +20,20 @@ class DotAcceptance(unittest.TestCase):
         self.repo.mkdir()
         for folder in ('apps', 'bootstrap'):
             shutil.copytree(ROOT / folder, self.repo / folder, ignore=shutil.ignore_patterns('__pycache__'))
+        manifest = json.loads((ROOT / 'apps/manifest.json').read_text())
+        for app in manifest['apps'].values():
+            for link in app['links']:
+                source = Path(link['source'])
+                if source.parts[0] != 'config':
+                    continue
+                target = self.repo / source
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if link['kind'] == 'directory':
+                    shutil.copytree(ROOT / source, target)
+                else:
+                    shutil.copy2(ROOT / source, target)
+        self.source = self.repo / next(link['source'] for link in manifest['apps']['fish']['links']
+                                      if link['target'] == 'fish/config.fish')
         shutil.copy2(ROOT / 'dot', self.repo / 'dot')
         for folder in ('nix', 'hosts', 'devshells'):
             (self.repo / folder).mkdir()
@@ -32,6 +46,8 @@ class DotAcceptance(unittest.TestCase):
         self.bin.mkdir()
         (self.bin / 'python3').symlink_to(sys.executable)
         (self.bin / 'dirname').symlink_to(shutil.which('dirname'))
+        for utility in ('cat', 'uname', 'env', 'tty'):
+            (self.bin / utility).symlink_to(shutil.which(utility))
         self.env = dict(os.environ, HOME=str(self.home), XDG_CONFIG_HOME=str(self.config),
                         PATH=str(self.bin), PYTHONDONTWRITEBYTECODE='1')
         self.target = self.config / 'fish/config.fish'
@@ -66,7 +82,7 @@ class DotAcceptance(unittest.TestCase):
         self.apply()
         self.assertEqual(first, self.target.lstat().st_mtime_ns)
         self.target.write_text('# edited through deployed path\n')
-        self.assertEqual((self.repo / 'apps/fish/config.fish').read_text(), '# edited through deployed path\n')
+        self.assertEqual((self.source).read_text(), '# edited through deployed path\n')
 
     def test_conflicts_preserved_and_preflight_is_complete(self):
         self.target.parent.mkdir(parents=True)
@@ -108,6 +124,16 @@ class DotAcceptance(unittest.TestCase):
         self.cli('apply', '--config-only', '--app', 'fish', '--backup', ok=False)
         self.assertEqual(list(foreign.iterdir()), [])
 
+    def test_existing_exact_source_directory_symlink_is_preserved(self):
+        self.config.mkdir()
+        parent = self.config / 'fish'
+        parent.symlink_to(self.source.parent)
+        before = self.source.read_bytes()
+        self.apply()
+        self.assertTrue(parent.is_symlink())
+        self.assertFalse(self.source.is_symlink())
+        self.assertEqual(self.source.read_bytes(), before)
+
     def test_local_override_preserved(self):
         self.target.parent.mkdir(parents=True)
         local = self.target.with_name('config.local.fish')
@@ -136,7 +162,7 @@ class DotAcceptance(unittest.TestCase):
             self.assertFalse(self.config.exists())
 
     def test_symlinked_source_rejected(self):
-        source = self.repo / 'apps/fish/config.fish'
+        source = self.source
         source.unlink()
         source.symlink_to('/etc/passwd')
         self.cli('apply', '--config-only', ok=False)
@@ -157,7 +183,7 @@ class DotAcceptance(unittest.TestCase):
         fish = shutil.which('fish')
         if not fish:
             self.skipTest('Fish unavailable')
-        shutil.copytree(self.repo / 'apps/fish', self.config / 'fish')
+        shutil.copytree(self.source.parent, self.config / 'fish')
         (self.config / 'fish/config.local.fish').write_text('set -g local_loaded yes\n')
         result = subprocess.run([fish, '-i', '-c', 'test "$local_loaded" = yes'], env=self.env,
                                 text=True, capture_output=True)
@@ -177,31 +203,31 @@ class DotAcceptance(unittest.TestCase):
         self.assertEqual(self.hm('check').returncode, 0)
         self.assertEqual(self.hm('apply').returncode, 0)
         self.apply()
-        self.assertEqual(self.target.resolve(), self.repo / 'apps/fish/config.fish')
+        self.assertEqual(self.target.resolve(), self.source)
 
     def test_hm_preflight_preserves_identical_foreign_file(self):
         self.target.parent.mkdir(parents=True)
-        shutil.copy2(self.repo / 'apps/fish/config.fish', self.target)
+        shutil.copy2(self.source, self.target)
         self.assertNotEqual(self.hm('check').returncode, 0)
         self.assertFalse(self.target.is_symlink())
 
     def test_interrupted_apply_reports_partial_progress(self):
-        blocked = self.config / 'yazi'
+        blocked = self.config / 'ripgrep'
         blocked.mkdir(parents=True)
         blocked.chmod(0o500)
         try:
-            result = self.cli('apply', '--config-only', '--app', 'fish', '--app', 'yazi', ok=False)
+            result = self.cli('apply', '--config-only', '--app', 'fish', '--app', 'ripgrep', ok=False)
             self.assertIn('PARTIAL APPLY', result.stderr)
             self.assertTrue(self.target.is_symlink())
-            self.assertFalse((blocked / 'yazi.toml').exists())
+            self.assertFalse((blocked / 'ripgreprc').exists())
         finally:
             blocked.chmod(0o700)
-        self.cli('apply', '--config-only', '--app', 'fish', '--app', 'yazi')
+        self.cli('apply', '--config-only', '--app', 'fish', '--app', 'ripgrep')
 
     def test_store_intermediary_link_is_owned(self):
         self.target.parent.mkdir(parents=True)
         intermediary = self.home / 'intermediary'
-        intermediary.symlink_to(self.repo / 'apps/fish/config.fish')
+        intermediary.symlink_to(self.source)
         self.target.symlink_to(intermediary)
         self.apply()
         self.assertEqual(os.readlink(self.target), str(intermediary))

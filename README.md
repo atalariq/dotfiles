@@ -1,6 +1,8 @@
 # Portable dotfiles + ThinkPad NixOS
 
-Native application configs live in `apps/`. Nix pins applications; Home Manager
+Your existing native application configs in `config/*` are the source of truth.
+Their themes, keybindings, plugins, functions and actual plugin locks are retained.
+`apps/noctalia` supplies only the new Noctalia v5 preferences. Nix pins applications; Home Manager
 installs the user environment and links the live checkout. `dot` also deploys
 configs on Linux, macOS and WSL without Nix. Python 3.10+ is the bootstrap prerequisite.
 
@@ -21,9 +23,9 @@ config-only option for mapped objects; symlinked ancestor directories require
 separate migration. Do not run the wrapper as root.
 
 - **Portable baseline:** Fish, Neovim, Yazi, eza, bat, zoxide, Starship, fd,
-  ripgrep and Git. Native app folders include manual-copy instructions.
+  ripgrep and Git. Application mappings preserve the original source layout.
 - **ThinkPad:** preserved hardware/disk/boot definitions and system stateVersion
-  `26.05`; Mango or Niri, Noctalia 5.3.0, authenticated session chooser,
+  `26.05`; Mango, Noctalia 5.3.0, authenticated Mango login,
   PipeWire/portals, firmware updates, fingerprint daemon, power profiles,
   compressed swap, Android Studio, KVM access and rootless Podman.
 - **Development shells:** PHP 8.4/Composer/Node 22/SQLite for Laravel;
@@ -47,9 +49,15 @@ keep secrets elsewhere. Moving the clone requires updating its recorded path
 and reapplying. `./dot build` uses a filtered source snapshot so legacy files
 and native `*.local.*` overrides are excluded from the Nix store.
 
+[Original configuration ownership](docs/restoring-original-configs.md) ·
 [Architecture, approval, recovery and development](docs/dotfiles-v1.md) ·
 [Verification results](docs/validation.md) · [Approved specification](docs/migrate-to-nix.spec.md)
 
-The old `config/`, `profiles/`, `script/` and `setup.sh` remain available for
-recovery, along with the [legacy guide](docs/legacy-dotfiles.md). They are not
-inputs to the new deployment path. Existing local modifications are preserved.
+Edit or replace files directly under `config/app/<app>/` and
+`config/desktop/mango/` when the external SSD is available. Live symlinks expose
+those changes immediately; reload the affected application as needed. Keep
+source paths stable, and add manifest mappings for new files outside linked
+directories. Original vim.pack locks and Yazi plugins remain in these trees.
+
+Generated placeholders, Niri and the obsolete setup scripts have been retired.
+Recovery material is archived outside the checkout; see the restoration record.

@@ -1,8 +1,0 @@
-// ===== Autostart =====
-spawn-sh-at-startup "~/.local/script/autostart"
-
-// WM-specific: prevent first window from stealing focus
-window-rule {
-  match at-startup=true
-  open-focused false
-}
