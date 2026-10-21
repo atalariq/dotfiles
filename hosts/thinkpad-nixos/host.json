@@ -1,0 +1,14 @@
+{
+  "system": "x86_64-linux",
+  "integration": "nixos",
+  "username": "atalariq",
+  "homeDirectory": "/home/atalariq",
+  "checkout": "/home/atalariq/.dotfiles",
+  "homeStateVersion": "26.05",
+  "exclude": [],
+  "include": [
+    "mango",
+    "niri",
+    "noctalia"
+  ]
+}

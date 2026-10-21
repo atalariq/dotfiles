@@ -1,206 +1,55 @@
-# dotfiles
+# Portable dotfiles + ThinkPad NixOS
 
-Personal dotfiles managed with a validated symlink farm.
+Native application configs live in `apps/`. Nix pins applications; Home Manager
+installs the user environment and links the live checkout. `dot` also deploys
+configs on Linux, macOS and WSL without Nix. Python 3.10+ is the bootstrap prerequisite.
 
-## Setup
-
-```bash
-# Clone
-git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
-
-# Deploy a full profile
-cd ~/Repos/dotfiles
-./setup.sh laptop
+```sh
+./dot plan                         # static intent, no mutation
+./dot doctor                       # read-only diagnostics; nonzero means work remains
+./dot build --host thinkpad-nixos   # build only; never activates
+./dot apply --config-only --app fish
+./dot apply --config-only           # all selected native configs
+./dot apply                        # preflight + build + explicit activation confirmation
+./dot update                       # explicitly refresh Nix pins; no activation
 ```
 
-`setup.sh` (repo root) is a shim that forwards to `script/setup.sh`, which delegates to `script/bootstrap.sh`. The bootstrap script reads a profile, links files into `$HOME`, detects conflicts, and validates the result.
+The real laptop has existing config conflicts. Read the
+[migration and review procedure](docs/dotfiles-v1.md) before any apply. Building
+is safe without resolving deployment conflicts. `--backup` is an explicit
+config-only option for mapped objects; symlinked ancestor directories require
+separate migration. Do not run the wrapper as root.
 
-Default behavior is file-level symlinking. Modules can opt into scoped directory-level symlinks through module metadata when a subtree is intentionally managed as one unit. `misc/scripts` uses that for `~/.local/script`.
+- **Portable baseline:** Fish, Neovim, Yazi, eza, bat, zoxide, Starship, fd,
+  ripgrep and Git. Native app folders include manual-copy instructions.
+- **ThinkPad:** preserved hardware/disk/boot definitions and system stateVersion
+  `26.05`; Mango or Niri, Noctalia 5.3.0, authenticated session chooser,
+  PipeWire/portals, firmware updates, fingerprint daemon, power profiles,
+  compressed swap, Android Studio, KVM access and rootless Podman.
+- **Development shells:** PHP 8.4/Composer/Node 22/SQLite for Laravel;
+  JDK 17/adb for Android. Project dependencies and SDK downloads remain project
+  or user state, outside the global terminal baseline.
+- **Portability:** Linux and Apple Silicon hosts can use standalone Home Manager;
+  Intel macOS uses config-only because pinned Nixpkgs 26.11 dropped Intel support.
+  There is no implicit nix-darwin/non-NixOS system management. Native Windows
+  is excluded; WSL is a Linux user environment.
 
-## Repo layout
-
-Deployable modules now live under `config/`:
-
-```text
-config/
-  app/
-  desktop/
-  misc/
-  system/
-profiles/
-script/
-secrets/
-docs/
+```sh
+# From a project directory, once this checkout is committed:
+nix develop /path/to/dotfiles#laravel
+nix develop /path/to/dotfiles#android
 ```
 
-A module is still addressed as `<category>/<module>` in the CLI:
+`apps/manifest.json` owns mappings and package selection. `hosts/<name>/host.json`
+records host identity and `include`/`exclude` differences. An ignored
+`host.local.json` replaces that record. Host records are public Nix inputs:
+keep secrets elsewhere. Moving the clone requires updating its recorded path
+and reapplying. `./dot build` uses a filtered source snapshot so legacy files
+and native `*.local.*` overrides are excluded from the Nix store.
 
-```bash
-./setup.sh use app/fish
-./setup.sh undo app/kitty
-```
+[Architecture, approval, recovery and development](docs/dotfiles-v1.md) ·
+[Verification results](docs/validation.md) · [Approved specification](docs/migrate-to-nix.spec.md)
 
-Internally those resolve to `config/app/fish` and `config/app/kitty`.
-
-## Profiles
-
-Machine-specific JSON profiles live in `profiles/`. Each profile declares deployable modules with a flat `modules` array:
-
-```json
-{
-  "name": "laptop",
-  "modules": [
-    "app/kitty",
-    "app/fish",
-    "desktop/mango",
-    "misc/scripts",
-    "system/archlinux"
-  ]
-}
-```
-
-| Profile       | For                                        |
-| ------------- | ------------------------------------------ |
-| `laptop.json` | Personal laptop, Arch (full)               |
-| `vps.json`    | Ubuntu server (lean shell/editor/CLI tools) |
-| `lab.json`    | Lab machine (minimal shell/editor tools)   |
-
-Modules are **atomic** — one tool per module (`app/bat`, `app/fzf`, `app/claude`,
-…), so a profile picks exactly the tools a machine needs. See `docs/sync.md` for
-the cross-machine workflow.
-
-**Device-local override:** if `profiles/<name>.local.json` exists it is used
-*instead of* `profiles/<name>.json`. `*.local.*` is gitignored, so a machine can
-pin its own module set without touching the shared profile — `./setup.sh <name>`
-picks the `.local` variant automatically.
-
-You can also pass a custom JSON config:
-
-```bash
-./setup.sh path/to/my-machine.json
-```
-
-## Bootstrapping a fresh machine
-
-```bash
-# Install essentials (Arch)
-sudo pacman -S git python fish
-
-# Deploy dotfiles
-git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
-cd ~/Repos/dotfiles
-./setup.sh laptop
-```
-
-On Ubuntu/Debian, swap the package step and use the lean profile:
-
-```bash
-sudo apt update && sudo apt install -y git python3 fish
-git clone git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
-cd ~/Repos/dotfiles
-./setup.sh profile vps
-```
-
-See `docs/sync.md` for the full fresh-machine + cross-device sync workflow.
-
-## Download only what you need
-
-GitHub does not support "clone just one folder" directly. If you want a subset, use sparse checkout.
-
-### Sparse checkout for one module
-
-```bash
-git clone --filter=blob:none --no-checkout git@github.com:atalariq/dotfiles.git ~/Repos/dotfiles
-cd ~/Repos/dotfiles
-git sparse-checkout init --cone
-git sparse-checkout set config/app/fish profiles script/setup.sh script/bootstrap.sh setup.sh README.md
-git checkout main
-```
-
-That is the sane option when a module depends on multiple files.
-
-### Single-file grab
-
-```bash
-mkdir -p ~/.config/fish
-curl -fsSL https://raw.githubusercontent.com/atalariq/dotfiles/main/config/app/fish/.config/fish/config.fish \
-  -o ~/.config/fish/config.fish
-```
-
-Use this only for truly standalone files. It is a bad fit for modules like Fish, Neovim, Yazi, or Noctalia that span multiple files.
-
-## Neovim
-
-The `app/nvim` module lives in this repo at `config/app/nvim` and owns two `NVIM_APPNAME` trees:
-
-- `nvim` for the main config
-- `nvim-minimal` for the fallback profile
-
-The Fish helper at `config/app/fish/.config/fish/conf.d/40-nvim.fish` exposes the selector and aliases for those real profiles only.
-
-For servers that ship only `vim`/`vi`, the `app/vim` module provides a plain,
-plugin-free `~/.vimrc` as the universal editor floor.
-
-## AI tooling
-
-AI tool configs are individual modules: `app/claude`, `app/codex`, `app/opencode`,
-`app/hermes`, `app/rtk`, `app/tirith`. Pick per machine in the profile.
-
-## Theming
-
-- **Theming:** wana palette → `theme-switch dark|light|toggle`; regenerate with `script/theme-sync`.
-
-## Tech stack
-
-| Layer               | Primary                               | Alternative     |
-| ------------------- | ------------------------------------- | --------------- |
-| OS                  | Arch Linux                            | Ubuntu / macOS  |
-| WM                  | mangoWM                               | niri            |
-| Desktop shell       | Noctalia                              | —               |
-| Terminal            | kitty                                 | —               |
-| Shell (login)       | bash                                  | zsh             |
-| Shell (interactive) | fish                                  | —               |
-| Multiplexer         | tmux (server)                         | herdr (desktop) |
-| Editor              | Neovim                                | —               |
-| File manager        | yazi (TUI)                            | Nautilus (GUI)  |
-| Launcher            | noctalia-shell                        | —               |
-| Media               | mpv                                   | mpd/ncmpcpp     |
-| Git TUI             | lazygit                               | —               |
-| Screenshots         | grimblast                             | —               |
-| Clipboard           | cliphist + wl-clipboard               | —               |
-| Theming             | wana palette (pywal/matugen optional) | —               |
-| Secrets             | SOPS + age                            | —               |
-
-## Architecture
-
-| Script                                         | Role                                                |
-| ---------------------------------------------- | --------------------------------------------------- |
-| `script/bootstrap.sh`                          | Validated symlink farm (`use` / `profile` / `undo`) |
-| `script/setup.sh`                              | Entry point: parses args, delegates to bootstrap    |
-| `setup.sh`                                     | Repo-root shim → forwards to `script/setup.sh`      |
-| `secrets/`                                     | SOPS/age encrypted secrets + POSIX loader           |
-| `config/misc/scripts/.local/script/autostart`  | Shared app launcher for all WMs                     |
-| `config/misc/scripts/.local/script/controller` | Unified keybind actions                             |
-
-| Doc                       | Covers                                |
-| ------------------------- | ------------------------------------- |
-| `CONTEXT.md`              | Domain glossary                       |
-| `AGENTS.md`               | Agent and contributor guide           |
-| `docs/script-style.md`    | Conventions for writing shell scripts |
-| `docs/secrets.md`         | SOPS/age secrets setup guide          |
-| `docs/install-package.md` | Package and tool installation guide   |
-| `docs/sync.md`            | Cross-machine sync workflow           |
-| `docs/yazi.md`            | Yazi setup + plugin install           |
-
-## Dependencies
-
-### Required
-
-- `sh` (POSIX) — bootstrap and deployment scripts
-- `python3` — profile parsing, path resolution, and JSON validation during bootstrap
-
-### Optional
-
-- `fish` — interactive shell config
-- `sops` — secrets management
-- `age` / `rage` — secrets key management
+The old `config/`, `profiles/`, `script/` and `setup.sh` remain available for
+recovery, along with the [legacy guide](docs/legacy-dotfiles.md). They are not
+inputs to the new deployment path. Existing local modifications are preserved.

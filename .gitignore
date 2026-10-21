@@ -92,3 +92,12 @@ config/app/fish/.config/fish/completions/vikunja-cli.fish
 /TODO.md
 /TODO-MISE.md
 /config/app/herdr/.config/herdr/.plugins.lock
+
+# Dotfiles v1 runtime artifacts (native plugin locks are intentionally trackable).
+__pycache__/
+*.pyc
+/result
+/result-*
+*.dot-backup-*
+!/apps/nvim/lazy-lock.json
+!/apps/nvim/nvim-pack-lock.json

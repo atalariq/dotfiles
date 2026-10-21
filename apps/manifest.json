@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "baseline": [
+    "fish",
+    "nvim",
+    "yazi",
+    "eza",
+    "bat",
+    "zoxide",
+    "starship",
+    "fd",
+    "ripgrep",
+    "git"
+  ],
+  "apps": {
+    "fish": {
+      "packages": [
+        "fish"
+      ],
+      "commands": [
+        "fish"
+      ],
+      "links": [
+        {
+          "source": "apps/fish/config.fish",
+          "root": "config",
+          "target": "fish/config.fish",
+          "kind": "file"
+        }
+      ]
+    },
+    "nvim": {
+      "packages": [
+        "neovim"
+      ],
+      "commands": [
+        "nvim"
+      ],
+      "links": [
+        {
+          "source": "apps/nvim",
+          "root": "config",
+          "target": "nvim",
+          "kind": "directory"
+        }
+      ]
+    },
+    "yazi": {
+      "packages": [
+        "yazi"
+      ],
+      "commands": [
+        "yazi"
+      ],
+      "links": [
+        {
+          "source": "apps/yazi/yazi.toml",
+          "root": "config",
+          "target": "yazi/yazi.toml",
+          "kind": "file"
+        }
+      ]
+    },
+    "eza": {
+      "packages": [
+        "eza"
+      ],
+      "commands": [
+        "eza"
+      ],
+      "links": []
+    },
+    "bat": {
+      "packages": [
+        "bat"
+      ],
+      "commands": [
+        "bat"
+      ],
+      "links": [
+        {
+          "source": "apps/bat/config",
+          "root": "config",
+          "target": "bat/config",
+          "kind": "file"
+        }
+      ]
+    },
+    "zoxide": {
+      "packages": [
+        "zoxide"
+      ],
+      "commands": [
+        "zoxide"
+      ],
+      "links": []
+    },
+    "starship": {
+      "packages": [
+        "starship"
+      ],
+      "commands": [
+        "starship"
+      ],
+      "links": [
+        {
+          "source": "apps/starship/starship.toml",
+          "root": "config",
+          "target": "starship.toml",
+          "kind": "file"
+        }
+      ]
+    },
+    "fd": {
+      "packages": [
+        "fd"
+      ],
+      "commands": [
+        "fd"
+      ],
+      "links": []
+    },
+    "ripgrep": {
+      "packages": [
+        "ripgrep"
+      ],
+      "commands": [
+        "rg"
+      ],
+      "links": []
+    },
+    "git": {
+      "packages": [
+        "git"
+      ],
+      "commands": [
+        "git"
+      ],
+      "links": [
+        {
+          "source": "apps/git/config",
+          "root": "config",
+          "target": "git/config",
+          "kind": "file"
+        }
+      ]
+    },
+    "mango": {
+      "packages": [],
+      "commands": [
+        "mango",
+        "noctalia",
+        "kitty"
+      ],
+      "links": [
+        {
+          "source": "apps/mango/config.conf",
+          "root": "config",
+          "target": "mango/config.conf",
+          "kind": "file"
+        }
+      ]
+    },
+    "niri": {
+      "packages": [],
+      "commands": [
+        "niri",
+        "noctalia",
+        "kitty"
+      ],
+      "links": [
+        {
+          "source": "apps/niri/config.kdl",
+          "root": "config",
+          "target": "niri/config.kdl",
+          "kind": "file"
+        }
+      ]
+    },
+    "noctalia": {
+      "packages": [],
+      "commands": [
+        "noctalia"
+      ],
+      "links": [
+        {
+          "source": "apps/noctalia/config.toml",
+          "root": "config",
+          "target": "noctalia/config.toml",
+          "kind": "file"
+        }
+      ]
+    }
+  }
+}

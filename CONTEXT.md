@@ -1,3 +1,21 @@
+# Dotfiles v1 vocabulary
+
+**Native app**: independently usable configuration under `apps/<id>`.
+**Manifest**: `apps/manifest.json`, the single mapping/package-selection source.
+**Baseline**: portable terminal applications, extended/excluded by host records.
+**Host capability**: explicit system integration; detecting Linux/macOS/WSL does
+not authorize managing that system.
+**Live link**: resolves to the working checkout; Nix generation rollback does
+not revert its contents.
+**Apply**: preflight, build, review, explicit activation. Config-only apply skips
+Nix and uses exactly the same native link ownership/validation boundary as HM.
+**Plan**: read-only static intent, not an exact closure diff.
+
+See `docs/dotfiles-v1.md` for the implementation and recovery contract.
+The definitions below describe the retained legacy deployment only.
+
+---
+
 # Dotfiles Conceptual Glossary
 
 ## Module

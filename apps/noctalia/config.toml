@@ -1,0 +1,5 @@
+# Shared preferences only. GUI state remains in $XDG_STATE_HOME/noctalia.
+[lockscreen]
+enabled = true
+fingerprint = true
+lock_before_suspend = true

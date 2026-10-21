@@ -1,3 +1,23 @@
+# Dotfiles v1 migration — current workflow
+
+For work in `apps/`, `bootstrap/`, `nix/`, `hosts/`, `devshells/`, or the root flake,
+read `docs/dotfiles-v1.md` and `docs/migrate-to-nix.spec.md`. The user's current
+scope extends the spec's old slice-1 prompt through the baseline, real ThinkPad
+integration, Mango/Niri + Noctalia v5, and Laravel/Android development shells.
+
+Native files in `apps/` are authoritative. `apps/manifest.json` owns application
+IDs, package lists and links. Both the CLI and Home Manager use the same Python
+validation/linking boundary. Run `python3 -B -m unittest discover -s tests -v`
+after changing it. Use `./dot build` for build-only validation. Activation and
+changes to the real user's deployed files require explicit approval. Preserve
+the captured hardware configuration and stateVersion.
+
+Legacy `config/`, `profiles/`, and `setup.sh` are retained for recovery. Treat
+the guide below as legacy-only; do not use its deployment commands on v1 apps.
+Some legacy paths are LIVE symlink targets: inspect before editing them.
+
+---
+
 # AGENTS.md — Dotfiles Repo Guide
 
 Primary reference for AI agents and humans working in this repo. For concept definitions, see `CONTEXT.md`.
