@@ -1,4 +1,7 @@
 # Shared preferences only. GUI state remains in $XDG_STATE_HOME/noctalia.
+[shell]
+polkit_agent = true
+
 [lockscreen]
 enabled = true
 fingerprint = true
