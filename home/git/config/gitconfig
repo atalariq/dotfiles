@@ -1,0 +1,42 @@
+# vim: ft=toml
+# Portable base config. Device-specific bits (signing key, credential helpers)
+# live in ~/.gitconfig.local — see the [include] at the bottom. A machine without
+# that file still works; commits are just unsigned.
+
+[user]
+email = atalariq.dev@outlook.com
+name = Atalariq Barra Hadinugraha
+username = atalariq
+[core]
+editor = vim
+excludesfile = ~/.gitignore_global
+autocrlf = input
+[init]
+defaultBranch = main
+[http]
+postBuffer = 524288000
+[pull]
+rebase = false
+[fetch]
+prune = true
+[rerere]
+enabled = true
+[rebase]
+autostash = true
+[push]
+autoSetupRemote = true
+[diff]
+algorithm = histogram
+external = difft
+[merge]
+conflictstyle = zdiff3
+[gpg]
+format = ssh
+[include]
+path = ~/.gitconfig.local
+
+[filter "lfs"]
+clean = git-lfs clean -- %f
+smudge = git-lfs smudge -- %f
+process = git-lfs filter-process
+required = true

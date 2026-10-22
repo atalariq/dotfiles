@@ -1,6 +1,0 @@
-#!/bin/sh
-if ! command -v python3 >/dev/null 2>&1; then
-    echo 'dot requires Python 3.10+; install it with your OS package manager.' >&2
-    exit 127
-fi
-exec python3 "$(dirname "$0")/bootstrap/dot.py" "$@"

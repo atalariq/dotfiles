@@ -1,4 +1,0 @@
-{
-  "name": "lab",
-  "modules": ["app/fish", "app/starship-plain", "app/tmux", "app/yazi"]
-}

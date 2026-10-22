@@ -1,63 +1,121 @@
-# Portable dotfiles + ThinkPad NixOS
+# Personal Nix configuration
 
-Your existing native application configs in `config/*` are the source of truth.
-Their themes, keybindings, plugins, functions and actual plugin locks are retained.
-`apps/noctalia` supplies only the new Noctalia v5 preferences. Nix pins applications; Home Manager
-installs the user environment and links the live checkout. `dot` also deploys
-configs on Linux, macOS and WSL without Nix. Python 3.10+ is the bootstrap prerequisite.
+NixOS on `thinkpad-nixos`, plus portable Home Manager for `atalariq` on x86_64
+Linux. Layout follows [psiri/nixos-config](https://github.com/psiri/nixos-config).
+
+## Where to edit
+
+| Location | Responsibility |
+| --- | --- |
+| `flake.nix` | Inputs, machine and portable Home Manager outputs |
+| `hosts/thinkpad-nixos/` | Hardware, boot, identity and device settings |
+| `hosts/standard.nix` | Desktop system baseline |
+| `modules/` | NixOS desktop, authentication and Lerd |
+| `home/default.nix` | Shared CLI/editor imports and user identity |
+| `home/thinkpad.nix` | Personal desktop applications |
+| `home/portable.nix` | Shared CLI/editor on another Linux machine |
+| `home/<application>/default.nix` | Packages and links for one application |
+| `home/<application>/config/` | Native application configuration |
+| `scripts/` | Personal desktop helpers |
+| `secrets/` | Existing encrypted sources and loader; keys stay outside Git |
+
+The checkout location is set once in `flake.nix`. Home Manager links native
+configuration directly to this checkout. Edit Lua/Fish/config files and reload
+the application; rebuild after changing Nix packages or modules. A generation
+rollback does not undo edits to these live files.
+
+Neovim uses `vim.pack`. Nix supplies the editor, LSPs, formatters, linters and
+external tools. Run `:PackInstall` and `:TSInstallBaseline` explicitly for initial
+plugin/parser setup, then restart. Ordinary startup uses installed plugins and
+parsers without downloading them. Tools cover Web/PHP, Android and Typst plus
+Nix/Lua/Shell/Markdown/JSON/YAML/TOML. Bun, Node and PHP/Composer are global;
+there is no project-environment framework.
+
+Wana is the single palette. Noctalia writes desktop/Mango/Kitty color fragments;
+other applications have ordinary static theme files next to their configuration.
+
+## Build and switch
+
+Use the normal user from this checkout. Nix Git flakes need new source files in
+the index. Review and stage the new public sources explicitly, without committing
+or staging credentials/runtime files:
 
 ```sh
-./dot plan                         # static intent, no mutation
-./dot doctor                       # read-only diagnostics; nonzero means work remains
-./dot build --host thinkpad-nixos   # build only; never activates
-./dot apply --config-only --app fish
-./dot apply --config-only           # all selected native configs
-./dot apply                        # preflight + build + explicit activation confirmation
-./dot update                       # explicitly refresh Nix pins; no activation
+git add -- flake.nix flake.lock home hosts modules scripts README.md .gitignore
+nix flake lock
+nix flake check
+nix build .#nixosConfigurations.thinkpad-nixos.config.system.build.toplevel --no-link
+nix build .#homeConfigurations.portable.activationPackage --no-link
 ```
 
-The real laptop has existing config conflicts. Read the
-[migration and review procedure](docs/dotfiles-v1.md) before any apply. Building
-is safe without resolving deployment conflicts. `--backup` is an explicit
-config-only option for mapped objects; symlinked ancestor directories require
-separate migration. Do not run the wrapper as root.
+Stop on any failure. Review lock changes before switching. Update an input
+deliberately with `nix flake update nixpkgs`; avoid unrelated pin changes.
 
-- **Portable baseline:** Fish, Neovim, Yazi, eza, bat, zoxide, Starship, fd,
-  ripgrep and Git. Application mappings preserve the original source layout.
-- **ThinkPad:** preserved hardware/disk/boot definitions and system stateVersion
-  `26.05`; Mango, Noctalia 5.3.0, authenticated Mango login,
-  PipeWire/portals, firmware updates, fingerprint daemon, power profiles,
-  compressed swap, Android Studio, KVM access and rootless Podman.
-- **Development shells:** PHP 8.4/Composer/Node 22/SQLite for Laravel;
-  JDK 17/adb for Android. Project dependencies and SDK downloads remain project
-  or user state, outside the global terminal baseline.
-- **Portability:** Linux and Apple Silicon hosts can use standalone Home Manager;
-  Intel macOS uses config-only because pinned Nixpkgs 26.11 dropped Intel support.
-  There is no implicit nix-darwin/non-NixOS system management. Native Windows
-  is excluded; WSL is a Linux user environment.
+After reviewing HOME conflicts and backing them up outside the checkout:
 
 ```sh
-# From a project directory, once this checkout is committed:
-nix develop /path/to/dotfiles#laravel
-nix develop /path/to/dotfiles#android
+sudo nixos-rebuild switch --flake .#thinkpad-nixos
 ```
 
-`apps/manifest.json` owns mappings and package selection. `hosts/<name>/host.json`
-records host identity and `include`/`exclude` differences. An ignored
-`host.local.json` replaces that record. Host records are public Nix inputs:
-keep secrets elsewhere. Moving the clone requires updating its recorded path
-and reapplying. `./dot build` uses a filtered source snapshot so legacy files
-and native `*.local.*` overrides are excluded from the Nix store.
+For portable use, edit user/home/checkout paths when needed, then run
+`home-manager switch --flake .#portable`.
 
-[Original configuration ownership](docs/restoring-original-configs.md) ·
-[Architecture, approval, recovery and development](docs/dotfiles-v1.md) ·
-[Verification results](docs/validation.md) · [Approved specification](docs/migrate-to-nix.spec.md)
+Keep a working generation. `sudo nixos-rebuild switch --rollback` restores the
+previous system generation; restore live configuration edits separately.
 
-Edit or replace files directly under `config/app/<app>/` and
-`config/desktop/mango/` when the external SSD is available. Live symlinks expose
-those changes immediately; reload the affected application as needed. Keep
-source paths stable, and add manifest mappings for new files outside linked
-directories. Original vim.pack locks and Yazi plugins remain in these trees.
+## First-time Lerd and Android setup
 
-Generated placeholders, Niri and the obsolete setup scripts have been retired.
-Recovery material is archived outside the checkout; see the restoration record.
+Lerd uses the community `lerd-nixos` package, following the
+[upstream NixOS guide](https://lerd.sh/getting-started/nixos). NixOS owns Podman,
+the `.test` DNS delegate, user linger and the port-80 permission setting.
+
+After the system build, switch and normal internet DNS work:
+
+```sh
+lerd install --no-ipv6
+lerd doctor
+```
+
+Use a release that skips imperative resolver changes on NixOS. Keep normal
+internet DNS working when Lerd is stopped. Verify `.test` resolution and user
+services. Trust only the generated **public** mkcert CA using
+`security.pki.certificateFiles` in the Lerd module after it exists; its private
+key stays in the user data directory. Project creation/migrations are explicit.
+
+Android Studio owns the writable SDK. Select/install the SDK and accept licenses
+there; no emulator, device authorization or license acceptance is automated.
+
+## Optional applications
+
+`home/hermes` preserves native settings without installing or enabling Hermes.
+Import it explicitly if wanted. API keys and sessions stay outside the checkout.
+
+`home/omniroute` is not imported by default. Pull the desired release with Podman,
+inspect its actual repository digest, and save
+`{"image":"docker.io/diegosouzapw/omniroute@sha256:<verified digest>"}` to
+`~/.local/state/omniroute/image.json` in a private directory. Import the module in
+`home/thinkpad.nix` and rebuild. The service uses only a pulled immutable image,
+listens on `127.0.0.1:20128`, and keeps state outside Git. Onboarding and model
+selection remain explicit; configure only verified free routes. OpenCode uses
+its direct model by default.
+
+## Completing the ownership cutover
+
+The old `apps/`, `config/` and `script/` trees have been removed. Existing HOME
+links may still reference those paths and need migration to the new generation.
+
+Inspect the built Home Manager generation's `home-files` links and compare every
+target with HOME. Save conflicting files and links outside Git. Split old
+directory links when a new module owns individual child files, particularly
+Mango and Kitty: Noctalia must retain writable theme fragment directories.
+Preserve credentials and writable application state. Do not force-overwrite
+foreign files or globally disable Home Manager collision checks.
+
+Once the new generation is healthy, verify that no deployed link references the
+old sources. Retire old theme-switch links and source-only mise configuration
+at the same time. Remove the remaining
+regular `~/.codex/AGENTS.md` and other old workflow instruction files during that
+reviewed host cleanup. Preserve credentials, sessions and application state.
+
+Verify plugin bootstrap, interactive previews, Lerd onboarding and physical
+Android devices on the target host after activation.
