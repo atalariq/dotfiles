@@ -1,0 +1,24 @@
+#!/bin/sh
+# JavaScript template strings are intentionally literal.
+# shellcheck disable=SC2016
+# Explicit service lifecycle; .envrc never invokes this command.
+set -eu
+cd -- "$(dirname -- "$0")"
+command -v podman-compose >/dev/null 2>&1 || { echo "Enter the bun-with-services devShell first." >&2; exit 1; }
+case "${1:-}" in
+  up)
+    case "${2:-}" in
+      postgres|redis|observability) exec podman-compose --profile "$2" up -d ;;
+      all) exec podman-compose --profile postgres --profile redis --profile observability up -d ;;
+      *) echo "Usage: ./services up postgres|redis|observability|all" >&2; exit 2 ;;
+    esac ;;
+  status) exec podman-compose --profile postgres --profile redis --profile observability ps ;;
+  stop) exec podman-compose --profile postgres --profile redis --profile observability stop ;;
+  down) exec podman-compose --profile postgres --profile redis --profile observability down ;;
+  health)
+    # The collector image is distroless; query its real health endpoint from Bun
+    # rather than pretending an unavailable shell/curl is a container healthcheck.
+    exec bun -e 'for (const [name, port, path] of [["collector", process.env.COLLECTOR_HEALTH_PORT || 13133, "/"], ["prometheus", process.env.PROMETHEUS_PORT || 9090, "/-/ready"], ["grafana", process.env.GRAFANA_PORT || 3001, "/api/health"]]) { const r = await fetch(`http://127.0.0.1:${port}${path}`); if (!r.ok) throw new Error(`${name}: ${r.status}`); console.log(`${name}: ready`); }'
+    ;;
+  *) echo "Usage: ./services up postgres|redis|observability|all | status | health | stop | down" >&2; exit 2 ;;
+esac

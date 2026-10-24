@@ -1,0 +1,6 @@
+#!/bin/sh
+# Called by Noctalia's optional user hook; launch only when requested.
+set -eu
+if [ "${1:-}" = "--terminal" ]; then
+  exec kitty
+fi

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Selecting a power profile does not change logind's lid/suspend policy.
+set -eu
+powerprofilesctl set power-saver
+printf 'Power-saver selected; lid behaviour is unchanged.\n'
+exec server-status

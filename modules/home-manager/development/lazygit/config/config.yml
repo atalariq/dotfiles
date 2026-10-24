@@ -1,0 +1,39 @@
+os:
+  editPreset: 'nvim'
+git:
+  diffRenderers:
+    - command: >-
+        delta --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - type: extDiff
+      command: difft --color=always --context={{diffContext}}
+    - type: rawGit
+      name: default
+gui:
+  nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - "#b8bb26"
+      - bold
+    inactiveBorderColor:
+      - "#665c54"
+    searchingActiveBorderColor:
+      - "#fabd2f"
+      - bold
+    optionsTextColor:
+      - "#83a598"
+    selectedLineBgColor:
+      - "#504945"
+    inactiveViewSelectedLineBgColor:
+      - "#3c3836"
+    cherryPickedCommitFgColor:
+      - "#282828"
+    cherryPickedCommitBgColor:
+      - "#8ec07c"
+    markedBaseCommitFgColor:
+      - "#282828"
+    markedBaseCommitBgColor:
+      - "#fabd2f"
+    unstagedChangesColor:
+      - "#fb4934"
+    defaultFgColor:
+      - "#d5c4a1"

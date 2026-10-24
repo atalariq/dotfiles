@@ -18,3 +18,5 @@ auth.json
 hosts.yml
 *.local.*
 *.private.*
+
+/.direnv/

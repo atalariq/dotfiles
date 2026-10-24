@@ -1,121 +1,160 @@
-# Personal Nix configuration
+<div align="center">
 
-NixOS on `thinkpad-nixos`, plus portable Home Manager for `atalariq` on x86_64
-Linux. Layout follows [psiri/nixos-config](https://github.com/psiri/nixos-config).
+# Dotfiles
 
-## Where to edit
+**A personal workspace, expressed in Nix.**
 
-| Location | Responsibility |
-| --- | --- |
-| `flake.nix` | Inputs, machine and portable Home Manager outputs |
-| `hosts/thinkpad-nixos/` | Hardware, boot, identity and device settings |
-| `hosts/standard.nix` | Desktop system baseline |
-| `modules/` | NixOS desktop, authentication and Lerd |
-| `home/default.nix` | Shared CLI/editor imports and user identity |
-| `home/thinkpad.nix` | Personal desktop applications |
-| `home/portable.nix` | Shared CLI/editor on another Linux machine |
-| `home/<application>/default.nix` | Packages and links for one application |
-| `home/<application>/config/` | Native application configuration |
-| `scripts/` | Personal desktop helpers |
-| `secrets/` | Existing encrypted sources and loader; keys stay outside Git |
+Mango · Noctalia · Stylix · Gruvbox · Fish · Neovim · Vim
 
-The checkout location is set once in `flake.nix`. Home Manager links native
-configuration directly to this checkout. Edit Lua/Fish/config files and reload
-the application; rebuild after changing Nix packages or modules. A generation
-rollback does not undo edits to these live files.
+[About](#about) · [Structure](#layoutstructure) · [Install](#install--apply) · [Reference](#quick-references) · [Notes](#notes)
 
-Neovim uses `vim.pack`. Nix supplies the editor, LSPs, formatters, linters and
-external tools. Run `:PackInstall` and `:TSInstallBaseline` explicitly for initial
-plugin/parser setup, then restart. Ordinary startup uses installed plugins and
-parsers without downloading them. Tools cover Web/PHP, Android and Typst plus
-Nix/Lua/Shell/Markdown/JSON/YAML/TOML. Bun, Node and PHP/Composer are global;
-there is no project-environment framework.
+![Desktop screenshot placeholder — replace after desktop acceptance](docs/assets/desktop-placeholder.svg)
 
-Wana is the single palette. Noctalia writes desktop/Mango/Kitty color fragments;
-other applications have ordinary static theme files next to their configuration.
+*Screenshot placeholder. This image is not a capture of the running desktop.*
 
-## Build and switch
+</div>
 
-Use the normal user from this checkout. Nix Git flakes need new source files in
-the index. Review and stage the new public sources explicitly, without committing
-or staging credentials/runtime files:
+## About
+
+A modular NixOS and Home Manager configuration for a ThinkPad workstation and a
+portable Linux command-line environment. Each application and system feature is
+opt-in. Hosts describe their choices; reusable modules describe how those choices
+work. Comments explain decisions close to their implementation, with longer
+explanations in [the architecture notes](docs/decisions.md).
+
+The workstation combines Mango's tiling workflow with Noctalia's desktop shell
+and Stylix-managed Gruvbox themes. Neovim is built through nvf; Vim provides an independent,
+plugin-free server workflow. Project tools live in flake devShells, with direnv integration. The specialised Bun template provides optional Podman services.
+
+This is a personal configuration intended to be read and adapted. Supporting a
+new machine means defining its hardware, user identity and explicit feature set.
+
+## Layout/Structure
+
+```text
+flake.nix                        Inputs, hosts, packages, checks and templates
+hosts/nixos/thinkpad-x13/         Host identity and preserved device configuration
+profiles/                        Portable Home Manager feature selection
+modules/nixos/                   Explicit system features
+modules/home-manager/            Independent applications grouped by purpose
+packages/neovim/                 Shared standalone/HM nvf editor package
+lib/                             Native-source and runtime-command helpers
+devshell/                        Twelve minimal, independent flake templates
+themes/                          Stylix scheme registry and shared appearance
+tests/                           Isolation, editor, theme and service checks
+docs/                            Guides, decisions and validation records
+secrets/                         Encrypted SOPS data; keys stay outside Git
+```
+
+Applications are grouped by purpose: terminal, editors, development, desktop,
+agents, downloader, working, academic, media, security and gaming. Importing a
+group enables none of its features. Simple package modules use a single Nix file;
+configured applications own their native sources and runtime helpers. There are
+no compatibility directories or old host aliases.
+
+## Prerequisites
+
+- Nix with `nix-command` and `flakes` enabled, Git, and an internet connection for
+  uncached inputs and build dependencies.
+- NixOS for the workstation; Linux with Nix for standalone Home Manager.
+- Your own hardware configuration, username and home directory when adapting the
+  host. Do not reuse another machine's filesystem UUIDs or encryption settings.
+- An age identity with access to your encrypted SOPS file if enabling secrets.
+  Modules can be evaluated and built without decrypting credentials.
+- Podman rootless is needed only for `bun-with-services`. Other templates have
+  no container requirement and can be reproduced by matching tool versions.
+
+## Install & Apply
+
+Clone or fork this repository into a directory of your choice. Review the host
+and user configuration before applying it. For a new machine, follow
+[adding a host](docs/installation.md#add-a-host) instead of using the ThinkPad's
+hardware configuration.
+
+From the repository root:
 
 ```sh
-git add -- flake.nix flake.lock home hosts modules scripts README.md .gitignore
-nix flake lock
 nix flake check
-nix build .#nixosConfigurations.thinkpad-nixos.config.system.build.toplevel --no-link
+nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link
 nix build .#homeConfigurations.portable.activationPackage --no-link
 ```
 
-Stop on any failure. Review lock changes before switching. Update an input
-deliberately with `nix flake update nixpkgs`; avoid unrelated pin changes.
+Nix Git flakes include tracked files. Add new public sources deliberately after
+review; keep private keys, credentials and runtime state outside the index.
+Review existing HOME targets and back up conflicts before the first activation.
 
-After reviewing HOME conflicts and backing them up outside the checkout:
-
-```sh
-sudo nixos-rebuild switch --flake .#thinkpad-nixos
-```
-
-For portable use, edit user/home/checkout paths when needed, then run
-`home-manager switch --flake .#portable`.
-
-Keep a working generation. `sudo nixos-rebuild switch --rollback` restores the
-previous system generation; restore live configuration edits separately.
-
-## First-time Lerd and Android setup
-
-Lerd uses the community `lerd-nixos` package, following the
-[upstream NixOS guide](https://lerd.sh/getting-started/nixos). NixOS owns Podman,
-the `.test` DNS delegate, user linger and the port-80 permission setting.
-
-After the system build, switch and normal internet DNS work:
+On the configured ThinkPad, apply a reviewed build with:
 
 ```sh
-lerd install --no-ipv6
-lerd doctor
+sudo nixos-rebuild switch --flake .#thinkpad-x13
 ```
 
-Use a release that skips imperative resolver changes on NixOS. Keep normal
-internet DNS working when Lerd is stopped. Verify `.test` resolution and user
-services. Trust only the generated **public** mkcert CA using
-`security.pki.certificateFiles` in the Lerd module after it exists; its private
-key stays in the user data directory. Project creation/migrations are explicit.
+For another Linux machine, adapt `profiles/portable.nix` and its identity first, then:
 
-Android Studio owns the writable SDK. Select/install the SDK and accept licenses
-there; no emulator, device authorization or license acceptance is automated.
+```sh
+nix run .#home-manager -- switch --flake .#portable
+```
 
-## Optional applications
+See [installation and recovery](docs/installation.md) for conflict handling,
+rollback, secrets provisioning and first-use checks. Preserve the existing
+`stateVersion` when adopting this layout on an established installation.
 
-`home/hermes` preserves native settings without installing or enabling Hermes.
-Import it explicitly if wanted. API keys and sessions stay outside the checkout.
+## Known Hosts
 
-`home/omniroute` is not imported by default. Pull the desired release with Podman,
-inspect its actual repository digest, and save
-`{"image":"docker.io/diegosouzapw/omniroute@sha256:<verified digest>"}` to
-`~/.local/state/omniroute/image.json` in a private directory. Import the module in
-`home/thinkpad.nix` and rebuild. The service uses only a pulled immutable image,
-listens on `127.0.0.1:20128`, and keeps state outside Git. Onboarding and model
-selection remain explicit; configure only verified free routes. OpenCode uses
-its direct model by default.
+| Host | Platform | Device | Role |
+| --- | --- | --- | --- |
+| `thinkpad-x13` | `x86_64-linux`, NixOS | Lenovo ThinkPad X13 Gen 2a, AMD Ryzen 7 PRO 5850U | Personal workstation |
+| `portable` | `x86_64-linux`, Home Manager | User-selected Linux machine | CLI and editor environment |
 
-## Completing the ownership cutover
+The sole NixOS host output and hostname are `thinkpad-x13`.
 
-The old `apps/`, `config/` and `script/` trees have been removed. Existing HOME
-links may still reference those paths and need migration to the new generation.
+## Quick References
 
-Inspect the built Home Manager generation's `home-files` links and compare every
-target with HOME. Save conflicting files and links outside Git. Split old
-directory links when a new module owns individual child files, particularly
-Mango and Kitty: Noctalia must retain writable theme fragment directories.
-Preserve credentials and writable application state. Do not force-overwrite
-foreign files or globally disable Home Manager collision checks.
+| Task | Command or source |
+| --- | --- |
+| Select features | host `home.nix`, `profiles/portable.nix`, host `default.nix` |
+| Read module/deployment conventions | [Configuration guide](docs/configuration.md) |
+| Try the shared editor | `nix run .#neovim` |
+| Enter the maintenance environment | `nix develop`, or review `.envrc` and run `direnv allow` |
+| Start a project environment | `nix flake init -t /path/to/dotfiles#python` |
+| Available toolchains | [Minimal devShells](docs/development.md) |
+| Change the prebuilt theme | `dotfiles-theme set gruvbox-light` |
+| Theme/font details | [Appearance guide](docs/themes.md) |
+| Run project services | `./services up postgres`, `up redis`, or `up observability` |
+| Stop services, retain data | `./services down` |
+| Run Hermes with scoped credentials | `hermes-with-secrets hermes` |
+| Update one input deliberately | `nix flake update nixpkgs` |
+| Format Nix sources | `nix fmt -- path/to/module.nix` |
+| Read current work and future ideas | [Backlog](TODO.md) |
 
-Once the new generation is healthy, verify that no deployed link references the
-old sources. Retire old theme-switch links and source-only mise configuration
-at the same time. Remove the remaining
-regular `~/.codex/AGENTS.md` and other old workflow instruction files during that
-reviewed host cleanup. Preserve credentials, sessions and application state.
+Project templates include [usage guides](docs/development.md), direnv integration
+and recorded versions. Only `bun-with-services` includes Compose files. Creating a template does not install dependencies
+or start a service until you invoke the corresponding command.
 
-Verify plugin bootstrap, interactive previews, Lerd onboarding and physical
-Android devices on the target host after activation.
+## Notes
+
+- Native configuration uses immutable sources by default. Live mode is an
+  explicit development choice; generation rollback cannot undo live edits.
+- Writable state stays outside the repository: editor caches, application
+  sessions, tokens, database volumes and the saved appearance selection.
+- Plugin and parser installation belongs to the Nix editor build, never startup.
+  Vim can be copied to a server independently of Nix and Neovim.
+- Zotero has an independent module and remains disabled by default.
+- The working group includes Plane/Linear web launchers and Slack desktop.
+- Hermes runs interactively; no gateway service is enabled. OmniRoute waits for
+  an explicitly provisioned immutable image pin before starting.
+- SDK licenses, account enrollment and physical-device authorization are manual.
+- Builds and automated checks do not establish runtime or device acceptance.
+
+## Inspiration
+
+[Ryan Yin](https://github.com/ryan4yin/nix-config) ·
+[Misterio's starter configs](https://github.com/Misterio77/nix-starter-configs) ·
+[Foundry](https://github.com/Misterio77/Foundry) ·
+[Calsjunior](https://github.com/Calsjunior/dotfiles) ·
+[natsukium](https://github.com/natsukium/dotfiles) ·
+[Waldir Borba](https://github.com/waldirborbajr/nixos-config)
+
+The architecture borrows explicit feature selection, readable composition and
+reasoning alongside source. The configuration and its tradeoffs remain specific
+to this repository. Licensed under [MIT](LICENSE).

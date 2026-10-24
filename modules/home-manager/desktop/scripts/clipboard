@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Keep cliphist's opaque IDs and binary decoding intact; previews are display only.
+set -euo pipefail
+select_entries() {
+  local status
+  cliphist list | fzf --height=40% --layout=reverse --border "$@" && return 0
+  status=$?
+  case "$status" in 1|130) return 0 ;; *) return "$status" ;; esac
+}
+case "${1:-copy}" in
+  copy|manage)
+    selection=$(select_entries --no-multi --header='Select an entry to copy; Esc cancels')
+    if [[ -n $selection ]]; then printf '%s\n' "$selection" | cliphist decode | wl-copy; fi
+    ;;
+  delete)
+    selection=$(select_entries --multi --header='Select entries to delete; Esc cancels')
+    if [[ -n $selection ]]; then printf '%s\n' "$selection" | cliphist delete; fi
+    ;;
+  stats) cliphist list | wc -l ;;
+  *) echo 'Usage: clipboard copy|manage|delete|stats' >&2; exit 2 ;;
+esac

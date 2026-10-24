@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Edit one path per line. Audit the whole proposal before changing any file.
+set -euo pipefail
+list=$(mktemp "${TMPDIR:-/tmp}/vimv.XXXXXXXX")
+trap 'rm -f -- "$list"' EXIT
+if (( $# )); then
+  sources=("$@")
+else
+  mapfile -d '' -t sources < <(find . -mindepth 1 -maxdepth 1 -print0)
+fi
+(( ${#sources[@]} )) || exit 0
+for path in "${sources[@]}"; do
+  if [[ $path == *$'\n'* || ! -e $path && ! -L $path ]]; then
+    printf 'Unsupported or missing source: %q\n' "$path" >&2
+    exit 1
+  fi
+  printf '%s\n' "$path" >> "$list"
+done
+# EDITOR names a binary; no eval or filename-generated shell expressions.
+"${VISUAL:-${EDITOR:-vim}}" "$list"
+mapfile -t destinations < "$list"
+if (( ${#sources[@]} != ${#destinations[@]} )); then
+  echo 'The number of paths changed; nothing was renamed.' >&2
+  exit 1
+fi
+declare -A seen=()
+for i in "${!sources[@]}"; do
+  destination=${destinations[i]}
+  [[ -n $destination && -z ${seen["$destination"]+present} ]] || {
+    echo 'Empty or duplicate destination; nothing was renamed.' >&2; exit 1;
+  }
+  seen["$destination"]=1
+  if [[ ${sources[i]} != "$destination" && ( -e $destination || -L $destination ) ]]; then
+    printf 'Destination exists; nothing was renamed: %s\n' "$destination" >&2
+    exit 1
+  fi
+done
+count=0
+for i in "${!sources[@]}"; do
+  [[ ${sources[i]} != "${destinations[i]}" ]] || continue
+  mkdir -p -- "$(dirname -- "${destinations[i]}")"
+  if git ls-files --error-unmatch -- "${sources[i]}" >/dev/null 2>&1; then
+    git mv -- "${sources[i]}" "${destinations[i]}"
+  else
+    mv -- "${sources[i]}" "${destinations[i]}"
+  fi
+  count=$((count + 1))
+done
+printf '%s files renamed.\n' "$count"

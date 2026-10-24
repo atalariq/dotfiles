@@ -1,91 +1,94 @@
-# TODO
+# Backlog
 
-## Migrasi tooling Nix + POSIX Shell
+One backlog for the modular dotfiles redesign. Checkmarks describe implemented
+source changes, not an unobserved successful installation. Build and runtime
+results belong in [the validation record](docs/artifacts/validation.md).
 
-Urutan berikut adalah kriteria penerimaan, bukan klaim bahwa port atau host telah
-selesai. Helper Python lama dipertahankan sampai regresi pengganti dan cutover
-host terbukti; Python proyek dan dependency upstream tetap diperbolehkan.
+## Modular configuration and documentation
 
-- [ ] Bootstrap dengan Nix saja, runtime dari pin tanpa evaluasi seluruh flake;
-  pertahankan CLI `dot plan|doctor|build|apply|update`.
-- [x] Pindahkan validasi manifest, seleksi aplikasi, deteksi target ganda dan
-  snapshot allowlist ke Nix; pertahankan isolasi credential/state/override.
-- [ ] Verifikasi aktivasi Home Manager sebagai penulis link; implementasi native menuju checkout hidup,
-  deklaratif menuju hasil Nix. Manifest tetap satu-satunya inventaris mapping.
-- [x] Port renderer tema ke Nix, bandingkan 57 keluaran lama/baru; Shell mengatur
-  sync/check dan selector runtime, HM memiliki target link tema.
-- [ ] Port `agent-work`, initializer dan OmniRoute ke Shell/jq/curl; buktikan
-  validasi tiket, konflik, direktori vendor eksklusif, private state dan tanpa
-  fallback berbayar. Operasi yang tak aman harus gagal sebelum menulis.
-- [ ] Audit helper Python aplikasi berdasarkan pemakaian; pertahankan fitur
-  native dan hapus hanya sumber yang terbukti tidak digunakan.
-  Completion OmniRoute sudah jq; `serve [port]` sudah menggunakan miniserve
-  sesuai pilihan pemilik. Binary/HTTP nyata menunggu instalasi host. Kitten
-  preview tanpa caller tidak lagi dideploy; sumber kompatibilitas masih ditahan.
-- [ ] Pensiunkan migrator layout/cutover otomatis dan `git-modes --apply` setelah
-  migrasi; sediakan audit read-only, prosedur manual, serta tes command lama
-  ditolak tanpa mutasi filesystem.
-- [ ] Jalankan syntax POSIX/ShellCheck dan regresi Shell/Nix: quoting, path
-  berspasi, konflik/symlink, kegagalan proses, credential isolation, idempotensi.
-  Ekspor pemeriksaan melalui `nix flake check`; jangan melemahkan assertion.
-- [x] Periksa akses daemon, jaringan dan Podman tanpa mengubah permission socket;
-  jika terhalang, catat blocker serta perintah host yang tepat.
-- [ ] Update pin Nixpkgs/devenv/Stylix, evaluasi penuh, parity tema dan build host.
-- [ ] Audit target HOME, backup konflik di luar Git, aktivasi HM; buktikan link,
-  preferensi native, layanan dan sesi desktop sebelum menghapus compatibility.
-- [ ] Selesaikan OpenCode V2, digest image OmniRoute nyata, onboarding provider
-  gratis, batas route, tes streaming/tool-call/429.
-- [ ] Acceptance proyek: Web, Laravel PostgreSQL/Redis, PDF Typst, Android
-  Studio/SDK/device fisik. Akun/lisensi/enrollment/otorisasi device oleh pemilik.
-- [ ] Setelah aktivasi sehat, GC hanya store tak direferensikan dengan generasi
-  rollback dan data proyek tetap ada; laporkan disk dan RAM secara terpisah.
-- [ ] Audit akhir semua tooling/check milik repo bebas pemanggilan Python;
-  hapus referensi helper lama hanya setelah tidak ada dependensi aktif.
-- [x] Tulis [buku latihan perawatan](docs/2026-10-22-maintainer-handbook.md)
-  dengan enam latihan; latihan pemilik belum dinyatakan dipraktikkan.
+- [x] Separate NixOS and Home Manager catalogues; every feature defaults off.
+- [x] Group native sources and runtime helpers into workflow bundles.
+- [x] Make ThinkPad and portable feature selections explicit.
+- [x] Introduce immutable deployment and explicit live-checkout development.
+- [x] Move the host to `hosts/nixos/thinkpad-x13`; retain the old output alias.
+- [x] Preserve generated hardware, device identities, authentication and stateVersion.
+- [x] Explain architecture in native source and linked decision records.
+- [x] Rewrite the public README and guides; include a screenshot placeholder.
+- [x] Consolidate the earlier TODO lists and remove obsolete path/command guidance.
+- [ ] Replace the placeholder with actual accepted desktop/editor screenshots.
+- [x] Remove compatibility source links, root wrappers and the old host alias; migrate checkout-backed HOME links.
 
-## Fondasi
+- [x] Remove the bundles/ layer and group applications by purpose.
+- [x] Integrate direnv/nix-direnv and minimal standalone devShells.
+- [x] Add Stylix Gruvbox dark/light variants and the requested fonts/icon/cursor.
 
-- [x] Cocokkan checkout lama dan gabungkan perubahan yang sesuai; lihat [reconciliation](docs/2026-10-22-reconciliation.md).
-- [x] Konfigurasi satu OpenSSH agent, GPG/pinentry, keyring, Polkit, dan fingerprint/PAM.
-- [x] Deklarasikan kebutuhan media/desktop; tambahkan File Roller dan ouch, lengkapi helper screenshot/OCR.
-- [ ] Verifikasi auth di perangkat: enrollment, login/unlock/sudo, keyring, SSH/GPG.
-- [ ] Verifikasi screenshot/OCR/recording, MPD dan OBS setelah aktivasi berhasil.
-- [ ] Selesaikan pin Stylix asli, parity ekspor tema dan filtered build (akses daemon/jaringan masih perlu dipastikan).
-- [ ] Cutover link HOME dengan backup/ownership audit; lalu hapus sumber/alias yang tertahan.
+## Desktop, shell and editors
 
-## Tahap berikutnya
+- [x] Split Mango into native settings, bindings, rules, tags, gestures and scratchpad.
+- [x] Port the reference layout to the pinned Mango syntax; retain current host geometry.
+- [x] Use systemd user services for clipboard and desktop process lifetimes.
+- [x] Integrate Bash login/environment with Fish interactive terminals.
+- [x] Package Neovim through nvf for standalone and Home Manager use.
+- [x] Retain Lua behaviour, snippets, keymaps, language tools and previews.
+- [x] Supply plugins and baseline parsers through Nix; remove startup bootstraps.
+- [x] Extend independent, plugin-free Vim for server editing and navigation.
+- [x] Package screenshot/OCR/recording helpers with their executable dependencies.
+- [ ] Verify graphical session, portals, clipboard, interactive Yazi selection and previews.
+- [ ] Verify screenshot/OCR/recording, OBS, MPD and media controls after activation.
+- [ ] Exercise Neovim debugging, completion, formatting and Markdown/Typst previews.
+- [ ] Exercise the standalone vimrc on a representative remote server.
 
-- [x] Satukan bootstrap/tools dalam `script/`; CLI deploy hanya melalui Nix.
-- [x] Hapus mise/toolchains dari instalasi dan shell; tahan sumber mise sampai cutover link HOME.
-- [x] Pecah delapan devshell menjadi modul package/command/environment, dengan builder bersama.
-- [x] Tanggal/provenance dokumen dan [indeks kronologis](docs/README.md).
-- [x] Audit mode Git read-only: `script/git-modes`; `--apply` dipensiunkan, perbaikan manual mengikuti operasi.
-- [ ] Cutover manual dengan backup target HM; writer Python lama dan tesnya hanya referensi. Cutover host belum dijalankan.
-- [x] Implementasi OpenCode V2 gratis + handoff Codex, command prompt dan validator tiket; aturan global Codex aktif dipertahankan.
-- [x] Implementasi devenv Web/Laravel/Typst/Android, Node24/Bun, PostgreSQL/Redis dan template laprak; initializer membawa konfigurasi mandiri.
-- [x] Implementasi service user OmniRoute rootless/login dengan guard image digest dan state privat.
-- [ ] Update pin Nixpkgs/devenv/Stylix, loading OpenCode V2 asli, build penuh dan aktivasi (daemon Nix ditolak sandbox).
-- [ ] Pin image OmniRoute nyata, onboarding akun gratis/key lokal, pembatasan model serta tes streaming/tool-call/429 (Podman/registry belum bisa diakses).
-- [ ] Verifikasi build Web, PostgreSQL/Redis Laravel, PDF Typst dan Android Studio/SDK/device fisik.
-- [ ] Setelah aktivasi sehat, preview/GC store yang tidak direferensikan; tahan semua generasi rollback dan laporkan disk/RAM terpisah.
-- Integrasi IDE/aplikasi development lebih lanjut (shell Nix sudah tersedia di `devshells/`):
-  - PHP Laravel (devenv.sh + Nix; nvim / PhpStorm; Sail mengikuti proyek yang sudah memakainya);
-  - Android Development (Android Studio);
-  - Rust learning journey & Projects (nvim / RustRover);
-  - Golang (nvim / Goland);
-  - Web Development HTML + CSS + JS/TS (nvim / WebStorm)
-- Setup Collaboration Apps (`work.nix`): Plane.so, Linear, Slack, Discord
-- Setup Academic Tools (`academic.nix`): Typst, Zotero, Anki, Obsidian
-- Setup Creative tools: REAPER (DAW), Kdenlive/Opencut/Concat (Davinci Resolve/Premiere Pro/CapCut alternative)
-- Setup hacking / pentesting tools (`hacking.nix`): pentest lab (OWASP Juice), basic hacking tools, etc.
-- NixOS Ricing: Mangowm + Noctalia, Fonts, Icons, Theme, Widget, etc.
-- Setup NixOS gaming (`gaming.nix`): Steam, MCPE Launcher, osu!, DOOM, GBA, PS1, SNES, PS2
-- Rewrite lanjutan Agentic Tools: claude-code, konfigurasi Codex di luar handoff, agy, hermes, SOUL.md, TASTE.md, DESIGN.md, RTK, Tirith, etc.
-- Setup Hermes Agent; OpenCode V2 menunggu verifikasi host di atas.
-- [x] Buat vimrc plugin-free; eksekusi Vim asli belum diverifikasi (binary tidak tersedia).
+## Development and applications
 
-## Next steps
+- [x] Provide independent flake devShell templates: Android, vanilla, Bun, Node, PHP, Python, Go, Rust, C/C++, Typst and Tectonic.
+- [x] Provide on-demand PostgreSQL/Redis and metrics services only in bun-with-services with pinned image digests.
+- [x] Preserve volumes on stop/down; keep migrations, seed and data deletion explicit.
+- [x] Record pinned tooling versions and document operation without Nix.
+- [x] Keep Lerd as a separate opt-in feature, independent of project templates.
+- [x] Add the Plane Cloud launcher; do not deploy a local Plane backend.
+- [x] Select academic applications explicitly, with a default-off Zotero module.
+- [x] Add opt-in Steam, osu!, DOOM, MCPE and GBA/PS1/SNES/PS2 emulator modules.
+- [ ] Complete Lerd onboarding, normal/.test DNS checks and public mkcert CA review.
+- [ ] Accept representative Web, Laravel PostgreSQL/Redis, Go, Rust and Typst projects.
+- [ ] Install/choose Android SDK, accept licenses and authorize a physical device manually.
+- [ ] Verify controller/audio/graphics and game assets for the selected gaming applications.
 
-- Setup Homelab (Alma Linux 10): MPD?, Jellyfin, NextCloud, Immich, etc.
-- Setup VPS (Oracle Cloud; Alma Linux 10): Deployment, Terraform, etc.
+## Secrets, agents and device acceptance
+
+- [x] Integrate sops-nix while keeping private identities outside Git.
+- [x] Deliver declared application secrets through runtime wrappers, not global shell exports.
+- [x] Preserve one OpenSSH agent, forwarded sockets, separate GnuPG and local signing identity.
+- [x] Install pinned Hermes CLI and native configuration; keep its gateway off.
+- [x] Preserve opt-in OmniRoute's immutable image and private-state guards.
+- [x] Keep a single balanced power manager; avoid speculative kernel/power tweaks.
+- [x] Audit backup mountpoint checks and filename-safe rename helpers.
+- [x] Build the full ThinkPad system and portable generation; inspect HOME targets read-only.
+- [ ] Provision/confirm age identities and exercise secret delivery/recovery without printing values.
+- [ ] Enroll/verify authentication, keyring, SSH forwarding and GPG on the target device.
+- [ ] Complete Hermes/provider onboarding and OmniRoute image/provider/route onboarding.
+- [ ] Verify streaming, tool calls and rate-limit behaviour for explicitly configured routes.
+- [ ] Measure battery, temperatures and build behaviour; verify suspend/resume, Wi-Fi and Bluetooth.
+- [ ] Review HOME ownership findings, back up reviewed conflicts and approve system activation.
+- [ ] Record runtime acceptance before removing rollback generations.
+- [ ] Only after acceptance: review unused store paths and report disk/RAM separately before any GC.
+
+## Owner-managed
+
+- Zotero has a default-off module; the workstation keeps it disabled. No package
+  workaround or security exception is introduced here.
+- Accounts, licenses, SDK enrollment, game assets, ROM/BIOS files and credentials
+  remain outside automated setup.
+
+## Separate roadmap
+
+- Homelab and VPS on AlmaLinux: services, deployment, Terraform and operational backups.
+- Jellyfin, Nextcloud and Immich server deployments; runtime clients can be configured separately.
+- Creative applications: REAPER, Kdenlive and other evaluated media tools.
+- Pentesting tools and an isolated practice lab.
+- Additional collaboration applications and agent workflows after requirements are defined.
+
+The previous manifest/devenv/agent-work migration tasks referred to a
+superseded implementation. This redesign does not recreate those frameworks or
+inherit their historical completion claims. Their still-relevant outcomes—build
+validation, HOME ownership, native tooling, secrets isolation and real host
+acceptance—are represented above.

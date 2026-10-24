@@ -1,0 +1,25 @@
+{
+  "logo": {
+    "type": "small",
+    "color": {
+      "1": "#b8bb26"
+    }
+  },
+  "display": {
+    "color": {
+      "keys": "#b8bb26",
+      "title": "#83a598"
+    }
+  },
+  "modules": [
+    "os",
+    "kernel",
+    "uptime",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "disk",
+    "battery"
+  ]
+}

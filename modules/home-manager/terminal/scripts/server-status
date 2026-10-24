@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Read-only status, usable on desktops and remote Linux hosts.
+set -euo pipefail
+printf 'Host: %s\n' "$(hostname)"
+printf 'Uptime: %s\n' "$(uptime -p)"
+free -h
+printf '\nNetwork\n'
+ip -brief address show up
+printf '\nBattery\n'
+found=false
+for battery in /sys/class/power_supply/*; do
+  [[ -r "$battery/type" ]] || continue
+  [[ $(cat "$battery/type") == Battery ]] || continue
+  found=true
+  printf '%s: ' "${battery##*/}"
+  cat "$battery/status"
+  if [[ -r "$battery/capacity" ]]; then printf 'Capacity: %s%%\n' "$(cat "$battery/capacity")"; fi
+  for metric in energy charge; do
+    if [[ -r "$battery/${metric}_full" && -r "$battery/${metric}_full_design" ]]; then
+      current=$(cat "$battery/${metric}_full")
+      design=$(cat "$battery/${metric}_full_design")
+      if (( design > 0 )); then printf 'Health: %s%% of design\n' "$((current * 100 / design))"; fi
+      break
+    fi
+  done
+done
+if [[ $found == false ]]; then printf 'No battery detected.\n'; fi
+printf '\nUser services\n'
+systemctl --user --failed --no-pager || true

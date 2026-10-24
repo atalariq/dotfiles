@@ -1,0 +1,108 @@
+" ~/.vimrc — minimal pure-vim config, no plugins.
+" The universal editor floor for servers/VPS that ship vim/vi but not nvim.
+" Copy this file alone for an SSH-friendly editor; no network or plugins.
+
+set nocompatible
+filetype plugin indent on
+syntax on
+
+" Leader
+let mapleader = " "
+let maplocalleader = " "
+
+" UI
+set number
+if exists('+relativenumber') | set relativenumber | endif
+set cursorline
+if exists('+signcolumn') | set signcolumn=yes | endif
+set ruler
+set laststatus=2
+set showcmd
+set wildmenu
+set mouse=a
+if has('termguicolors')
+  set termguicolors
+endif
+
+" Search
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+nnoremap <silent> <Esc> :nohlsearch<CR>
+
+" Indent / wrap
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set autoindent
+if exists('+breakindent') | set breakindent | endif
+set linebreak
+set wrap
+
+" ASCII whitespace hints work without a patched font.
+set list
+set listchars=tab:>-,trail:.,nbsp:+
+
+" Behaviour
+set hidden
+set backspace=indent,eol,start
+set updatetime=300
+set scrolloff=4
+
+" Clipboard: use system clipboard when vim is built with it, else stay local
+if has('clipboard')
+  if has('unnamedplus')
+    set clipboard=unnamedplus
+  else
+    set clipboard=unnamed
+  endif
+endif
+
+" Persistent undo under ~/.vim/undo (created on demand)
+if has('persistent_undo')
+  let s:undodir = expand('~/.vim/undo')
+  if !isdirectory(s:undodir)
+    call mkdir(s:undodir, 'p', 0700)
+  endif
+  let &undodir = s:undodir
+  set undofile
+endif
+
+" Optional vendored palette, with a built-in fallback for a standalone .vimrc.
+try
+  colorscheme dotfiles
+catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme default
+endtry
+
+" Server workflow uses Vim's own buffers, netrw, quickfix and diff support.
+" Avoid plugin bootstraps: a copied vimrc must work before network recovery.
+set splitbelow
+set splitright
+set wildmode=longest:full,full
+set path+=**
+set wildignore+=*/.git/*,*/node_modules/*,*/vendor/*,*/target/*
+set grepprg=grep\ -RIn\ --exclude-dir=.git\ --exclude-dir=node_modules\ --exclude-dir=vendor\ --
+set grepformat=%f:%l:%m
+nnoremap <leader>e :Explore<CR>
+nnoremap <leader>b :ls<CR>:buffer<Space>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap <leader>q :copen<CR>
+nnoremap <leader>Q :cclose<CR>
+nnoremap <leader>m :make<CR>
+nnoremap <leader>d :diffthis<CR>
+nnoremap <leader>D :diffoff!<CR>
+" Search text literally; shellescape prevents the prompt becoming shell code.
+function! ServerGrep() abort
+  let l:query = input('Search: ')
+  if !empty(l:query)
+    execute 'silent grep! ' . shellescape(l:query) . ' .'
+    copen
+    redraw!
+  endif
+endfunction
+nnoremap <leader>/ :call ServerGrep()<CR>

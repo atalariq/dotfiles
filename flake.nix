@@ -19,40 +19,103 @@
       url = "github:lerd-env/lerd-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nvf = {
+      url = "github:NotAShelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    llm-agents.url = "github:numtide/llm-agents.nix";
+    nvim-emmet = {
+      url = "github:olrtg/nvim-emmet/cde4fb2968704aae5c18b7f8a9bc2508767bb78d";
+      flake = false;
+    };
+    pathfinder-nvim = {
+      url = "github:HawkinsT/pathfinder.nvim/9c79815dfd31726119b44a71c0654377be01d3c2";
+      flake = false;
+    };
+    kitehost-nvim = {
+      url = "github:selimacerbas/kitehost.nvim/4cb5c94a84cc653e0b32e0c9aed95465a36fc94d";
+      flake = false;
+    };
+    mdkite-nvim = {
+      url = "github:selimacerbas/mdkite.nvim/dded03dc6cce87364b48260b2ffbace575a6add7";
+      flake = false;
+    };
+
   };
 
   outputs =
-    inputs@{ nixpkgs, home-manager, ... }:
+    inputs@{
+      self,
+      nixpkgs,
+      home-manager,
+      ...
+    }:
     let
       system = "x86_64-linux";
-      checkout = "/home/atalariq/.dotfiles";
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
-    in
-    {
-      nixosConfigurations.thinkpad-nixos = nixpkgs.lib.nixosSystem {
+      editor = import ./packages/neovim { inherit inputs pkgs; };
+      host = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
-          ./hosts/thinkpad-nixos
+          ./hosts/nixos/thinkpad-x13
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit inputs checkout; };
-            home-manager.users.atalariq = import ./home/thinkpad.nix;
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              neovimPackage = editor;
+            };
+            home-manager.users.atalariq = import ./hosts/nixos/thinkpad-x13/home.nix;
           }
         ];
       };
-
+    in
+    {
+      nixosConfigurations = {
+        thinkpad-x13 = host;
+      };
       homeConfigurations.portable = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        extraSpecialArgs = { inherit inputs checkout; };
-        modules = [ ./home/portable.nix ];
+        extraSpecialArgs = {
+          inherit inputs;
+          neovimPackage = editor;
+        };
+        modules = [ ./profiles/portable.nix ];
       };
-
+      nixosModules.default = import ./modules/nixos;
+      homeManagerModules.default = import ./modules/home-manager;
+      packages.${system} = {
+        neovim = editor;
+        default = editor;
+        home-manager = home-manager.packages.${system}.home-manager;
+      };
       formatter.${system} = pkgs.nixfmt;
+      devShells.${system}.default = pkgs.mkShell {
+        packages = with pkgs; [
+          nixfmt
+          shellcheck
+          shfmt
+          fish
+          jq
+          git
+          direnv
+          nix-direnv
+        ];
+      };
+      checks.${system} = import ./tests { inherit inputs pkgs editor; };
+      templates = import ./devshell;
     };
 }

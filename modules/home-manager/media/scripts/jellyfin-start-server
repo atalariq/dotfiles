@@ -1,0 +1,4 @@
+#!/bin/sh
+# The server deployment owns storage and mounts; a launcher must not rebind them.
+set -eu
+exec systemctl start jellyfin.service
