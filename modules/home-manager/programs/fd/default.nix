@@ -1,0 +1,21 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  programs.fd.ignores = lib.mkIf config.programs.fd.enable [
+    ".git/"
+    "node_modules/"
+    "dist/"
+    "build/"
+    "target/"
+    "coverage/"
+    ".next/"
+    ".expo/"
+    ".gradle/"
+    ".idea/"
+    ".vscode/"
+  ];
+}

@@ -52,7 +52,7 @@
     desktop.mango.enable = true;
     desktop.noctalia.enable = true;
     security.authentication.enable = true;
-    security.ssh.enable = true;
+    security.ssh.enable = false;
     security.secrets.enable = true;
     development.podman.enable = true;
     development.lerd.enable = true;

@@ -38,7 +38,7 @@ def main():
               home.stateVersion = "26.05";
               xdg.enable = true;
               systemd.user.startServices = false;
-              dotfiles.desktop.appearance.enable = true;
+              dotfiles.appearance.enable = true;
             } ];
           }).activationPackage
         '''

@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-selection=$(cliphist list | fzf --multi --height=40% --layout=reverse --border --header='Select entries to delete; Esc cancels') || {
-  status=$?
-  case "$status" in 1|130) exit 0 ;; *) exit "$status" ;; esac
-}
-if [[ -n $selection ]]; then printf '%s\n' "$selection" | cliphist delete; fi

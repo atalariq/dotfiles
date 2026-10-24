@@ -5,18 +5,12 @@
   ...
 }:
 {
+  # Catalogue imports declare features; profiles own the actual selection.
   imports = [
-    ./terminal
-    ./editors
-    ./development
+    ./programs
+    ./services/secrets.nix
     ./desktop
-    ./agents
-    ./downloader
-    ./working
-    ./academic
-    ./media
-    ./security
-    ./gaming
+    ./appearance
   ];
   options.dotfiles.deployment = {
     mode = lib.mkOption {
@@ -25,12 +19,12 @@
         "live"
       ];
       default = "immutable";
-      description = "Whether native files follow generations or a live checkout.";
+      description = "Whether remaining native sources follow a generation or the checkout.";
     };
     checkout = lib.mkOption {
       type = lib.types.str;
       default = "${config.home.homeDirectory}/.dotfiles";
-      description = "Absolute source checkout for live mode and optional source-editing helpers.";
+      description = "Absolute source checkout used by live native configurations.";
     };
   };
   config._module.args.dotfilesLib = import ../../lib/configuration.nix {

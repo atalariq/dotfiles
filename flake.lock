@@ -121,6 +121,22 @@
     "flake-compat": {
       "flake": false,
       "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_2": {
+      "flake": false,
+      "locked": {
         "lastModified": 1777699697,
         "narHash": "sha256-Eg9b/rq/ECYwNwEXs5i9wHyhxNI0JrYx2srdI2uZMaQ=",
         "ref": "refs/heads/main",
@@ -135,6 +151,26 @@
       }
     },
     "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790898470,
+        "narHash": "sha256-zTwuwezD0w3hpga6a6P8emidzAZFyWqlNeRBlpWOOl8=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "024633cd702b10285db5cb19b40ad48d2399ba60",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_2": {
       "inputs": {
         "nixpkgs-lib": [
           "llm-agents",
@@ -155,7 +191,7 @@
         "type": "github"
       }
     },
-    "flake-parts_2": {
+    "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
       },
@@ -173,7 +209,7 @@
         "type": "github"
       }
     },
-    "flake-parts_3": {
+    "flake-parts_4": {
       "inputs": {
         "nixpkgs-lib": [
           "stylix",
@@ -312,7 +348,7 @@
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
-        "flake-parts": "flake-parts",
+        "flake-parts": "flake-parts_2",
         "nixpkgs": "nixpkgs",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
@@ -331,9 +367,30 @@
         "type": "github"
       }
     },
+    "look": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1792829268,
+        "narHash": "sha256-vK5WDNW/zDO/vd5+2iJK8UmX0uYAQqv1zD+FIq1DK14=",
+        "owner": "kunkka19xx",
+        "repo": "look",
+        "rev": "c52825e59341d5c6c38359f07c8c2728cca9f03a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kunkka19xx",
+        "repo": "look",
+        "type": "github"
+      }
+    },
     "mangowm": {
       "inputs": {
-        "flake-parts": "flake-parts_2",
+        "flake-parts": "flake-parts_3",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -382,6 +439,67 @@
       "original": {
         "owner": "Gerg-L",
         "repo": "mnw",
+        "type": "github"
+      }
+    },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792737899,
+        "narHash": "sha256-P0/GhewcEQmAbzq3QunNWY2jLJaYH9F6c/5dEM/jQ4M=",
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "rev": "bb0b90dbd54e207100de72b5dcbe3188c98a4b69",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-darwin",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "nix-index-database": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792309949,
+        "narHash": "sha256-2DAEMk8YkV8OF6N2uw9jQ016cYoNkcgnq50AShwWxNw=",
+        "owner": "nix-community",
+        "repo": "nix-index-database",
+        "rev": "1b4d1758fa6053c5d6284254a793134fa602fbff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
+    "nixos-wsl": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789164534,
+        "narHash": "sha256-DoYGPM6QpnYBLWj9gGw6ZwAzIX+HrAVov1BoT+8Jixo=",
+        "owner": "nix-community",
+        "repo": "NixOS-WSL",
+        "rev": "72c92b11bb8289e6651c7fef29cc0a885fd6a255",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "NixOS-WSL",
         "type": "github"
       }
     },
@@ -479,7 +597,7 @@
     },
     "nvf": {
       "inputs": {
-        "flake-compat": "flake-compat",
+        "flake-compat": "flake-compat_2",
         "mnw": "mnw",
         "nixpkgs": [
           "nixpkgs"
@@ -535,12 +653,17 @@
     },
     "root": {
       "inputs": {
+        "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "kitehost-nvim": "kitehost-nvim",
         "lerd": "lerd",
         "llm-agents": "llm-agents",
+        "look": "look",
         "mangowm": "mangowm",
         "mdkite-nvim": "mdkite-nvim",
+        "nix-darwin": "nix-darwin",
+        "nix-index-database": "nix-index-database",
+        "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2",
         "noctalia": "noctalia",
         "nvf": "nvf",
@@ -548,6 +671,27 @@
         "pathfinder-nvim": "pathfinder-nvim",
         "sops-nix": "sops-nix",
         "stylix": "stylix"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "look",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791189933,
+        "narHash": "sha256-Y8eN7ki0Urx4Ojf4w1xSpWg8uk/3lJqK+E0Oth77rH0=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "e60029353d0c48d216bc4b065168ccd4079c166f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "scenefx": {
@@ -600,7 +744,7 @@
         "base16-helix": "base16-helix",
         "base16-vim": "base16-vim",
         "firefox-gnome-theme": "firefox-gnome-theme",
-        "flake-parts": "flake-parts_3",
+        "flake-parts": "flake-parts_4",
         "gnome-shell": "gnome-shell",
         "nixpkgs": [
           "nixpkgs"

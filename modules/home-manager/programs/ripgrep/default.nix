@@ -1,0 +1,20 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  programs.ripgrep.arguments = lib.mkIf config.programs.ripgrep.enable [
+    "--hidden"
+    "--glob=!.git/*"
+    "--glob=!node_modules/*"
+    "--glob=!dist/*"
+    "--glob=!build/*"
+    "--glob=!target/*"
+    "--glob=!coverage/*"
+    "--smart-case"
+    "--line-number"
+    "--column"
+  ];
+}

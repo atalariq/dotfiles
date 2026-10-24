@@ -1,96 +1,78 @@
-# Installation and recovery
+# Instalasi dan recovery
 
 ## Add a host
 
-1. Create `hosts/nixos/<name>/default.nix` and use your own generated hardware
-   configuration. Keep filesystem UUIDs, encrypted devices and boot settings
-   appropriate to the machine.
-2. Import `modules/nixos`, then explicitly enable its required features. Copy the
-   composition pattern from the ThinkPad, not its device identities.
-3. Define the user and a Home Manager composition. Choose features individually;
-   use `profiles/portable.nix` as a CLI/editor reference.
-4. Register a `nixpkgs.lib.nixosSystem` output in `flake.nix`, integrating the
-   pinned Home Manager input and passing `inputs` through its special arguments.
-5. Set `home.username`, `home.homeDirectory`, and existing stateVersion values.
-   In live mode, also set the checkout option. Add new source files to Git after
-   reviewing them so the flake can see them.
-6. Evaluate, check and build before switching. Review the resulting service,
-   package and HOME ownership changes before applying them.
+1. Tambahkan entry pada registry host: jenis `nixos`, `darwin`, `home` atau `wsl`,
+   arsitektur, username serta HOME atau modul host yang sesuai.
+2. Pilih profil bersama. CLI/development tidak membutuhkan desktop NixOS.
+   Contoh memakai user `example`; ganti identitas sebelum menjalankan apply.
+3. Untuk NixOS, gunakan hardware hasil scan mesin sendiri. Pertahankan
+   `system.stateVersion` dan `home.stateVersion` instalasi lama.
+4. Tambahkan sumber publik baru ke Git, jalankan `just check`, lalu `just build nama-host`.
+5. Audit target HOME, backup konflik secara privat, dan review perubahan paket
+   dengan `just diff nama-host` sebelum `just apply nama-host`.
 
-## Existing HOME files
+Flake menghasilkan keluarganya otomatis dari registry. Tambahan host tidak
+memerlukan salinan konstruksi nixosSystem/darwinSystem/Home Manager.
 
-Home Manager stops on foreign-file conflicts. Preserve this protection. Inspect
-built generation `home-files` links and compare their destinations with HOME.
-Back up conflicting files and symlinks into a private directory outside Git.
+## Pilih jenis instalasi
 
-Old directory links sometimes need to be replaced with individually owned files.
-This matters for Fish state, application login data, Mango and Kitty generated
-themes. Never blanket-force a directory over credentials, sessions or writable
-application state. Keep backups and a working generation until runtime checks pass.
+- **NixOS:** output `nixosConfigurations`, termasuk ThinkPad yang ada. Driver,
+  login manager, firewall, audio dan power management dikelola modul NixOS.
+- **macOS Apple Silicon:** output `darwinConfigurations.macos-example`. Home
+  Manager diintegrasikan lewat nix-darwin. Adaptasi user dan stateVersion dahulu;
+  bootstrap nix-darwin mengikuti petunjuk upstream bila belum terpasang.
+- **Ubuntu/distro lain:** output `homeConfigurations.ubuntu-x86_64-linux` atau
+  `ubuntu-aarch64-linux`. `targets.genericLinux` menyediakan integrasi HM yang
+  relevan. Driver GPU, login shell sistem dan layanan OS tetap dimiliki distro.
+  Aplikasi GUI Nix mungkin memerlukan setup GPU generic-Linux/nixGL sesuai driver.
+- **Ubuntu WSL:** memakai Nix/Home Manager di distro yang sudah ada; tidak mengganti
+  Ubuntu menjadi NixOS. CLI menjadi default. GUI memerlukan WSLg; Podman rootless
+  memerlukan dukungan kernel dan user services/systemd dari distro WSL.
+- **NixOS-WSL:** contoh sistem terpisah memakai modul upstream NixOS-WSL. Instal atau
+  impor distribusi WSL sesuai dokumentasi upstream, lalu adaptasi registry sebelum
+  switch. Jangan menerapkannya pada ThinkPad native.
 
-The source migration has removed all compatibility links and wrappers. Existing
-checkout-backed HOME links were backed up privately and moved to canonical
-sources. Review the current generation ownership before activation.
+Nix tidak men-cross-build macOS hanya dengan mengekspor output Darwin. Gunakan
+runner native yang sesuai untuk build/runtime acceptance. Tidak ada dukungan
+Mac Intel melalui pengabaian metadata platform.
 
-## Apply and roll back
-
-Build the desired system and HM outputs first. On the ThinkPad:
-
-```sh
-sudo nixos-rebuild switch --flake .#thinkpad-x13
-```
-
-The sole host output is `thinkpad-x13`. Review SSH client entries and network
-inventory for the hostname before switching. A hostname change does not require regenerating SSH
-host keys or changing encrypted-disk identities.
-
-If necessary, return to the previous system generation:
+## Build dan apply
 
 ```sh
-sudo nixos-rebuild switch --rollback
+nix develop
+just build ubuntu-x86_64-linux
+just build thinkpad-x13
+just diff thinkpad-x13
+# Setelah konfigurasi dan konflik diperiksa:
+just apply thinkpad-x13
 ```
 
-Keep a bootable generation. Native live edits must be reverted with Git or the
-file backup; rollback restores immutable generation contents, not external state.
-Do not delete database volumes, application data or working rollback generations
-as part of a configuration refactor.
+Just memakai selector host/configuration nh, bukan menebak nama dari mesin yang
+menjalankan build. Apply menolak platform/identitas yang berbeda. NixOS system
+apply membutuhkan NixOS, dan target WSL membutuhkan lingkungan WSL.
 
-## First use
+## HOME conflicts and source migration
 
-- Confirm password and fingerprint login/unlock/sudo, keyring, SSH forwarding,
-  GPG/pinentry, portals, audio and screenshot/recording.
-- Confirm suspend/resume, display scaling, Wi-Fi, Bluetooth and battery behaviour.
-- Start Neovim and test completion, LSP, formatting, debugging and previews on
-  representative projects. No plugin/parser installation command is needed.
-- Verify Steam/controller and each selected game/emulator. Game assets, ROMs,
-  BIOS files and account enrollment stay outside the repository.
-- Android SDK installation, license acceptance and physical-device authorization
-  happen in Studio/the owner's terminal.
+Backup file yang akan digantikan di direktori privat di luar Git. Periksa linked
+parent directory, bukan hanya leaf: `.config/mango/script` dan direktori aplikasi
+lain dapat menunjuk langsung ke checkout. Jangan menulis file melalui link tersebut
+karena itu juga mengubah sumber repo. File runtime yang tidak dikelola dipertahankan.
 
-### Lerd
+Mode immutable mengikuti generasi; mode live hanya berlaku pada sumber native
+yang memakai helper. Perubahan file live tidak dapat dibatalkan oleh rollback
+profile. Build terlebih dahulu, lalu lakukan aktivasi dengan autentikasi lokal.
 
-Lerd remains independent of the project templates. After activation, verify normal
-DNS before and after `lerd install --no-ipv6` and `lerd doctor`. Check `.test` DNS
-and services with Lerd running and stopped. Add only the generated public mkcert
-CA to the system trust configuration after reviewing it; retain its private key
-in user state. Database migrations and project creation remain explicit.
+## Recovery
 
-### OmniRoute
+Pertahankan generasi yang sudah bekerja dan backup sampai login, autentikasi,
+portal, audio, suspend dan aplikasi penting diterima. Gunakan pilihan generasi
+boot NixOS atau aktivasi ulang generasi Home Manager yang diketahui bekerja.
 
-The service waits for `~/.local/state/omniroute/image.json`. Pull a chosen release,
-inspect its actual immutable digest, and write a private file containing:
+`just clean` adalah preview. `clean-apply` membersihkan user profile dengan
+retensi minimal lima generasi dan 30 hari, tanpa menghapus root manual/direnv.
+Tidak ada cleanup terjadwal, penghapusan backup migrasi, atau migrasi disk.
 
-```json
-{"image":"docker.io/diegosouzapw/omniroute@sha256:<verified digest>"}
-```
-
-The existing guard accepts only a verified digest-shaped reference and uses
-`--pull=never`. Onboarding, API credentials and route selection remain explicit;
-this repository does not enable an automatic paid fallback.
-
-## Runtime acceptance
-
-A successful build establishes buildability. Hardware, account, UI and device
-checks require the target host and remain pending until actually observed.
-Record results and blockers in the validation artifact; do not convert a checklist
-into a claim of successful activation.
+Provisioning age identity, akun aplikasi, SDK license dan trust perangkat tetap
+manual. Baca [secrets](secrets.md), [power/performance](performance.md), dan
+[catatan validasi](artifacts/validation.md) sebelum acceptance host.

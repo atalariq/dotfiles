@@ -2,6 +2,26 @@
   description = "Atalariq's NixOS and Home Manager configuration";
 
   inputs = {
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    look = {
+      url = "github:kunkka19xx/look";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
       url = "git+https://github.com/nix-community/home-manager?shallow=1";
@@ -51,71 +71,57 @@
 
   };
 
+  # Per-platform build products are separate from named machine configurations.
   outputs =
-    inputs@{
-      self,
-      nixpkgs,
-      home-manager,
-      ...
-    }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      editor = import ./packages/neovim { inherit inputs pkgs; };
-      host = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/nixos/thinkpad-x13
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
-              neovimPackage = editor;
-            };
-            home-manager.users.atalariq = import ./hosts/nixos/thinkpad-x13/home.nix;
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+      perSystem =
+        { system, ... }:
+        let
+          pkgs = import inputs.nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+          editor = import ./packages/neovim { inherit inputs pkgs; };
+        in
+        {
+          packages = {
+            neovim = editor;
+            default = editor;
+            home-manager = inputs.home-manager.packages.${system}.home-manager;
+            pencil-dev = pkgs.callPackage ./packages/pencil-dev.nix { };
           }
-        ];
-      };
-    in
-    {
-      nixosConfigurations = {
-        thinkpad-x13 = host;
-      };
-      homeConfigurations.portable = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = {
-          inherit inputs;
-          neovimPackage = editor;
+          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+            concat = pkgs.callPackage ./packages/concat.nix { };
+          };
+          formatter = pkgs.nixfmt;
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [
+              nixfmt
+              shellcheck
+              shfmt
+              fish
+              jq
+              git
+              direnv
+              nix-direnv
+              just
+              nh
+            ];
+          };
+          checks = import ./tests { inherit inputs pkgs editor; };
         };
-        modules = [ ./profiles/portable.nix ];
+      flake = (import ./lib/hosts.nix { inherit inputs; }) // {
+        nixosModules.default = import ./modules/nixos;
+        darwinModules.default = import ./modules/darwin;
+        homeManagerModules.default = import ./modules/home-manager;
+        templates = import ./devshell;
+        lib.hostRegistry = import ./hosts;
       };
-      nixosModules.default = import ./modules/nixos;
-      homeManagerModules.default = import ./modules/home-manager;
-      packages.${system} = {
-        neovim = editor;
-        default = editor;
-        home-manager = home-manager.packages.${system}.home-manager;
-      };
-      formatter.${system} = pkgs.nixfmt;
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          nixfmt
-          shellcheck
-          shfmt
-          fish
-          jq
-          git
-          direnv
-          nix-direnv
-        ];
-      };
-      checks.${system} = import ./tests { inherit inputs pkgs editor; };
-      templates = import ./devshell;
     };
 }

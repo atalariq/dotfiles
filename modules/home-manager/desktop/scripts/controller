@@ -107,9 +107,9 @@ do_app() {
 
 do_noctalia() {
     case "${1:-}" in
-        launcher)       noctalia msg panel-toggle launcher         ;;
-        clipboard)      noctalia msg panel-toggle clipboard      ;;
-        emoji)          noctalia msg panel-toggle launcher "/emoji"          ;;
+        launcher)       lookapp --toggle         ;;
+        clipboard)      lookapp clipboard      ;;
+        emoji)          lookapp --toggle          ;;
         control-center) noctalia msg panel-toggle control-center    ;;
         notifications)  noctalia msg panel-toggle notifications   ;;
         wallpaper)      noctalia msg panel-toggle wallpaper       ;;

@@ -17,7 +17,7 @@ let
   roles = builtins.attrNames baseline;
   themedSource =
     path:
-    if !config.dotfiles.desktop.appearance.enable then
+    if !config.dotfiles.appearance.enable then
       source path
     else
       pkgs.writeText (builtins.baseNameOf path) (
@@ -27,7 +27,7 @@ let
       );
   themedDirectory =
     path:
-    if !config.dotfiles.desktop.appearance.enable then
+    if !config.dotfiles.appearance.enable then
       source path
     else
       pkgs.linkFarm "native-appearance" (

@@ -31,7 +31,6 @@ let
     "shot"
     "shot-simple"
     "get_focus_info"
-    "launcher-clipboard"
     "macro.sh"
   ];
   scripts = lib.genAttrs scriptNames (
@@ -54,7 +53,6 @@ let
         gawk
         procps
         wl-clipboard
-        cliphist
         grim
         slurp
         libnotify
@@ -101,8 +99,8 @@ in
     assertions = [
       {
         assertion =
-          config.dotfiles.terminal.kitty.enable
-          && config.dotfiles.terminal.yazi.enable
+          config.programs.kitty.enable
+          && config.programs.yazi.enable
           && config.dotfiles.desktop.helpers.enable
           && config.dotfiles.desktop.noctalia.enable;
         message = "The configured Mango workflow requires Kitty, Yazi, desktop helpers and Noctalia; enable them explicitly.";
@@ -111,7 +109,7 @@ in
     wayland.windowManager.mango = {
       enable = true;
       systemd.enable = true;
-      autostart_sh = "systemctl --user start noctalia.service dotfiles-clipboard-persist.service dotfiles-clipboard-history.service";
+      autostart_sh = "systemctl --user start noctalia.service look.service";
     };
     home.extraDependencies = [ validated ];
     xdg.configFile =
@@ -120,15 +118,13 @@ in
       }))
       // {
         "mango/monitors.conf".text = cfg.monitorConfig;
-        "mango/theme.conf".text = lib.mkIf (!config.dotfiles.desktop.appearance.enable) "";
+        "mango/theme.conf".text = lib.mkIf (!config.dotfiles.appearance.enable) "";
         "mango/script/shot".source =
           pkgs.writeShellScript "shot" ''exec ${scripts."shot"}/bin/mango-shot "$@"'';
         "mango/script/shot-simple".source =
           pkgs.writeShellScript "shot-simple" ''exec ${scripts."shot-simple"}/bin/mango-shot-simple "$@"'';
         "mango/script/get_focus_info".source =
           pkgs.writeShellScript "get_focus_info" ''exec ${scripts."get_focus_info"}/bin/mango-get_focus_info "$@"'';
-        "mango/script/launcher-clipboard".source =
-          pkgs.writeShellScript "launcher-clipboard" ''exec ${scripts."launcher-clipboard"}/bin/mango-launcher-clipboard "$@"'';
         "mango/script/macro.sh".source =
           pkgs.writeShellScript "macro.sh" ''exec ${scripts."macro.sh"}/bin/mango-macro.sh "$@"'';
 

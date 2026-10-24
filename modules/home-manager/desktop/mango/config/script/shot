@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shot.sh - Screenshot & screen recorder for wlroots-based Wayland compositors
 # Dependencies: grim, slurp, wl-copy, wl-paste, notify-send (libnotify), imagemagick,
-#               mmsg, tesseract, satty, gpu-screen-recorder, ripdrag, cliphist
+#               mmsg, tesseract, satty, gpu-screen-recorder, ripdrag
 
 set -o pipefail
 
@@ -86,14 +86,9 @@ decorate() {
   rm -rf "$tmp_dir"
 }
 
-# ─── CLIPHIST ──────────────────────────────────────────────────────────────────
-
-# Deletes the latest cliphist entry (the raw screenshot), then pushes
-# the new file so history stays clean with only the final version.
-cliphist_replace() {
-  local file="$1"
-  cliphist list | head -1 | cliphist delete
-  wl-copy <"$file"
+# Clipboard history belongs to Look. Publish only; do not mutate a second store.
+copy_image() {
+  wl-copy <"$1"
 }
 
 # ─── FINALIZE ──────────────────────────────────────────────────────────────────
@@ -138,7 +133,7 @@ _finalize_decorated() {
     local out
     out="$(make_filename 'shot')"
     mv "$tmp" "$out"
-    cliphist_replace "$out"
+    copy_image "$out"
     _notify_saved "$out"
     ;;
   drag)
@@ -172,7 +167,7 @@ finalize() {
       local out
       out="$(make_filename 'shot')"
       cp "$tmp" "$out"
-      cliphist_replace "$out"
+      copy_image "$out"
       _notify_saved "$out"
       ;;
     decorate)
@@ -180,7 +175,7 @@ finalize() {
       out="$(make_filename 'shot')"
       cp "$tmp" "$out"
       decorate "$out"
-      cliphist_replace "$out"    # clipboard sekarang versi terdekorasi
+      copy_image "$out"    # clipboard sekarang versi terdekorasi
       _finalize_decorated "$out" # prompt tahap kedua
       exit 0                     # cleanup sudah dihandle di dalam helper
       ;;

@@ -54,7 +54,7 @@ let
           home.username = "test";
           home.homeDirectory = "/home/test";
           home.stateVersion = "26.05";
-          dotfiles.editors.vim.enable = true;
+          dotfiles.programs.vim.enable = true;
           dotfiles.deployment.mode = mode;
           dotfiles.deployment.checkout = "/home/test/source checkout";
         }
@@ -75,16 +75,34 @@ let
         home.homeDirectory = "/build/theme-home";
         home.stateVersion = "26.05";
         dotfiles = {
-          desktop.appearance.enable = true;
-          terminal.btop.enable = true;
-          terminal.bat.enable = true;
-          terminal.yazi.enable = true;
-          terminal.bash.enable = true;
-          terminal.fish.enable = true;
-          terminal.direnv.enable = true;
-          editors.neovim.enable = true;
-          editors.vim.enable = true;
+          appearance.enable = true;
+          programs.btop.enable = true;
+          programs.bat.enable = true;
+          programs.neovim.enable = true;
+          programs.vim.enable = true;
         };
+        programs = {
+          yazi.enable = true;
+          bash.enable = true;
+          fish.enable = true;
+          direnv.enable = true;
+        };
+      }
+    ];
+  };
+  shellHome = inputs.home-manager.lib.homeManagerConfiguration {
+    inherit pkgs;
+    extraSpecialArgs = { inherit inputs; };
+    modules = [
+      ../modules/home-manager
+      {
+        home.username = "test";
+        home.homeDirectory = "/build/shell-home";
+        home.stateVersion = "26.05";
+        programs.fish.enable = true;
+        programs.yazi.enable = true;
+        programs.atuin.enable = true;
+        programs.television.enable = true;
       }
     ];
   };
@@ -107,7 +125,7 @@ let
   );
   packagePaths = c: map toString c.config.home.packages;
 in
-{
+builtins.removeAttrs {
   catalogue-inert =
     assert packagePaths empty == packagePaths baseline;
     assert empty.config.home.file == baseline.config.home.file;
@@ -127,19 +145,17 @@ in
   source-modes = pkgs.runCommand "source-modes" { } ''
     test "$(readlink ${
       liveVim.config.home.file.".vimrc".source
-    })" = "/home/test/source checkout/modules/home-manager/editors/vim/config/vimrc"
+    })" = "/home/test/source checkout/modules/home-manager/programs/vim/config/vimrc"
     cmp ${
       immutableVim.config.home.file.".vimrc".source
-    } ${../modules/home-manager/editors/vim/config/vimrc}
+    } ${../modules/home-manager/programs/vim/config/vimrc}
     touch "$out"
   '';
   direnv-gating =
-    assert !(empty.config.xdg.configFile ? "fish/conf.d/00-direnv.fish");
+    assert !empty.config.programs.direnv.enable;
     assert
-      lib.length (
-        lib.splitString "direnv hook fish"
-          appearance.config.xdg.configFile."fish/conf.d/00-direnv.fish".text
-      ) == 2;
+      lib.length (lib.splitString "direnv hook fish" appearance.config.programs.fish.interactiveShellInit)
+      == 2;
     assert
       lib.length (lib.splitString "direnv hook bash" appearance.config.programs.bash.initExtra) == 2;
     pkgs.runCommand "direnv-gating" { } "touch $out";
@@ -161,7 +177,63 @@ in
         ];
       }
       ''
-        bash ${./theme.sh} ${../modules/home-manager/desktop/appearance/theme-switch} ${baseThemeHook}
+        bash ${./theme.sh} ${../modules/home-manager/appearance/theme-switch} ${baseThemeHook}
+        touch "$out"
+      '';
+  commands =
+    pkgs.runCommand "command-routing"
+      {
+        nativeBuildInputs = [
+          pkgs.bash
+          pkgs.jq
+          pkgs.gnugrep
+          pkgs.coreutils
+        ];
+      }
+      ''
+        bash ${./commands.sh} ${../.}
+        touch "$out"
+      '';
+  fish-startup =
+    assert
+      shellHome.config.programs.yazi.initLua
+      == builtins.readFile ../modules/home-manager/programs/yazi/config/init.lua;
+    pkgs.runCommand "fish-startup"
+      {
+        nativeBuildInputs = [
+          pkgs.fish
+          pkgs.coreutils
+        ];
+      }
+      ''
+        export HOME="$TMPDIR/home"
+        export XDG_CONFIG_HOME="$HOME/.config"
+        export __HM_SESS_VARS_SOURCED=1
+        mkdir -p "$HOME" "$TMPDIR/bin" "$TMPDIR/destination"
+        cat > "$TMPDIR/bin/yazi" <<'MOCK'
+        #!${pkgs.runtimeShell}
+        for argument do
+          case "$argument" in --cwd-file=*) printf '%s\n' "$YAZI_TEST_DESTINATION" > "''${argument#--cwd-file=}";; esac
+        done
+        MOCK
+        chmod +x "$TMPDIR/bin/yazi"
+        export PATH="$TMPDIR/bin:$PATH"
+        export YAZI_TEST_DESTINATION="$TMPDIR/destination"
+        ${pkgs.fish}/bin/fish --no-config --no-execute ${
+          shellHome.config.xdg.configFile."fish/config.fish".source
+        }
+        ${pkgs.fish}/bin/fish --no-config --interactive --command '
+          set -g fish_key_bindings fish_default_key_bindings
+          source ${shellHome.config.xdg.configFile."fish/config.fish".source}
+          string match -q "*_atuin_search*" -- (bind ctrl-r); or exit 1
+          string match -q "*tv_smart_autocomplete*" -- (bind ctrl-t); or exit 1
+          if bind --user c,r >/dev/null 2>&1; exit 1; end
+          abbr --query yt; or exit 1
+          abbr --query yy; or exit 1
+          functions --query yazicd; or exit 1
+          yazicd
+          test "$PWD" = "$YAZI_TEST_DESTINATION"; or exit 1
+        '
         touch "$out"
       '';
   runtime-helpers =
@@ -191,14 +263,14 @@ in
       ''
             shellcheck \
               ${../modules/home-manager/desktop/scripts}/* \
-              ${../modules/home-manager/terminal/scripts}/* \
-              ${../modules/home-manager/media/scripts}/* \
-              ${../modules/home-manager/security/scripts}/* \
-              ${../modules/home-manager/desktop/mango/config/script}/* \
-              ${../devshell/bun-with-services/services} ${../modules/home-manager/desktop/appearance/theme-switch} ${./runtime.sh} ${./theme.sh} ${./containers.sh} ${./direnv.sh}
+              ${../modules/home-manager/programs/_terminal-scripts}/* \
+              ${../modules/home-manager/programs/_media-scripts}/* \
+              ${../modules/home-manager/programs/_security-scripts}/* \
+              ${../modules/home-manager/desktop/mango/config/script}/* ${../lib/commands.sh} \
+              ${../devshell/bun-with-services/services} ${../modules/home-manager/appearance/theme-switch} ${./runtime.sh} ${./theme.sh} ${./containers.sh} ${./direnv.sh}
             while IFS= read -r -d "" file; do
           fish --no-config --no-execute "$file"
-        done < <(find ${../modules/home-manager/terminal/fish/config} -name '*.fish' -print0)
+        done < <(find ${../modules/home-manager/programs/fish/config} -name '*.fish' -print0)
             touch "$out"
       '';
   neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''
@@ -212,9 +284,9 @@ in
   vim-server = pkgs.runCommand "vim-server" { nativeBuildInputs = [ pkgs.vim ]; } ''
     export HOME="$TMPDIR/home"
     mkdir -p "$HOME"
-    vim -N -n -es -i NONE -u ${../modules/home-manager/editors/vim/config/vimrc} \
+    vim -N -n -es -i NONE -u ${../modules/home-manager/programs/vim/config/vimrc} \
       '+call assert_equal(1, &number)' '+call assert_equal(1, &hidden)' \
       '+if len(v:errors) | cquit | endif' +qa
     touch "$out"
   '';
-}
+} (lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "system-features-independent" ])

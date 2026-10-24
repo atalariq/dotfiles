@@ -10,21 +10,9 @@ let
   cfg = config.dotfiles;
   commands = {
     autostart = [ pkgs.systemd ];
-    clipboard = with pkgs; [
-      coreutils
-      gnugrep
-      gnused
-      fzf
-      cliphist
-      wl-clipboard
-    ];
-    clipboard-delete-fzf = with pkgs; [
-      coreutils
-      fzf
-      cliphist
-    ];
     controller = with pkgs; [
       coreutils
+      config.programs.lookapp.package
       brightnessctl
       kitty
       brave-origin
@@ -54,10 +42,7 @@ in
     assertions = [
       {
         assertion =
-          cfg.desktop.noctalia.enable
-          && cfg.terminal.kitty.enable
-          && cfg.desktop.brave.enable
-          && cfg.desktop.files.enable;
+          cfg.desktop.noctalia.enable && config.programs.kitty.enable && config.programs.lookapp.enable;
         message = "Desktop controller helpers require explicit Noctalia, Kitty, Brave and desktop files features.";
       }
     ];
@@ -68,31 +53,5 @@ in
         source = pkgs.writeShellScript "compat-${name}" ''exec ${package}/bin/${name} "$@"'';
       }
     ) scripts;
-    systemd.user.services = {
-      dotfiles-clipboard-persist = {
-        Unit = {
-          Description = "Persist the Wayland clipboard";
-          PartOf = [ "graphical-session.target" ];
-          After = [ "graphical-session.target" ];
-        };
-        Service = {
-          ExecStart = "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --reconnect-tries 0";
-          Restart = "on-failure";
-        };
-        Install.WantedBy = [ "graphical-session.target" ];
-      };
-      dotfiles-clipboard-history = {
-        Unit = {
-          Description = "Record Wayland clipboard history";
-          PartOf = [ "graphical-session.target" ];
-          After = [ "graphical-session.target" ];
-        };
-        Service = {
-          ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store";
-          Restart = "on-failure";
-        };
-        Install.WantedBy = [ "graphical-session.target" ];
-      };
-    };
   };
 }

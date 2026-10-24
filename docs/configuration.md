@@ -1,85 +1,71 @@
-# Configuration model
+# Model konfigurasi
 
 ## Host choices and reusable features
 
-A host imports the NixOS catalogue; a Home Manager configuration imports the home
-catalogue. Importing either catalogue declares options. Individual features use
-`lib.mkEnableOption` (default false) and guard their effects with `lib.mkIf`.
+Host memilih profil dan menyimpan identitas/platform. Profil menyusun workflow;
+modul menjelaskan perilaku satu program atau layanan. Karena itu rsync, Vim,
+Kitty, dan Godot tidak perlu dikategorikan ulang setiap kali workflow berubah.
 
 ```nix
 {
   imports = [ /path/to/dotfiles/modules/home-manager ];
   home.username = "alice";
   home.homeDirectory = "/home/alice";
-  home.stateVersion = "26.05"; # Use the value appropriate to your installation.
-  dotfiles.terminal.bash.enable = true;
-  dotfiles.terminal.fish.enable = true;
-  dotfiles.terminal.ripgrep.enable = true;
-  dotfiles.editors.vim.enable = true;
+  home.stateVersion = "26.05"; # Pertahankan nilai instalasi yang sudah ada.
+  programs.fish.enable = true;
+  programs.ripgrep.enable = true;
+  dotfiles.programs.vim.enable = true;
 }
 ```
 
-A group groups related files. It has no master enable switch: enabling Fish does
-not enable Atuin, Starship or the rest of the shell group. Dependencies within a
-command belong to its package; dependencies between configured features are
-explicit assertions or conditional integration. NixOS services and HM settings
-are separate choices, even when they describe the same desktop application.
+Gunakan opsi Home Manager upstream terlebih dahulu. Tambahkan paket biasa ke
+`home.packages` dalam profil bila tidak ada konfigurasi tambahan; Zotero cukup
+`pkgs.zotero`, tanpa modul enable tersendiri. Opsi `dotfiles.programs.*` hanya
+tersisa untuk integrasi khusus yang belum digantikan modul upstream.
 
-A new feature belongs in its group, declares one enable option, and places all
-packages, files, services and activation effects inside that condition. Register
-its module in the group index. Read a neighbouring module before adding another
-abstraction; avoid filesystem discovery that silently changes composition.
+Katalog program membaca file Nix dan direktori aplikasi langsung secara
+alfabetis. Direktori privat berawalan `_` bukan modul. Import katalog tidak
+mengaktifkan aplikasi. Profil sengaja mengaktifkan beberapa fitur sekaligus.
+
+Desktop berisi compositor, shell, portal dan integrasi sesi; aplikasi GUI
+berada di program/profil GUI atau creative. Modul NixOS Mango mengatur sesi login
+serta kebutuhan sistem, sedangkan Home Manager Mango mengatur keybinding dan
+monitor. Host macOS/Ubuntu tidak perlu mengimpor modul sistem NixOS.
 
 ## Source modes
 
-`dotfiles.deployment.mode = "immutable"` is the default. Native files are copied
-into the Nix store, so a generation captures their contents. Rebuild and activate
-after editing them. This is the normal mode for reproducible deployments.
+`dotfiles.deployment.mode = "immutable"` adalah default. File native yang masih
+ada mengikuti generasi. `live` dengan `dotfiles.deployment.checkout` eksplisit
+hanya memengaruhi sumber yang memakai helper tersebut. Fish, Git, Starship,
+Fastfetch, fd, ripgrep, Fzf, Herdr, Kitty dan pengaturan Yazi kini dihasilkan Nix;
+perubahan opsi tersebut memerlukan rebuild, termasuk dalam mode live.
 
-For native configuration development:
-
-```nix
-{
-  dotfiles.deployment.mode = "live";
-  dotfiles.deployment.checkout = "/home/alice/src/dotfiles";
-}
-```
-
-The source helper then links native files to that checkout. Reload the relevant
-application after editing. Packages, module options, generated Nix settings,
-script wrappers, plugin dependencies and the nvf package still require a rebuild.
-Noctalia's settings are Nix-generated, not live TOML/JSON. The optional Fish
-`nvim-config` picker uses the checkout path in either mode to edit source; an
-immutable installation still needs a rebuild to apply those edits. Use Git to restore live
-file edits; generation rollback does not restore them.
-
-Neovim's native Lua runtime follows the selected mode; nvf still owns its plugins
-and external tools. Do not edit generated init.lua or run a second plugin manager.
+Tmux dan Vim memiliki sumber mandiri yang bisa disalin tanpa Nix. Lua Neovim,
+plugin Yazi, serta completion Fish tetap memakai bahasa aplikasinya; konfigurasi
+dan pemasangannya dideklarasikan Nix. nvf memiliki plugin dan executable editor;
+tidak ada plugin manager kedua yang mengunduh saat startup.
 
 ## Runtime state and ownership
 
-Own configuration at file granularity wherever the neighbouring directory also
-contains writable state. Examples are GH login state, Codex sessions, Fish
-universal variables, Hermes memories and Noctalia runtime settings. Do not link
-those parent directories wholesale into the store.
+Jangan mengelola direktori writable secara keseluruhan ketika aplikasi menyimpan
+state di sana. Token, sesi Codex, history shell, identitas Syncthing, proyek,
+SDK Android dan dokumen berada di luar Nix store. Look memakai merger konfigurasi
+upstream karena aplikasinya juga menulis pengaturan melalui UI.
 
-Stylix and its adapters generate the managed application theme files. Noctalia
-consumes the selected palette; its template generation is disabled. Edit the
-scheme registry or native source and rebuild, rather than editing generated
-files. OBS seeds absent configuration and leaves existing profiles writable.
-
-Runtime helper source belongs to its workflow group. The Nix wrapper supplies
-its executables through the user profile; there are no root script wrappers.
-[Appearance and switching](themes.md) explains the saved theme state.
+Syncthing tidak mempunyai default folder atau perangkat pasangan. UI berada di
+localhost:8384; pairing/folder yang ditambahkan lewat UI tidak dibuang rebuild.
+LazySQL menggunakan kredensial runtime; jangan menaruh password di opsi Nix.
 
 ## Literate source
 
-Write comments that explain intent, visible behaviour and constraints. Ordinary
-settings need one or two sentences. A non-obvious decision should name the
-problem, rejected alternatives, chosen tradeoff and a link to the longer record
-in [decisions.md](decisions.md).
+Nix adalah sumber utama, bukan hasil ekstraksi Markdown/Org. Komentar menjelaskan
+alasan dan batas perilaku dekat opsi terkait; handbook ini menghubungkan bagian
+tersebut. Contohnya komentar profil daya pada modul hardware, pemisahan host dan
+per-platform output di flake, serta pemilihan toolchain pada profil development.
 
-Keep native formats native. Put commentary for JSON or another comment-free
-format in its owning Nix module. Do not duplicate a file's contents in Markdown
-or introduce a tangling step. Describe verified history as history, and new
-choices as decisions made now.
+Latihan: tambahkan satu paket ke profil, lihat `git diff`, jalankan `just build`
+untuk host yang dipilih, lalu baca [catatan keputusan](decisions.md). Untuk
+aplikasi dengan konfigurasi, buat satu modul alfabetis dan verifikasi katalog
+tetap inert sebelum fitur diaktifkan.
+
+[Appearance dan switching](themes.md) menjelaskan state tema dan pemilik warna.

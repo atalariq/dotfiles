@@ -5,7 +5,7 @@
 Encrypted SOPS data can be committed; private identities cannot. Substitute your
 own encrypted source and recipients when adapting this configuration. Provision
 the user's age identity at `~/.config/sops/age/keys.txt`, mode 0600 in a private
-directory, or set `dotfiles.security.secrets.keyFile` to its existing location.
+directory, or set `dotfiles.services.secrets.keyFile` to its existing location.
 Do not create an unrelated identity and assume it can decrypt existing data.
 
 System services use the NixOS module's separately provisioned identity at
@@ -21,8 +21,8 @@ command arguments, terminal output or Git.
 
 ```nix
 {
-  dotfiles.security.secrets.enable = true;
-  dotfiles.security.secrets.applications.example = {
+  dotfiles.services.secrets.enable = true;
+  dotfiles.services.secrets.applications.example = {
     API_KEY = "SOPS_KEY_NAME";
   };
 }

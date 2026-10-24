@@ -1,7 +1,7 @@
 {
   inputs,
   pkgs,
-  runtime ? ../../modules/home-manager/editors/neovim/config,
+  runtime ? ../../modules/home-manager/programs/neovim/config,
 }:
 let
   # nvf owns the reproducible package, while native Lua preserves behaviour.
@@ -164,7 +164,7 @@ let
           ];
           luaConfigRC.dotfiles = lib.nvim.dag.entryAfter [ "extraPluginConfigs" ] ''
             vim.g.dotfiles_config_dir = "${runtime}"
-            vim.g.dotfiles_vale_config = "${../../modules/home-manager/editors/neovim/vale.ini}"
+            vim.g.dotfiles_vale_config = "${../../modules/home-manager/programs/neovim/vale.ini}"
             vim.opt.runtimepath:prepend("${runtime}")
             vim.opt.runtimepath:append("${runtime}/after")
             dofile("${runtime}/init.lua")

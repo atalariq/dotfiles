@@ -1,8 +1,8 @@
 # Appearance
 
-`dotfiles.desktop.appearance.enable` enables Stylix and explicit appearance
-adapters. `dotfiles.desktop.appearance.theme` defaults to `gruvbox-dark`
-(Gruvbox Dark Medium); `gruvbox-light` is the second prebuilt choice.
+`dotfiles.appearance.enable` mengaktifkan Stylix dan dua pilihan prebuilt:
+Gruvbox Dark Medium (`gruvbox-dark`) serta Gruvbox Light (`gruvbox-light`).
+`dotfiles.appearance.gui` mengaktifkan target GUI yang sesuai OS.
 
 ```sh
 dotfiles-theme list
@@ -11,38 +11,40 @@ dotfiles-theme set gruvbox-light
 dotfiles-theme set gruvbox-dark
 ```
 
-These commands activate prebuilt Home Manager specialisations. They do not build
-packages or require sudo. They require an initial base Home Manager activation.
-The base generation catalogue is registered as an indirect Nix GC root and kept separately from the active variant, so
-switching repeatedly never loses the list of available themes. The last valid
-selection survives a base deployment; a removed/invalid selection falls back to
-the declared default. Activation is a Home Manager operation and retains its
-normal collision checks.
+Perintah mengaktifkan specialisation Home Manager yang sudah dibangun, tanpa
+build atau sudo. Aktivasi base pertama diperlukan. Catalogue base diregistrasikan
+sebagai indirect GC root agar kedua variant tetap dapat dipilih. Pilihan valid
+terakhir dipulihkan saat deployment base; pilihan yang dihapus fallback ke default.
+Aktivasi variant tetap memiliki collision checks Home Manager.
 
-Stylix owns GTK/Qt, selected application themes and fonts. Small adapters provide
-Noctalia's palette, Mango borders, native Kitty/tmux/Fish/fzf configuration,
-Herdr and the shared editor's palette data. Noctalia's template generation is
-turned off. Native palette assets such as rmpc use the selected Stylix roles.
-Theme assets are generated even in live source mode; native behaviour files
-still follow the checkout where their module uses live sources.
+## Pemilik konfigurasi
 
-Kitty, tmux and Noctalia receive reload requests. Existing Fish shells, editors
-and applications without hot reload may need reopening. The shared nvf binary
-reads an optional palette file from `dotfiles-theme/neovim.lua`; without Home
-Manager it uses its embedded Gruvbox fallback. Vim's generated colours are an
-ordinary Vimscript file, not a plugin dependency. A copied vimrc still works
-independently.
+Stylix menggunakan target upstream Kitty, Fish, Fzf, Starship, bat, btop dan Yazi.
+Pin ini belum mempunyai target Fastfetch/Herdr; adapter Nix kecil memasok warna,
+seperti pada Mango, Noctalia dan Look. Starship mempertahankan nama role prompt
+melalui mapping ke Base16. CLI tanpa appearance memakai fallback Gruvbox.
 
-Inter is the sans-serif default, Fira Code the monospace default, and Nerd Font
-Symbols Only supplies symbols without replacing the text fonts. DejaVu Serif
-remains the serif fallback. Times New Roman and EB Garamond are installed for
-specific documents; Typst defaults separately to New Computer Modern.
-Icons are Papirus-Dark; the cursor is Bibata Modern Ice at size 24.
+Noctalia mengonsumsi palette dan tidak menghasilkan template aplikasi. Look
+mengelola launcher/clipboard, sementara Noctalia tetap memiliki shell/lockscreen.
+Warna Look dikirim sebagai custom theme lewat modul upstream yang dapat menggabung
+pengaturan writable aplikasi. Pengumpul clipboard Noctalia/cliphist tidak aktif.
 
-Add a future handmade Base16 scheme to `themes/default.nix`; the active Wana
-assets and old generated plugin lock have been removed. Defining a new scheme
-requires rebuilding its variants once before runtime selection becomes available.
+Kitty, tmux dan Noctalia menerima permintaan reload bila relevan. Fish dan aplikasi
+lain dapat perlu dibuka ulang; jangan menganggap semua proses mendukung hot reload.
+Neovim membaca palette opsional tanpa memerlukan rebuild binary editor per warna.
+Vim memakai file Vimscript biasa dan fallback mandiri saat disalin tanpa Nix.
 
-The optional real activation test is `python3 tests/activation.py`. It uses a
-temporary HOME, Nix profile and D-Bus session; it checks real specialisation
-activation and GC-root reachability without collecting store paths.
+## Fonts dan penambahan tema
+
+Sans-serif Inter, monospace Fira Code dengan Nerd Font Symbols Only, dan fallback
+serif DejaVu Serif dipertahankan. Times New Roman/EB Garamond tersedia untuk dokumen;
+Font Typst diatur pada proyek masing-masing. Linux GUI memakai Papirus-Dark dan Bibata Modern
+Ice 24. Cursor/ikon/GTK/Qt tidak dipaksakan pada host CLI atau macOS.
+
+`themes/` adalah registry scheme dan nilai appearance bersama, bukan kumpulan
+aplikasi. Tambahkan scheme Base16 di registry lalu rebuild variant sekali sebelum
+memilihnya. Wana yang ditulis ulang kelak dapat memakai interface yang sama.
+
+`tests/activation.py` menguji switching nyata dalam HOME/profile/D-Bus sementara,
+termasuk saved selection, fallback dan GC-root reachability. Pengujian tersebut
+bukan aktivasi desktop pengguna.
