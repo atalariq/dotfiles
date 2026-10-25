@@ -87,3 +87,8 @@ diperiksa; command rollback terpisah ditolak selama handoff masih berjalan.
 Gunakan pasangan helper/tool immutable dari handoff yang sama. Kegagalan menulis
 catatan hasil tidak menghentikan percobaan rollback; bila rollback sendiri gagal,
 helper melaporkannya dan mempertahankan jurnal untuk recovery manual.
+
+Inventory diurutkan dengan locale C secara eksplisit agar terminal dengan locale
+berbeda menghasilkan byte yang sama. Jika guard masih melaporkan perubahan,
+periksa perbedaan path dan siapkan backup transaksi baru dari kondisi sekarang;
+jangan menjalankan switch secara terpisah untuk melewati penolakan relocation.

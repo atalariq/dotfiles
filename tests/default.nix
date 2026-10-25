@@ -342,7 +342,7 @@ builtins.removeAttrs
                 ${../modules/home-manager/programs/_terminal-scripts}/* \
                 ${../modules/home-manager/programs/_media-scripts}/* \
                 ${../modules/home-manager/programs/_security-scripts}/* \
-                ${../modules/home-manager/programs/capture/shot} ${../modules/home-manager/programs/capture/window} ${../modules/home-manager/programs/capture/record} ${../modules/home-manager/programs/capture/close} ${../modules/home-manager/programs/capture/pick-color} ${../lib/commands.sh} ${../lib/format.sh} ${./format.sh} ${../secrets/load.sh} ${./secrets.sh} ${../lib/audit-home.sh} ${../lib/cutover.sh} ${../lib/activate-owner.sh} ${./activate-owner.sh} \
+                ${../modules/home-manager/programs/capture/shot} ${../modules/home-manager/programs/capture/window} ${../modules/home-manager/programs/capture/record} ${../modules/home-manager/programs/capture/close} ${../modules/home-manager/programs/capture/pick-color} ${../lib/commands.sh} ${../lib/format.sh} ${./format.sh} ${../secrets/load.sh} ${./secrets.sh} ${../lib/audit-home.sh} ${./audit-locale.sh} ${../lib/cutover.sh} ${../lib/activate-owner.sh} ${./activate-owner.sh} \
                 ${../devshell/bun-with-services/services} ${../modules/home-manager/appearance/theme-switch} ${./capture.sh} ${./desktop-workflow.sh} ${./shelf-native.sh} ${./capture-native.sh} ${./runtime.sh} ${./safety.sh} ${./cutover.sh} ${./shelf-stop.sh} ${./theme.sh} ${./containers.sh} ${./direnv.sh}
               while IFS= read -r -d "" file; do
             fish --no-config --no-execute "$file"
@@ -390,6 +390,22 @@ builtins.removeAttrs
             grep -Fx 'bindn = SUPER,q,spawn,desktop-close' ${home.xdg.configFile."mango/binds.conf".source}
               if grep -F XF86LaunchA ${home.xdg.configFile."mango/binds.conf".source}; then exit 1; fi
               touch "$out"
+        '';
+    audit-locale =
+      pkgs.runCommand "audit-locale"
+        {
+          nativeBuildInputs = [
+            pkgs.bash
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.gnugrep
+            pkgs.glibc.bin
+          ];
+          LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
+        }
+        ''
+          bash ${./audit-locale.sh} ${../lib/audit-home.sh}
+          touch "$out"
         '';
     owner-activation =
       pkgs.runCommand "owner-activation"
@@ -539,6 +555,7 @@ builtins.removeAttrs
       "desktop-workflow"
       "cutover"
       "owner-activation"
+      "audit-locale"
       "shelf-stop"
     ])
     ++ (lib.optionals (pkgs.stdenv.hostPlatform.system != "x86_64-linux") [ "desktop-bindings" ])

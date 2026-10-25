@@ -161,3 +161,16 @@ Proses rollback terpisah ditolak selama lock dipegang. Tes memakai helper cutove
 asli untuk memverifikasi protokol lock, serta memastikan kegagalan pencatatan
 hasil tidak mencegah percobaan rollback. Helper/tool immutable baru dipertahankan
 sebagai root tambahan; root versi sebelumnya tetap disimpan.
+
+## Perbaikan audit locale dan retry cutover
+
+Percobaan berikutnya berhenti sebelum relocation karena inventory berubah: sembilan
+link lama di `~/.local/script` sudah tidak ada. Backup lama tetap valid sebagai
+arsip historis; kondisi HOME baru memerlukan transaksi baru. Tidak ada bypass
+checksum atau pemulihan otomatis atas file yang sudah hilang dari HOME.
+
+Ditemukan pula false positive akibat locale: audit HOME identik menghasilkan
+urutan byte berbeda antara C dan en_US. Fixture locale nyata direproduksi merah,
+lalu hijau setelah audit menetapkan LC_ALL=C. Check `audit-locale` memakai locale
+archive terpin, sehingga guard membandingkan data deterministik lintas terminal.
+Tes cutover dan shell-syntax tetap lulus. Source desktop/target build tidak berubah.

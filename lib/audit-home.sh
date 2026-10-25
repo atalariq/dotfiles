@@ -1,6 +1,8 @@
 #!/bin/sh
 # Publish an inventory only after every scan/read has succeeded.
 set -eu
+# Inventories are compared byte-for-byte across agent and owner terminals.
+export LC_ALL=C
 generation=${1:?Usage: audit-home.sh GENERATION [HOME]}
 target_home=${2:-$HOME}
 files=$(readlink -f -- "$generation/home-files")
