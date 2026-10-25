@@ -174,3 +174,26 @@ urutan byte berbeda antara C dan en_US. Fixture locale nyata direproduksi merah,
 lalu hijau setelah audit menetapkan LC_ALL=C. Check `audit-locale` memakai locale
 archive terpin, sehingga guard membandingkan data deterministik lintas terminal.
 Tes cutover dan shell-syntax tetap lulus. Source desktop/target build tidak berubah.
+
+
+## Perbaikan handoff Espanso dan config Mango — 2026-10-25
+
+Percobaan owner pada transaksi `6jg2IU2T` gagal karena Espanso yang masih aktif
+membuat ulang `match/packages` selama relocation. HOME dipulihkan; config utama
+Mango lama kembali, sementara fragmen generasi baru belum terpasang. Ini menjelaskan
+pesan `mango -p` tentang enam fragmen hilang; aktivasi desktop belum diterima.
+
+Konfigurasi match sekarang rekursif agar state runtime tetap writable. Handoff
+menghentikan daemon aktif sebelum relocation dan melanjutkannya hanya setelah
+aktivasi terverifikasi atau rollback aman. Tes mencakup urutan stop/relocate/start,
+kegagalan stop, kegagalan switch, rollback gagal, serta restart gagal setelah
+aktivasi sukses. Review independen dengan konteks kosong tidak menemukan masalah
+konkret pada perubahan ini. Hasil source/build tetap terpisah dari aktivasi owner.
+
+Build ThinkPad dan Home Manager Ubuntu x86_64 lulus setelah perbaikan. Probe
+`tests/espanso-layout.sh` terhadap generasi lama gagal dengan tabrakan direktori
+match, lalu lulus pada generasi baru memakai checker Home Manager yang asli;
+file sentinel runtime tetap utuh. Parser Mango merupakan dependency build config.
+Tes handoff lokal lulus; flake check final mencakup regresi layout ini juga.
+Flake check final lulus. Parser `mango -p` pada salinan terisolasi seluruh config
+Mango dari generasi baru juga lulus tanpa ERROR/Unknown keyword/Invalid.

@@ -355,6 +355,7 @@ builtins.removeAttrs
         home = host.home-manager.users.atalariq;
         shortcuts = import ../modules/home-manager/desktop/shortcuts.nix;
       in
+      assert home.xdg.configFile."espanso/match".recursive;
       assert host.services.keyd.enable;
       assert home.dotfiles.desktop.umbriel.settings.general.mod_key == "Super";
       assert host.services.keyd.keyboards.superkey.settings.main.capslock == "overload(superkey, esc)";
@@ -373,6 +374,10 @@ builtins.removeAttrs
         {
           nativeBuildInputs = [
             pkgs.gnugrep
+            pkgs.bash
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.gnused
             pkgs.keyd
           ];
         }
@@ -384,6 +389,7 @@ builtins.removeAttrs
                 }"
               ) shortcuts}
               keyd check ${host.environment.etc."keyd/superkey.conf".source}
+              bash ${./espanso-layout.sh} ${home.home.activationPackage}
           test "$(tail -n ${toString (builtins.length shortcuts + 1)} ${
             home.xdg.configFile."mango/binds.conf".source
           } | head -n 1)" = 'key_mode = default'

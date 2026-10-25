@@ -92,3 +92,19 @@ Inventory diurutkan dengan locale C secara eksplisit agar terminal dengan locale
 berbeda menghasilkan byte yang sama. Jika guard masih melaporkan perubahan,
 periksa perbedaan path dan siapkan backup transaksi baru dari kondisi sekarang;
 jangan menjalankan switch secara terpisah untuk melewati penolakan relocation.
+
+
+Espanso dihentikan sementara sebelum relocation jika daemon pengguna sedang aktif
+dan generasi tujuan memiliki konfigurasi match. Setelah aktivasi terverifikasi
+atau rollback aman, daemon dihidupkan kembali. Rollback yang belum tuntas tidak
+menghidupkan daemon agar tidak menulis ke HOME yang belum dipulihkan. Kegagalan
+restart setelah aktivasi dicatat sebagai `activated-service-failed`, tanpa
+membatalkan migrasi HOME yang sudah terverifikasi.
+
+Direktori Espanso `match` memakai link file rekursif Home Manager, sehingga
+`match/packages` tetap writable untuk state runtime. Jangan menggantinya dengan
+link direktori immutable. Jika rollback mengembalikan config Mango lama yang
+merujuk fragmen yang belum terpasang, `mango -p` dapat melaporkan fragmen hilang.
+Selesaikan aktivasi HOME melalui transaksi baru; jangan menyalin fragmen secara
+manual atau melewati guard. Logout/login sesudah aktivasi untuk memakai binary
+Mango baru; sesi lama tidak diperbarui hanya dengan rebuild.

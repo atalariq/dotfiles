@@ -28,7 +28,9 @@ generation=$(jq -er .generation "$state/plan.json")
 if [[ -f $state/protected-codex.sha256 ]]; then sha256sum -c "$state/protected-codex.sha256"; fi
 # Password prompts stay in the owner's terminal, before any HOME relocation.
 sudo -v
-"$cutover" relocate "$state"
+espanso_paused=false
+relocation_attempted=false
+relocated=false
 finish() {
 	local code=$?
 	trap - EXIT
@@ -37,13 +39,34 @@ finish() {
 		set +e
 		printf 'Activation failed (%s); restoring HOME. System rollback is separate.\n' "$code" >&2
 		jq -n --argjson code "$code" '{result:"failed",exitCode:$code}' >"$state/activation-result.json"
-		if ! "$cutover" rollback "$state"; then
-			printf 'HOME rollback incomplete; preserve both copies and inspect the journal.\n' >&2
+		local safe_to_resume=true
+		if [[ $relocated == true ]]; then
+			if ! "$cutover" rollback "$state"; then
+				safe_to_resume=false
+				printf 'HOME rollback incomplete; preserve both copies and inspect the journal.\n' >&2
+			fi
+		elif [[ $relocation_attempted == true ]]; then
+			case $(jq -r .status "$state/status.json") in
+			prepared | restored) ;;
+			*) safe_to_resume=false ;;
+			esac
+		fi
+		if [[ $espanso_paused == true && $safe_to_resume == true ]]; then
+			systemctl --user start espanso.service || printf 'Could not resume Espanso after recovery.\n' >&2
 		fi
 	fi
 	exit "$code"
 }
 trap finish EXIT
+# The daemon recreates match/packages while its configuration is relocated.
+# Pause only an already-active instance; leave an inactive instance inactive.
+if [[ -e $generation/home-files/.config/espanso/match ]] && systemctl --user is-active --quiet espanso.service; then
+	espanso_paused=true
+	systemctl --user stop espanso.service
+fi
+relocation_attempted=true
+"$cutover" relocate "$state"
+relocated=true
 # Never pause for a password after HOME has moved; expiry triggers rollback.
 sudo -n nixos-rebuild switch --flake "path:$source#$host" 2>&1 | tee "$state/owner-switch.log"
 [[ $(systemctl show "home-manager-$owner.service" -p Result --value) == success ]]
@@ -60,6 +83,13 @@ for candidate in "$generation" "$generation"/specialisation/*; do
 done
 [[ $matched == true ]]
 if [[ -f $state/protected-codex.sha256 ]]; then sha256sum -c "$state/protected-codex.sha256"; fi
+# Core migration is now verified; restarting a utility must not roll it back.
+trap - EXIT
+if [[ $espanso_paused == true ]] && ! systemctl --user start espanso.service; then
+	jq -n '{result:"activated-service-failed",service:"espanso.service"}' >"$state/activation-result.json"
+	echo 'System and HOME activated, but Espanso could not resume; inspect its user journal.' >&2
+	exit 1
+fi
 jq -n --arg system "$system" --arg source "$source" --arg at "$(date -u +%FT%TZ)" \
 	'{result:"activated",system:$system,source:$source,at:$at}' >"$state/activation-result.json"
 trap - EXIT
