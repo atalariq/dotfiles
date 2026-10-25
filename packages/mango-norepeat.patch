@@ -1,0 +1,82 @@
+--- a/include/mango/config/parse.h
++++ b/include/mango/config/parse.h
+@@ -98,6 +98,7 @@
+ 	bool iscommonmode;
+ 	bool isdefaultmode;
+ 	bool islockapply;
++	bool isnorepeat;
+ 	bool isreleaseapply;
+ 	bool ispassapply;
+ 	bool isallowconflict;
+--- a/include/mango/input/keyboard.h
++++ b/include/mango/input/keyboard.h
+@@ -65,7 +65,7 @@
+ 
+ bool is_keyboard_shortcut_inhibitor(struct wlr_surface *surface);
+ 
+-int32_t keyboard_check_keybinding(uint32_t state, bool locked, uint32_t mods,
++int32_t keyboard_check_keybinding(uint32_t state, bool locked, bool repeated, uint32_t mods,
+ 								  xkb_keysym_t sym, uint32_t keycode);
+ 
+ void keyboard_cancel_pending_release_bind(void);
+--- a/src/config/binding_parse.c
++++ b/src/config/binding_parse.c
+@@ -73,6 +73,9 @@
+ 			break;
+ 		case 'l':
+ 			kb->islockapply = true;
++			break;
++		case 'n':
++			kb->isnorepeat = true;
+ 			break;
+ 		case 'r':
+ 			kb->isreleaseapply = true;
+--- a/src/config/option_defs.c
++++ b/src/config/option_defs.c
+@@ -1927,7 +1927,7 @@
+ 
+ 		config->exec_once_count++;
+ 
+-	} else if (regex_match("^bind[s|l|r|p|c]*$", key)) {
++	} else if (regex_match("^bind[slrpcn]*$", key)) {
+ 		config->key_bindings =
+ 			realloc(config->key_bindings,
+ 					(config->key_bindings_count + 1) * sizeof(KeyBinding));
+--- a/src/input/keyboard.c
++++ b/src/input/keyboard.c
+@@ -189,7 +189,7 @@
+ 								 1000 / group->keyboard->repeat_info.rate);
+ 
+ 	for (i = 0; i < group->nsyms; i++)
+-		keyboard_check_keybinding(WL_KEYBOARD_KEY_STATE_PRESSED, false,
++		keyboard_check_keybinding(WL_KEYBOARD_KEY_STATE_PRESSED, false, true,
+ 								  group->mods, group->keysyms[i],
+ 								  group->keycode);
+ 
+@@ -582,7 +582,7 @@
+ 	bound_keycodes[i] = bound_keycodes[--bound_keycode_count];
+ }
+ 
+-int32_t keyboard_check_keybinding(uint32_t state, bool is_locked, uint32_t mods,
++int32_t keyboard_check_keybinding(uint32_t state, bool is_locked, bool repeated, uint32_t mods,
+ 								  xkb_keysym_t sym, uint32_t keycode) {
+ 	/*
+ 	 * Here we handle compositor keybindings. This is when the compositor is
+@@ -599,6 +599,8 @@
+ 	}
+ 
+ 	for (ji = 0; ji < config.key_bindings_count; ji++) {
++		if (repeated && config.key_bindings[ji].isnorepeat)
++			continue;
+ 		if (is_locked && config.key_bindings[ji].islockapply == false)
+ 			continue;
+ 
+@@ -756,7 +758,7 @@
+ 	}
+ 
+ 	for (i = 0; i < nsyms; i++)
+-		handled = keyboard_check_keybinding(event->state, server.session_locked,
++		handled = keyboard_check_keybinding(event->state, server.session_locked, false,
+ 											mods, syms[i], keycode) ||
+ 				  handled;
+ 

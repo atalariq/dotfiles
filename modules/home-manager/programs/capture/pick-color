@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+# Never use hyprpicker --autocopy: validate before changing the clipboard.
+color=$(hyprpicker --format hex) || exit 0
+printf '%s\n' "$color" | LC_ALL=C grep -Eq '^#[[:xdigit:]]{6}$' || exit 0
+printf '%s' "$color" | wl-copy --type text/plain
+notify-send 'Color copied' "$color"

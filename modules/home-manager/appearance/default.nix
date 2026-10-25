@@ -212,13 +212,18 @@ in
             if ${pkgs.systemd}/bin/systemctl --user is-active --quiet noctalia.service; then
               run ${
                 inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-              }/bin/noctalia ipc config-reload || true
+              }/bin/noctalia msg config-reload || true
               run ${
                 inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-              }/bin/noctalia ipc color-scheme-set custom stylix || true
+              }/bin/noctalia msg color-scheme-set custom stylix || true
               run ${
                 inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-              }/bin/noctalia ipc theme-mode-set ${config.stylix.polarity} || true
+              }/bin/noctalia msg theme-mode-set ${config.stylix.polarity} || true
+            fi
+          ''}
+          ${lib.optionalString config.dotfiles.desktop.shelf.enable ''
+            if ${pkgs.systemd}/bin/systemctl --user is-active --quiet pluto-shelf.service; then
+              run ${pkgs.systemd}/bin/systemctl --user restart pluto-shelf.service
             fi
           ''}
           fi
@@ -287,6 +292,45 @@ in
           set -g message-style "bg=${c.base01},fg=${c.base05}"
           setw -g window-status-current-style "bg=${c.base02},fg=${c.base0B},bold"
         '';
+      })
+      (lib.mkIf config.dotfiles.desktop.umbriel.enable {
+        dotfiles.desktop.umbriel.settings = {
+          input.cursor = {
+            theme = config.stylix.cursor.name;
+            size = config.stylix.cursor.size;
+          };
+          colors = {
+            background = c.base00;
+            backdrop = c.base00;
+            text_primary = c.base05;
+            text_muted = c.base04;
+            accent_primary = c.base0B;
+            accent_secondary = c.base0D;
+            warning = c.base0A;
+            error = c.base08;
+            border = {
+              focused = c.base0B;
+              unfocused = c.base03;
+              outer = c.base01;
+            };
+          };
+        };
+      })
+      (lib.mkIf config.dotfiles.desktop.shelf.enable {
+        dotfiles.desktop.shelf.settings = {
+          font = config.stylix.fonts.sansSerif.name;
+          font_size = config.stylix.fonts.sizes.popups;
+          palette = {
+            bg = c.base00;
+            surface = c.base01;
+            fg = c.base05;
+            muted = c.base04;
+            dim = c.base03;
+            accent = c.base0B;
+            danger = c.base08;
+            border = c.base02;
+          };
+        };
       })
       (lib.mkIf config.dotfiles.desktop.mango.enable {
         xdg.configFile."mango/theme.conf".text = ''

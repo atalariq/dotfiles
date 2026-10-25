@@ -18,11 +18,14 @@
   ];
   options.dotfiles = {
     system.base.enable = lib.mkEnableOption "the shared NixOS baseline";
+    desktop.capture.enable = lib.mkEnableOption "GPU Screen Recorder system integration";
     desktop.audio.enable = lib.mkEnableOption "PipeWire audio";
     desktop.bluetooth.enable = lib.mkEnableOption "Bluetooth integration";
     desktop.files.enable = lib.mkEnableOption "desktop removable-media services";
     desktop.fonts.enable = lib.mkEnableOption "desktop fonts";
     desktop.espanso.enable = lib.mkEnableOption "Espanso Wayland service";
+    desktop.umbriel.enable = lib.mkEnableOption "the Umbriel session";
+    desktop.greeter.enable = lib.mkEnableOption "the Noctalia login greeter";
     desktop.mango.enable = lib.mkEnableOption "the Mango session";
     desktop.noctalia.enable = lib.mkEnableOption "Noctalia desktop services";
     security.authentication.enable = lib.mkEnableOption "desktop authentication";

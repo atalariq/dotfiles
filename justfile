@@ -7,8 +7,11 @@ default:
 check:
     nix flake check --no-update-lock-file
 
+desktop-smoke:
+    nix run .#desktop-smoke
+
 fmt:
-    @rg --no-config --files -g '*.nix' | rg --no-config -v '/(hardware-configuration|per-device)\.nix$' | xargs nixfmt
+    @sh lib/format.sh
 
 build host:
     @sh lib/commands.sh build "$1"
@@ -32,8 +35,10 @@ clean:
 clean-apply:
     nh clean user --keep 5 --keep-since 30d --no-gcroots --no-direnv
 
+# Requires an applied system profile providing tlpctl.
 power profile:
     tlpctl set "$1"
 
+# Requires an applied system profile providing dotfiles-boost.
 boost +command:
     dotfiles-boost "$@"

@@ -57,3 +57,20 @@ GnuPG runs separately with graphical pinentry. The Git configuration supports SS
 signing through a user-local include; key selection, signing requirements and
 credentials remain local. Do not force a new signing identity during a layout
 change. On a server, select terminal pinentry if graphical pinentry is unavailable.
+
+## Legacy loader
+
+`secrets/load.sh` sudah dipensiunkan: menjalankannya atau men-source file tersebut
+mengembalikan status 2 dengan petunjuk migrasi, tanpa mendekripsi, mengeksekusi
+nilai dotenv, atau mengekspor kredensial ke shell pemanggil. Hapus pemanggilan
+legacy dari konfigurasi shell pribadi jika masih ada. Gunakan wrapper
+`<application>-with-secrets command [arguments...]` di atas, yang membaca file
+runtime per aplikasi tanpa parsing dotenv; nilai multiline tidak menjadi kode.
+Lokasi identitas yang didokumentasikan tetap
+`${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt` atau opsi `keyFile` eksplisit.
+
+Recipient cadangan belum ditambahkan. Tambahkan hanya public recipient dari
+identitas pemulihan yang sudah disimpan terpisah dan kamu kuasai, jalankan
+`sops updatekeys secrets/secrets.yaml`, lalu uji dekripsi salinan terenkripsi
+dengan identitas cadangan tanpa mencetak plaintext. Simpan identitas lama sampai
+uji pemulihan selesai; jangan membuat key sementara dan menganggapnya backup.

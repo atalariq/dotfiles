@@ -1,0 +1,95 @@
+#!/bin/sh
+# One session adapter for capture, recorder selection and guarded close.
+set -eu
+case ":${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-}}:" in
+*:[Uu]mbriel:*)
+	backend=umbriel
+	socket="${XDG_RUNTIME_DIR:-}/umbriel-${WAYLAND_DISPLAY:-}.sock"
+	;;
+*:[Mm]ango:*)
+	backend=mango
+	socket=${MANGO_INSTANCE_SIGNATURE:-}
+	;;
+*)
+	echo 'This workflow requires an Umbriel or Mango session.' >&2
+	exit 1
+	;;
+esac
+window_query() {
+	if [ "$backend" = umbriel ]; then
+		data=$(umbriel windows --json) || return $?
+		[ -n "$data" ] || return 1
+		printf '%s\n' "$data" | jq -ec '(if type == "object" then .ok else . end) | map(select(.active == true)) | first | select(. != null) | {id, app_id, title, x, y, width: .w, height: .h, output}'
+	else
+		data=$(mmsg get focusing-client) || return $?
+		[ -n "$data" ] || return 1
+		printf '%s\n' "$data" | jq -ec 'select(.id != null and .is_focused == true) | {id, app_id: .appid, title, x, y, width, height, output: .monitor}'
+	fi
+}
+output_query() {
+	if [ "$backend" = umbriel ]; then
+		data=$(umbriel outputs --json) || return $?
+		[ -n "$data" ] || return 1
+		printf '%s\n' "$data" | jq -ec 'if type == "object" then .ok else . end'
+	else
+		# Mango active means selected, not enabled. All enumerated monitors are live.
+		data=$(mmsg get all-monitors) || return $?
+		[ -n "$data" ] || return 1
+		printf '%s\n' "$data" | jq -ec '[.monitors[] | {name, enabled: true, focused: .active, scale, position: {x,y}, logical_size: {width,height}}]'
+	fi
+}
+case "${1:-geometry}" in
+session)
+	# Socket inode distinguishes compositor restarts with the same display name.
+	test -S "$socket"
+	printf '%s:%s:%s\n' "$backend" "${XDG_SESSION_ID:-}" "$(stat -Lc '%d:%i:%Z' "$socket")"
+	;;
+json) window_query ;;
+outputs) output_query ;;
+watch)
+	if [ "$backend" = umbriel ]; then
+		umbriel subscribe windows | jq --unbuffered -rc 'select(.event == "windows") | .data | map(select(.active == true)) | first | .id // "none"'
+	else
+		mmsg watch focusing-client | jq --unbuffered -rc 'if .is_focused then .id else "none" end'
+	fi
+	;;
+close)
+	case "${2:-}" in '' | *[!a-zA-Z0-9-]*) exit 2 ;; esac
+	if [ "$backend" = umbriel ]; then
+		# The CLI validates the reply; a successful msg has a null payload.
+		umbriel msg "window-close:$2"
+	else
+		case "$2" in *[!0-9]*) exit 2 ;; esac
+		data=$(mmsg dispatch "killclient,client,$2") || exit $?
+		[ -n "$data" ] || exit 1
+		printf '%s\n' "$data" | jq -e '.success == true' >/dev/null
+	fi
+	;;
+output)
+	output_query | jq -er 'map(select(.enabled and .focused)) | first | .name | select(type == "string" and length > 0)'
+	;;
+geometry)
+	window=$(window_query)
+	outputs=$(output_query)
+	printf '%s\n' "$window" | jq -er --argjson outputs "$outputs" '
+    select([.x,.y,.width,.height] | all(.[]; type == "number" and (isinfinite | not) and (isnan | not))) |
+    select(.width > 0 and .height > 0) |
+    . as $w | ($outputs | map(select(.name == $w.output and .enabled)) | first) as $o |
+    if $o == null then error("Focused output unavailable") else
+      ([.x, $o.position.x] | max) as $left |
+      ([.y, $o.position.y] | max) as $top |
+      ([.x + .width, $o.position.x + $o.logical_size.width] | min) as $right |
+      ([.y + .height, $o.position.y + $o.logical_size.height] | min) as $bottom |
+      select($right > $left and $bottom > $top) |
+      ($left | floor) as $x | ($top | floor) as $y |
+      "\($x),\($y) \(($right | ceil) - $x)x\(($bottom | ceil) - $y)" end'
+	;;
+info)
+	window=$(window_query)
+	printf '%s\n' "$window" | jq -er '"appid:\(.app_id),title:\(.title)"'
+	;;
+*)
+	echo 'Usage: capture-window geometry|info|json|outputs|output|session|watch|close ID' >&2
+	exit 2
+	;;
+esac

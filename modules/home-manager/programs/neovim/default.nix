@@ -11,14 +11,14 @@ let
   # Only native files can use live mode. Plugin/tool changes always rebuild.
   editor =
     if config.dotfiles.deployment.mode == "live" then
-      import ../../../../packages/neovim {
+      import ../../../../packages/neovim.nix {
         inherit inputs pkgs;
         runtime = dotfilesLib.source ./config;
       }
     else if neovimPackage != null then
       neovimPackage
     else
-      import ../../../../packages/neovim { inherit inputs pkgs; };
+      import ../../../../packages/neovim.nix { inherit inputs pkgs; };
 in
 {
   options.dotfiles.programs.neovim.enable = lib.mkEnableOption "nvf workstation editor";

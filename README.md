@@ -4,7 +4,7 @@
 
 **A personal workspace, expressed in Nix.**
 
-Mango · Noctalia · Look · Stylix · Gruvbox · Fish · Neovim · Vim
+Umbriel · Mango fallback · Noctalia · Look · Stylix · Gruvbox · Fish · Neovim · Vim
 
 [About](#about) · [Structure](#layoutstructure) · [Install](#install--apply) · [Reference](#quick-references)
 
@@ -21,7 +21,8 @@ and WSL. Shared profiles describe workflows; hosts supply identity, platform and
 hardware. Nix is annotated directly, with an Indonesian handbook explaining the
 reasons and maintenance exercises. No Markdown/Org generation step is required.
 
-The ThinkPad uses Mango, Noctalia's panel/lockscreen, Look's launcher/clipboard,
+The ThinkPad defaults to Umbriel with Mango as a fallback, Noctalia Greeter,
+Noctalia's panel/lockscreen, Look's launcher/clipboard,
 Stylix Gruvbox, and TLP/tlp-pd. Project toolchains come from standalone devShells
 with direnv. Podman services are isolated in the Bun services template.
 
@@ -36,7 +37,7 @@ modules/home-manager/services/  User service integrations
 modules/home-manager/desktop/   Compositor and desktop session integrations
 modules/home-manager/appearance/ Stylix targets, adapters and theme switching
 modules/nixos/, modules/darwin/ System integrations for their respective OS
-packages/                       Shared nvf editor and pinned pen.dev package
+packages/                       Shared nvf editor and pinned binary application packages
 lib/                            Host construction, native sources and command dispatcher
 devshell/                       Bun with services, Go and Rust templates
 themes/                         Shared schemes, fonts, icons and cursor
@@ -107,6 +108,8 @@ The old `portable` output has been replaced by the Ubuntu examples without alias
 | Execute reviewed cleanup | `just clean-apply` (retain five generations and 30 days) |
 | Format source | `just fmt` (generated hardware/device files excluded) |
 | Application decisions | [Applications](docs/applications.md) |
+| Desktop, SuperKey, shelf and capture | [Desktop guide](docs/desktop.md) |
+| Desktop migration evidence | [Traceability](docs/artifacts/desktop-migration.md) |
 | Test/build limitations | [Validation](docs/artifacts/validation.md) |
 
 ## Notes
@@ -129,3 +132,6 @@ Build success does not establish desktop, power, audio or physical-device behavi
 [Waldir Borba](https://github.com/waldirborbajr/nixos-config)
 
 Licensed under [MIT](LICENSE).
+
+Desktop changes can be verified with `just desktop-smoke`; use the
+[immutable cutover guide](docs/cutover.md) for audited HOME relocation and recovery.

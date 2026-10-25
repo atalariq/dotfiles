@@ -43,6 +43,19 @@
   systemd.user.services.syncthing.Service.Environment = [ "STNODEFAULTFOLDER=1" ];
   dotfiles = {
     desktop = {
+      umbriel = {
+        enable = true;
+        settings.output.eDP-1 = {
+          mode = "1920x1200@60";
+          position = [
+            0
+            0
+          ];
+          scale = 1.25;
+          workspaces = 9;
+        };
+      };
+      shelf.enable = true;
       mango.enable = true;
       mango.monitorConfig = "monitor_rule = name:eDP-1,width:1920,height:1200,refresh:60,x:0,y:0,scale:1.25,vrr:0,rr:0";
       noctalia.enable = true;

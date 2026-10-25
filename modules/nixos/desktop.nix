@@ -1,39 +1,86 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }:
 let
-  # The greeter starts a Bash login environment before the compositor, so HM's
-  # session variables also reach Fish terminals and graphical applications.
-  session = pkgs.writeShellScript "mango-login" ''
-    exec ${pkgs.bash}/bin/bash --login -c ${lib.escapeShellArg "exec ${config.programs.mango.package}/bin/mango"}
-  '';
+  style = import ../../themes/style.nix { inherit pkgs; };
+  c = lib.mapAttrs (_: value: "#${value}") (
+    builtins.removeAttrs style.base16Scheme [
+      "scheme"
+      "author"
+    ]
+  );
 in
 {
-  # Mango preserves the existing tiling/keybinding workflow. Noctalia owns the
-  # shell and lock screen; see docs/decisions.md.
+  # Session packages are independent of the one login greeter. The host chooses
+  # its default; keeping Mango enabled does not replace the Umbriel default.
   config = lib.mkMerge [
+    (lib.mkIf config.dotfiles.desktop.capture.enable {
+      programs.gpu-screen-recorder.enable = true;
+    })
     (lib.mkIf config.dotfiles.desktop.mango.enable {
       programs.mango.enable = true;
+      programs.mango.package = import ../../packages/mango.nix { inherit inputs pkgs; };
       # Upstream marks graphical-desktop enabled, which would otherwise default
       # PipeWire on. Preserve our explicit audio selection at normal priority.
       services.pipewire.enable = config.dotfiles.desktop.audio.enable;
-      services.greetd = {
+      security.polkit.enable = true;
+      services.libinput.enable = true;
+    })
+    (lib.mkIf config.dotfiles.desktop.umbriel.enable {
+      programs.umbriel.enable = true;
+      # The pinned wrapper expects Xwayland on PATH; supply it explicitly.
+      environment.systemPackages = [ pkgs.xwayland ];
+      services.pipewire.enable = config.dotfiles.desktop.audio.enable;
+      services.libinput.enable = true;
+    })
+    (lib.mkIf (config.dotfiles.desktop.mango.enable || config.dotfiles.desktop.umbriel.enable) {
+      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
+    })
+    (lib.mkIf config.dotfiles.desktop.greeter.enable {
+      services.displayManager.noctalia-greeter = {
         enable = true;
-        useTextGreeter = true;
-        settings.default_session = {
-          command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd ${session}";
-          user = "greeter";
+        cursorTheme = {
+          package = style.cursor.package;
+          name = style.cursor.name;
+        };
+        settings = {
+          cursor.size = style.cursor.size;
+          keyboard.layout = "us";
+          keyboard.options = "ctrl:swap_rwin_rctl";
+          # Empty submission starts the existing fingerprint PAM conversation.
+          auth.allow_empty_password = true;
+          appearance = {
+            scheme = "Synced";
+            theme_mode = style.polarity;
+            font_family = style.fonts.sansSerif.name;
+            palette = {
+              primary = c.base0B;
+              on_primary = c.base00;
+              secondary = c.base0D;
+              on_secondary = c.base00;
+              tertiary = c.base0E;
+              on_tertiary = c.base00;
+              error = c.base08;
+              on_error = c.base00;
+              surface = c.base00;
+              on_surface = c.base05;
+              surface_variant = c.base01;
+              on_surface_variant = c.base04;
+              outline = c.base03;
+              shadow = c.base00;
+              hover = c.base02;
+              on_hover = c.base05;
+            };
+          };
         };
       };
-      # A rebuild must not terminate the graphical session.
+      services.greetd.useTextGreeter = false;
+      # Defer the new greeter to logout/reboot, preserving the current session.
       systemd.services.greetd.restartIfChanged = false;
-      services.displayManager.defaultSession = "mango";
-      security.polkit.enable = true;
-      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
-      services.libinput.enable = true;
     })
     (lib.mkIf config.dotfiles.desktop.audio.enable {
       security.rtkit.enable = true;

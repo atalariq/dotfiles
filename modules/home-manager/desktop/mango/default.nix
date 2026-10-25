@@ -16,64 +16,18 @@ let
     "gestures.conf"
     "scratchpad.conf"
   ];
-  chooser = pkgs.writeShellScript "yazi-chooser" ''
-    export PATH=${
-      lib.makeBinPath [
-        pkgs.kitty
-        pkgs.yazi
-        pkgs.coreutils
-      ]
-    }:"$PATH"
-    ${builtins.readFile ./config/yazi-chooser}
-  '';
-  script = import ../../../../lib/runtime-script.nix { inherit pkgs lib; };
-  scriptNames = [
-    "shot"
-    "shot-simple"
-    "get_focus_info"
-    "macro.sh"
-  ];
-  scripts = lib.genAttrs scriptNames (
-    name:
-    script {
-      name = "mango-${name}";
-      source = ./config/script + "/${name}";
-      runtimeInputs = with pkgs; [
-        bash
-        findutils
-        psmisc
-        xdg-utils
-        fyi
-        inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-        kitty
-        coreutils
-        jq
-        gnugrep
-        gnused
-        gawk
-        procps
-        wl-clipboard
-        grim
-        slurp
-        libnotify
-        imagemagick
-        satty
-        gpu-screen-recorder
-        ripdrag
-        (tesseract.override {
-          enableLanguages = [
-            "eng"
-            "ind"
-          ];
-        })
-        config.wayland.windowManager.mango.package
-      ];
-    }
-  );
+  binds =
+    builtins.readFile ./config/binds.conf
+    + "\nkey_mode = default\n"
+    + lib.concatMapStringsSep "\n" (
+      shortcut:
+      "bindn = CTRL+SUPER+ALT${lib.optionalString shortcut.shift "+SHIFT"},${shortcut.key},spawn,${shortcut.command}"
+    ) (import ../shortcuts.nix);
   validated = pkgs.runCommand "mango-config-check" { nativeBuildInputs = [ pkgs.gnugrep ]; } ''
     export HOME="$TMPDIR/home"
     mkdir -p "$HOME/.config/mango"
     cp ${./config}/*.conf "$HOME/.config/mango/"
+    cp --remove-destination ${pkgs.writeText "mango-binds.conf" binds} "$HOME/.config/mango/binds.conf"
     cp ${config.xdg.configFile."mango/theme.conf".source} "$HOME/.config/mango/theme.conf"
     cat > "$HOME/.config/mango/monitors.conf" <<'EOF'
     ${cfg.monitorConfig}
@@ -102,12 +56,14 @@ in
           config.programs.kitty.enable
           && config.programs.yazi.enable
           && config.dotfiles.desktop.helpers.enable
-          && config.dotfiles.desktop.noctalia.enable;
-        message = "The configured Mango workflow requires Kitty, Yazi, desktop helpers and Noctalia; enable them explicitly.";
+          && config.dotfiles.desktop.noctalia.enable
+          && config.dotfiles.programs.capture.enable;
+        message = "The configured Mango workflow requires Kitty, Yazi, desktop helpers, Noctalia and capture; enable them explicitly.";
       }
     ];
     wayland.windowManager.mango = {
       enable = true;
+      package = import ../../../../packages/mango.nix { inherit inputs pkgs; };
       systemd.enable = true;
       autostart_sh = "systemctl --user start noctalia.service look.service";
     };
@@ -117,24 +73,11 @@ in
         source = lib.mkForce (dotfilesLib.source (./config + "/${builtins.baseNameOf name}"));
       }))
       // {
+        "mango/binds.conf" = {
+          source = lib.mkForce (pkgs.writeText "mango-binds.conf" binds);
+        };
         "mango/monitors.conf".text = cfg.monitorConfig;
         "mango/theme.conf".text = lib.mkIf (!config.dotfiles.appearance.enable) "";
-        "mango/script/shot".source =
-          pkgs.writeShellScript "shot" ''exec ${scripts."shot"}/bin/mango-shot "$@"'';
-        "mango/script/shot-simple".source =
-          pkgs.writeShellScript "shot-simple" ''exec ${scripts."shot-simple"}/bin/mango-shot-simple "$@"'';
-        "mango/script/get_focus_info".source =
-          pkgs.writeShellScript "get_focus_info" ''exec ${scripts."get_focus_info"}/bin/mango-get_focus_info "$@"'';
-        "mango/script/macro.sh".source =
-          pkgs.writeShellScript "macro.sh" ''exec ${scripts."macro.sh"}/bin/mango-macro.sh "$@"'';
-
-        "xdg-desktop-portal-termfilechooser/config".text = ''
-          [filechooser]
-          cmd=${chooser}
-          default_dir=${config.home.homeDirectory}
-          open_mode=suggested
-          save_mode=suggested
-        '';
         "xdg-desktop-portal/mango-portals.conf".text = ''
           [preferred]
           default=gtk

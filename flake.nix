@@ -87,7 +87,7 @@
             inherit system;
             config.allowUnfree = true;
           };
-          editor = import ./packages/neovim { inherit inputs pkgs; };
+          editor = import ./packages/neovim.nix { inherit inputs pkgs; };
         in
         {
           packages = {
@@ -97,12 +97,19 @@
             pencil-dev = pkgs.callPackage ./packages/pencil-dev.nix { };
           }
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+            dotfiles-cutover = pkgs.callPackage ./packages/cutover.nix { };
+            desktop-smoke = pkgs.callPackage ./packages/desktop-smoke.nix { inherit inputs; };
+            mango = import ./packages/mango.nix { inherit inputs pkgs; };
+            pluto-shelf = pkgs.callPackage ./packages/pluto-shelf.nix { };
             concat = pkgs.callPackage ./packages/concat.nix { };
           };
           formatter = pkgs.nixfmt;
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               nixfmt
+              ripgrep
+              coreutils
+              findutils
               shellcheck
               shfmt
               fish

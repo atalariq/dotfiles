@@ -15,7 +15,7 @@ let
     in
     {
       inherit inputs;
-      neovimPackage = import ../packages/neovim { inherit inputs pkgs; };
+      neovimPackage = import ../packages/neovim.nix { inherit inputs pkgs; };
     };
   homeFor = host: { ... }: {
     imports = [ ../modules/home-manager ] ++ (host.profiles or [ ]);

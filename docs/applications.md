@@ -62,3 +62,25 @@ yang sama. Model AI opsional diunduh manual lewat pengaturan Concat.
 
 [Concat upstream](https://github.com/jub0t/Concat) menjelaskan fitur dan status
 beta; tidak ada akun, model atau server MCP yang diprovisikan oleh dotfiles.
+
+## Sumber paket dan editor
+
+Paket Nix dari binary cache diutamakan untuk menghindari kompilasi lokal. Jika
+cache tidak menyediakan paket yang perlu dibangun dari source, periksa AppImage
+resmi sesuai arsitektur dan bungkus lewat `appimageTools` dengan versi/hash tetap.
+Kebijakan ini tidak mengganti seluruh aplikasi cached dengan AppImage. Pen sudah
+memakai binary rilis resmi; Concat tetap AppImage.
+
+`packages/neovim.nix` adalah definisi paket editor nvf yang dipakai bersama oleh
+Home Manager dan `nix run .#neovim`. Lua di modul program mempertahankan perilaku;
+plugin dan executable tool dibawa paket, tanpa instalasi plugin saat startup.
+[Diagnosis dan acceptance](desktop.md#troubleshooting-dan-acceptance).
+
+## Shelf, warna dan recording
+
+Pluto Shelf **0.1.5** memakai wheel resmi PyPI dengan SHA-256 tetap dalam
+`packages/pluto-shelf.nix`; nama paket `pluto-shelf` membedakannya dari tool
+Kubernetes `pluto`. Desktop ThinkPad memilih satu service serta konfigurasi
+Stylix. Tidak memakai installer/updater upstream. Hyprpicker disediakan capture.
+Recording tetap memakai GPU Screen Recorder terpin, H.264/MP4 60 fps dengan
+fallback CPU dan audio monitor sink eksplisit. Lihat [desktop](desktop.md).

@@ -21,7 +21,7 @@ Aktivasi variant tetap memiliki collision checks Home Manager.
 
 Stylix menggunakan target upstream Kitty, Fish, Fzf, Starship, bat, btop dan Yazi.
 Pin ini belum mempunyai target Fastfetch/Herdr; adapter Nix kecil memasok warna,
-seperti pada Mango, Noctalia dan Look. Starship mempertahankan nama role prompt
+seperti pada Umbriel, Mango, Noctalia dan Look. Starship mempertahankan nama role prompt
 melalui mapping ke Base16. CLI tanpa appearance memakai fallback Gruvbox.
 
 Noctalia mengonsumsi palette dan tidak menghasilkan template aplikasi. Look
@@ -48,3 +48,9 @@ memilihnya. Wana yang ditulis ulang kelak dapat memakai interface yang sama.
 `tests/activation.py` menguji switching nyata dalam HOME/profile/D-Bus sementara,
 termasuk saved selection, fallback dan GC-root reachability. Pengujian tersebut
 bukan aktivasi desktop pengguna.
+
+Kedua compositor menerima palet dari adapter yang sama pada tiap specialisation.
+Umbriel mengawasi TOML dan memuat ulang sebagian besar pengaturan; Mango memuat
+ulang saat config berubah sesuai dukungan upstream. Greeter memakai Gruvbox gelap
+dari `themes/` saat rebuild sistem. Switching pengguna tidak menyinkronkan
+wallpaper/palet ke greeter dengan privilege tambahan. Lihat [desktop](desktop.md).

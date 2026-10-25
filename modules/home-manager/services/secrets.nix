@@ -56,7 +56,8 @@ in
                 echo "Secret unavailable: start sops-nix.service and provision its age key." >&2
                 exit 1
               }
-              export ${variable}="$(cat ${lib.escapeShellArg config.sops.secrets.${key}.path})"
+              ${variable}="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.${key}.path})"
+              export ${variable}
             '') environment
           )}
           if [ "$#" -eq 0 ]; then

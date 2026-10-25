@@ -80,3 +80,84 @@ nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel \
   memerlukan acceptance pengguna. Tidak ada perangkat/folder sync otomatis.
 - Ukur frametime/temperatur dan build Gradle dengan workload yang sama sebelum
   menyimpulkan peningkatan performa atau penghematan baterai.
+
+## Perubahan desktop berikutnya
+
+Umbriel default, Mango fallback, Noctalia Greeter, capture bersama dan perataan
+paket Neovim memiliki [catatan migrasi tersendiri](desktop-migration.md). Path
+build di atas adalah bukti historis dan dapat sudah tidak tersedia di store;
+periksa hasil build terkini, bukan menganggap path tersebut selalu aktif.
+
+
+## Lanjutan SuperKey — 2026-10-25
+
+Flake checks Linux, evaluasi semua platform, build ThinkPad/Ubuntu dan startup
+Neovim yang diuji ulang lulus. Tes headless nyata mencakup PNG/clipboard output
+serta jendela, Pluto singleton/persistence dan close guard pada Umbriel/Mango.
+Recording dan color picker memiliki fixture jalur berhasil/gagal/cancel;
+penerimaan perangkat setelah aktivasi masih terbuka. Lihat matriks, store paths,
+status backup dan perintah cutover di [artefak desktop](desktop-migration.md).
+
+## Hardening desktop, 25 Oktober 2026
+
+- Flake checks Linux, evaluasi semua platform dan Neovim startup `--rebuild` lulus.
+- Smoke Wayland nyata lulus di Umbriel/Mango: capture clipboard, urutan release,
+  repeat/no-repeat, close guard dan flush/persistence shelf saat stop.
+- Regresi cutover mencakup GC roots, rollback parsial/interupsi, checksum rusak,
+  konflik data baru dan penolakan lintas filesystem sebelum ada pemindahan.
+- Regresi audit mencakup traversal gagal, direktori tidak terbaca dan FIFO;
+  `vimv` mencakup alias symlink/ancestor dan tracked Git rename; `gignore`
+  mempertahankan file lama saat HTTP gagal dan menolak symlink.
+- Status ini memverifikasi source/build, bukan aktivasi atau acceptance perangkat.
+  Snapshot output final dicatat dalam state privat tool [cutover](../cutover.md).
+
+## Rencana perbaikan OpenCode, 25 Oktober 2026
+
+P1: tes activation theme memeriksa substitusi mock benar-benar terjadi dan command
+`nix-store` asli tidak tersisa. Kontrak cleanup ditinjau terhadap source **nh
+4.4.2**, dari input nixpkgs terpin: `crates/nh-clean/src/clean.rs`, cabang
+`if !is_profile_clean && !args.no_gcroots` melewati seluruh pemindaian/pemangkasan
+GC roots ketika `--no-gcroots` aktif. Penghapusan generasi dan store GC adalah
+operasi terpisah; store GC tetap menghormati root terdaftar. `just clean` dry-run
+lulus dan checksum backup serta enam link root transaksi lama tetap terverifikasi.
+Pesan “Performing garbage collection” juga dicetak saat dry-run; source memanggil
+command dengan `.dry(args.dry)`. Tidak ada cleanup non-dry yang dijalankan.
+Verifikasi ini perlu ditinjau lagi bila versi/pin nh berubah.
+
+P2: live+appearance memerlukan opt-in eksplisit; helper menolak path foreign;
+aktivasi live memeriksa checkout sebelum writeBoundary. P3: toolchain devShell
+memuat ripgrep/coreutils/findutils; formatter memakai daftar NUL, tidak berjalan
+pada daftar kosong, dan menolak hasil scan parsial. P5: loader dotenv berbasis
+eval dipensiunkan; wrapper runtime per aplikasi tetap menjadi satu jalur secrets.
+Refactor nixpkgs P4 dan provisioning recipient cadangan tetap pekerjaan terpisah.
+
+Review source independen dengan konteks kosong juga menemukan pembacaan secrets
+yang gagal dapat tertutupi status `export`, serta pemeriksaan variabel EDITOR
+Fish yang keliru. Wrapper kini memisahkan assignment dari export dan memakai cat
+terpin; tes membuktikan file hilang maupun error baca tidak meluncurkan child,
+dan nilai multiline/sintaks shell tetap literal. `todo` memakai `set -q EDITOR`;
+pemeriksaan Fish dengan EDITOR=vim mempertahankan pilihan pengguna.
+
+## Recovery aktivasi Home Manager, 25 Oktober 2026
+
+Diagnosis langsung: system aktif sudah menunjuk build `pgngkwn...`, system profile
+masih generasi sebelumnya, service Home Manager gagal, sedangkan transaksi
+`FaV5RUvv` masih prepared dan jurnal kosong. Pemeriksa collision Home Manager asli
+mereproduksi `.bashrc would be clobbered` dengan exit 1 tanpa menjalankan aktivasi.
+Semua checksum backup, audit HOME serta raw/effective tar compare lulus. Hash
+konfigurasi Codex pribadi tetap cocok.
+
+Handoff berantai kini mengautentikasi sudo sebelum relocation dan memanggil
+rollback HOME jika switch/verifikasi gagal. Tes terisolasi mencakup autentikasi
+ gagal, relocation gagal, switch gagal, verifikasi gagal dan sukses terverifikasi.
+Probe `sudo -n true` menghasilkan `sudo: a password is required`; HOME belum
+dipindahkan oleh agent. Aktivasi nyata tetap menunggu command di terminal pemilik.
+Error Lerd `/bin/mkdir` pada quadlet merupakan follow-up terpisah.
+
+Review independen handoff juga menyorot lifetime lock dan pencatatan kegagalan.
+Lock transaksi kini dipegang parent sampai switch/verifikasi selesai; child
+cutover berbagi descriptor yang sama setelah pemeriksaan identitas file lock.
+Proses rollback terpisah ditolak selama lock dipegang. Tes memakai helper cutover
+asli untuk memverifikasi protokol lock, serta memastikan kegagalan pencatatan
+hasil tidak mencegah percobaan rollback. Helper/tool immutable baru dipertahankan
+sebagai root tambahan; root versi sebelumnya tetap disimpan.

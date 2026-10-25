@@ -5,6 +5,7 @@
   ...
 }:
 {
+  home.packages = lib.mkIf config.programs.fish.enable [ pkgs.glib ];
   programs.fish = lib.mkIf config.programs.fish.enable {
     shellInit = ''
       # Portable paths; project environments and existing runtime settings take priority.
@@ -428,7 +429,30 @@
               return 1
           end
 
-          curl -fsSL "https://www.toptal.com/developers/gitignore/api/$argv" > .gitignore
+          if test -L .gitignore; or test -d .gitignore
+              echo "Refusing a symlink or directory .gitignore" >&2
+              return 1
+          end
+          set -l temporary (${pkgs.coreutils}/bin/mktemp .gitignore.tmp.XXXXXXXX)
+          or return 1
+          set -l templates (string join , -- $argv)
+          if curl -fsSL "https://www.toptal.com/developers/gitignore/api/$templates" > "$temporary"
+              if test -f .gitignore
+                  ${pkgs.coreutils}/bin/chmod --reference=.gitignore "$temporary"
+                  or begin
+                      ${pkgs.coreutils}/bin/rm -f -- "$temporary"
+                      return 1
+                  end
+              end
+              ${pkgs.coreutils}/bin/mv -T -- "$temporary" .gitignore
+              set -l result $status
+              ${pkgs.coreutils}/bin/rm -f -- "$temporary"
+              return $result
+          else
+              set -l result $status
+              ${pkgs.coreutils}/bin/rm -f -- "$temporary"
+              return $result
+          end
         '';
       };
       "groot" = {
@@ -530,7 +554,7 @@
         description = "Open TODO.md file";
 
         "body" = ''
-          if not set -q $EDITOR
+          if not set -q EDITOR
               set EDITOR nvim
           end
 

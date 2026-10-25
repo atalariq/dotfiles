@@ -31,6 +31,17 @@
     layout = "us";
     variant = "";
   };
+  # Device input policy belongs to this host; portable/WSL profiles stay inert.
+  services.keyd = {
+    enable = true;
+    keyboards.superkey = {
+      ids = [ "*" ];
+      settings = {
+        main.capslock = "overload(superkey, esc)";
+        "superkey:C-M-A" = { };
+      };
+    };
+  };
   users.users.atalariq = {
     isNormalUser = true;
     description = "Atalariq Barra Hadinugraha";
@@ -44,12 +55,15 @@
   };
   dotfiles = {
     system.base.enable = true;
+    desktop.capture.enable = true;
     desktop.audio.enable = true;
     desktop.bluetooth.enable = true;
     desktop.files.enable = true;
     desktop.fonts.enable = true;
     desktop.espanso.enable = true;
     desktop.mango.enable = true;
+    desktop.umbriel.enable = true;
+    desktop.greeter.enable = true;
     desktop.noctalia.enable = true;
     security.authentication.enable = true;
     security.ssh.enable = false;
@@ -59,5 +73,7 @@
     hardware.thinkpad.enable = true;
     gaming.steam.enable = true;
   };
+  services.displayManager.defaultSession = "umbriel";
+  services.displayManager.noctalia-greeter.settings.session.default = "Umbriel";
   system.stateVersion = "26.05";
 }

@@ -1,49 +1,108 @@
 #!/usr/bin/env bash
-# Edit one path per line. Audit the whole proposal before changing any file.
+# Edit one path per line; reject conflicting plans before moving any source.
 set -euo pipefail
 list=$(mktemp "${TMPDIR:-/tmp}/vimv.XXXXXXXX")
-trap 'rm -f -- "$list"' EXIT
-if (( $# )); then
-  sources=("$@")
+completed=()
+cleanup() {
+	status=$?
+	rm -f -- "$list"
+	if ((status != 0 && ${#completed[@]})); then
+		printf 'Rename stopped after these completed operations:\n' >&2
+		printf '%s\n' "${completed[@]}" >&2
+	fi
+}
+trap cleanup EXIT
+canonical_entry() {
+	local parent name
+	name=$(basename -- "$1")
+	case "$name" in
+	. | .. | /) realpath -m -- "$1" ;;
+	*)
+		parent=$(realpath -m -- "$(dirname -- "$1")")
+		printf '%s/%s\n' "${parent%/}" "$name"
+		;;
+	esac
+}
+if (($#)); then
+	sources=("$@")
 else
-  mapfile -d '' -t sources < <(find . -mindepth 1 -maxdepth 1 -print0)
+	find . -mindepth 1 -maxdepth 1 -print0 >"$list"
+	mapfile -d '' -t sources <"$list"
+	: >"$list"
 fi
-(( ${#sources[@]} )) || exit 0
+((${#sources[@]})) || exit 0
 for path in "${sources[@]}"; do
-  if [[ $path == *$'\n'* || ! -e $path && ! -L $path ]]; then
-    printf 'Unsupported or missing source: %q\n' "$path" >&2
-    exit 1
-  fi
-  printf '%s\n' "$path" >> "$list"
+	if [[ $path == *$'\n'* || ! -e $path && ! -L $path ]]; then
+		printf 'Unsupported or missing source: %q\n' "$path" >&2
+		exit 1
+	fi
+	printf '%s\n' "$path" >>"$list"
 done
-# EDITOR names a binary; no eval or filename-generated shell expressions.
 "${VISUAL:-${EDITOR:-vim}}" "$list"
-mapfile -t destinations < "$list"
-if (( ${#sources[@]} != ${#destinations[@]} )); then
-  echo 'The number of paths changed; nothing was renamed.' >&2
-  exit 1
+mapfile -t destinations <"$list"
+if ((${#sources[@]} != ${#destinations[@]})); then
+	echo 'The number of paths changed; nothing was renamed.' >&2
+	exit 1
 fi
-declare -A seen=()
+declare -A seen_sources=() seen_destinations=()
+tracked=()
 for i in "${!sources[@]}"; do
-  destination=${destinations[i]}
-  [[ -n $destination && -z ${seen["$destination"]+present} ]] || {
-    echo 'Empty or duplicate destination; nothing was renamed.' >&2; exit 1;
-  }
-  seen["$destination"]=1
-  if [[ ${sources[i]} != "$destination" && ( -e $destination || -L $destination ) ]]; then
-    printf 'Destination exists; nothing was renamed: %s\n' "$destination" >&2
-    exit 1
-  fi
+	[[ -n ${destinations[i]} ]] || {
+		echo 'Empty destination' >&2
+		exit 1
+	}
+	sources[i]=$(canonical_entry "${sources[i]}")
+	destinations[i]=$(canonical_entry "${destinations[i]}")
+	source=${sources[i]} destination=${destinations[i]}
+	[[ $source != / && $destination != / ]] || {
+		echo "Root is not a rename entry." >&2
+		exit 1
+	}
+	if [[ -n ${seen_sources["$source"]+present} || -n ${seen_destinations["$destination"]+present} ]]; then
+		echo 'Aliased or duplicate path; nothing was renamed.' >&2
+		exit 1
+	fi
+	seen_sources["$source"]=1 seen_destinations["$destination"]=1
+	if [[ $source != "$destination" && (-e $destination || -L $destination) ]]; then
+		printf 'Destination exists; nothing was renamed: %s\n' "$destination" >&2
+		exit 1
+	fi
+	parent=$(dirname -- "$destination")
+	while [[ ! -d $parent ]]; do
+		if [[ -e $parent || -L $parent ]]; then
+			printf 'Destination parent is not a directory: %s\n' "$parent" >&2
+			exit 1
+		fi
+		parent=$(dirname -- "$parent")
+	done
+	tracked[i]=0
+	if git ls-files --error-unmatch -- "$source" >/dev/null 2>&1; then
+		tracked[i]=1
+		root=$(git rev-parse --show-toplevel)
+		[[ $destination == "$root/"* ]] || {
+			echo 'Tracked destination must stay in its worktree.' >&2
+			exit 1
+		}
+	fi
 done
-count=0
 for i in "${!sources[@]}"; do
-  [[ ${sources[i]} != "${destinations[i]}" ]] || continue
-  mkdir -p -- "$(dirname -- "${destinations[i]}")"
-  if git ls-files --error-unmatch -- "${sources[i]}" >/dev/null 2>&1; then
-    git mv -- "${sources[i]}" "${destinations[i]}"
-  else
-    mv -- "${sources[i]}" "${destinations[i]}"
-  fi
-  count=$((count + 1))
+	for j in "${!sources[@]}"; do
+		if [[ ${destinations[i]} == "${sources[j]}/"* ]] ||
+			{ [[ $i != "$j" ]] && { [[ ${sources[i]} == "${sources[j]}/"* ]] || [[ ${destinations[i]} == "${destinations[j]}/"* ]]; }; }; then
+			echo 'Overlapping rename paths; nothing was renamed.' >&2
+			exit 1
+		fi
+	done
 done
-printf '%s files renamed.\n' "$count"
+for i in "${!sources[@]}"; do
+	[[ ${sources[i]} != "${destinations[i]}" ]] || continue
+	mkdir -p -- "$(dirname -- "${destinations[i]}")"
+	if [[ ${tracked[i]} == 1 ]]; then
+		git mv -- "${sources[i]}" "${destinations[i]}"
+	else
+		mv --no-target-directory --update=none-fail -- "${sources[i]}" "${destinations[i]}"
+	fi
+	printf -v receipt '%q -> %q' "${sources[i]}" "${destinations[i]}"
+	completed+=("$receipt")
+done
+printf '%s files renamed.\n' "${#completed[@]}"

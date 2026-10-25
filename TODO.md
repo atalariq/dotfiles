@@ -18,10 +18,16 @@ are recorded in [validation](docs/artifacts/validation.md).
 - [x] Selected creative/development applications and pinned pen.dev package.
 - [x] Syncthing with manual pairing and localhost UI; no automatic sharing.
 - [x] Disable ThinkPad SSH server; retain authentication and rollback material.
+- [x] Umbriel default, Mango fallback and Noctalia Greeter declarations.
+- [x] Shared capture workflow with native compositor queries and packaged tools.
+- [x] Flat nvf package definition and conform startup regression check.
 - [x] Annotated Nix and Indonesian maintenance handbook.
 
 ## Host acceptance
 
+- [ ] Accept Noctalia Greeter, login Umbriel, then login Mango fallback.
+- [ ] Test real screenshots, clipboard, Save, Decorate, Satty and OCR in both sessions.
+- [ ] Confirm nvim from the activated PATH loads conform without startup errors.
 - [ ] Review existing HOME ownership and perform the real system activation.
 - [ ] Confirm Look focusing, shortcuts, clipboard and absence of old collectors.
 - [ ] Verify TLP panel switching, charger events, hold release and suspend/resume.

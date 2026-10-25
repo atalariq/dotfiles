@@ -28,9 +28,13 @@ alfabetis. Direktori privat berawalan `_` bukan modul. Import katalog tidak
 mengaktifkan aplikasi. Profil sengaja mengaktifkan beberapa fitur sekaligus.
 
 Desktop berisi compositor, shell, portal dan integrasi sesi; aplikasi GUI
-berada di program/profil GUI atau creative. Modul NixOS Mango mengatur sesi login
-serta kebutuhan sistem, sedangkan Home Manager Mango mengatur keybinding dan
-monitor. Host macOS/Ubuntu tidak perlu mengimpor modul sistem NixOS.
+berada di program/profil GUI atau creative. Modul NixOS mendaftarkan sesi Umbriel/Mango dan greeter secara independen;
+Home Manager mengatur keybinding dan konfigurasi pengguna. Host memilih default
+Umbriel dan geometry layar, dengan Mango sebagai fallback. Modul capture memiliki
+workflow screenshot/recording/color picker bersama. `desktop/shortcuts.nix` menjadi
+sumber binding kedua compositor; `desktop/shelf.nix` mengelola Pluto. Keyd hanya
+dipilih ThinkPad; `dotfiles.desktop.capture.enable` pada NixOS menyediakan integrasi
+KMS GPU Screen Recorder. Lihat [desktop](desktop.md) untuk peta kepemilikan. Host macOS/Ubuntu tidak perlu mengimpor modul sistem NixOS.
 
 ## Source modes
 
@@ -42,7 +46,7 @@ perubahan opsi tersebut memerlukan rebuild, termasuk dalam mode live.
 
 Tmux dan Vim memiliki sumber mandiri yang bisa disalin tanpa Nix. Lua Neovim,
 plugin Yazi, serta completion Fish tetap memakai bahasa aplikasinya; konfigurasi
-dan pemasangannya dideklarasikan Nix. nvf memiliki plugin dan executable editor;
+dan pemasangannya dideklarasikan Nix. `packages/neovim.nix` membangun nvf yang memiliki plugin dan executable editor;
 tidak ada plugin manager kedua yang mengunduh saat startup.
 
 ## Runtime state and ownership
@@ -69,3 +73,11 @@ aplikasi dengan konfigurasi, buat satu modul alfabetis dan verifikasi katalog
 tetap inert sebelum fitur diaktifkan.
 
 [Appearance dan switching](themes.md) menjelaskan state tema dan pemilik warna.
+
+Live mode dengan appearance ditolak secara default karena file bertema dihasilkan
+ke Nix store. Jika kombinasi ini disengaja, tetapkan
+`dotfiles.deployment.allowThemedFiles = true`; evaluasi memberi warning bahwa
+edit file bertema tetap memerlukan rebuild. Sumber native lain tetap mengikuti
+checkout. Helper live menolak path dari luar source tree agar tidak menghasilkan
+symlink palsu. Checkout harus berupa path absolut dan tersedia sebelum tahap
+aktivasi yang menulis HOME; jika pindah, perbarui opsi `checkout` terlebih dahulu.

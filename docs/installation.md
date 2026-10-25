@@ -63,6 +63,17 @@ Mode immutable mengikuti generasi; mode live hanya berlaku pada sumber native
 yang memakai helper. Perubahan file live tidak dapat dibatalkan oleh rollback
 profile. Build terlebih dahulu, lalu lakukan aktivasi dengan autentikasi lokal.
 
+Sebelum apply ThinkPad, jalankan audit read-only terhadap generasi yang baru
+dibangun: `sh lib/audit-home.sh /nix/store/...-home-manager-generation`. Inventaris
+menampilkan leaf, symlink induk, dan link Neovim lama yang tidak lagi dimiliki
+manifest nvf. Salin konflik beserta isi targetnya ke backup privat; jangan
+menghapus direktori writable atau menyimpan inventaris privat di Git.
+
+Selesaikan migrasi HOME, review diff, lalu lakukan aktivasi dengan sudo lokal
+dan reboot manual setelah pekerjaan tersimpan. Noctalia Greeter menawarkan
+Umbriel sebagai default dan Mango sebagai fallback. Uji [kedua desktop dan
+screenshot](desktop.md) sebelum menghapus backup.
+
 ## Recovery
 
 Pertahankan generasi yang sudah bekerja dan backup sampai login, autentikasi,
@@ -76,3 +87,16 @@ Tidak ada cleanup terjadwal, penghapusan backup migrasi, atau migrasi disk.
 Provisioning age identity, akun aplikasi, SDK license dan trust perangkat tetap
 manual. Baca [secrets](secrets.md), [power/performance](performance.md), dan
 [catatan validasi](artifacts/validation.md) sebelum acceptance host.
+
+Untuk lanjutan SuperKey, audit/backup terbaru dicatat di
+[artefak desktop](artifacts/desktop-migration.md). Backup menyimpan arsip symlink
+serta arsip isi efektif secara terpisah; checksum harus cocok sebelum cutover.
+Periksa `targets.list` dan `home-audit.tsv` privat. Ekstrak arsip isi efektif ke
+direktori pemulihan kosong untuk dibandingkan; jangan mengekstrak langsung di
+atas symlink konfigurasi yang aktif. Setelah persetujuan, pindahkan hanya konflik
+HOME yang sudah ditinjau, lalu jalankan switch dengan autentikasi sudo lokal.
+Generasi dan backup tetap disimpan sampai acceptance kedua sesi selesai.
+
+Alur cutover baru menggunakan backup, GC root dan jurnal transaksi privat;
+lihat [panduan cutover](cutover.md). Gunakan command aktivasi dari snapshot
+immutable yang dicetak tool, menggantikan handoff checkout mutable di atas.

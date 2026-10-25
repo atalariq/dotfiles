@@ -27,6 +27,16 @@ let
     ];
     noctalia-autostart = [ pkgs.kitty ];
   };
+  chooser = pkgs.writeShellScript "yazi-chooser" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.kitty
+        pkgs.yazi
+        pkgs.coreutils
+      ]
+    }:"$PATH"
+    ${builtins.readFile ./scripts/yazi-chooser}
+  '';
   scripts = lib.mapAttrs (
     name: runtimeInputs:
     script {
@@ -42,10 +52,20 @@ in
     assertions = [
       {
         assertion =
-          cfg.desktop.noctalia.enable && config.programs.kitty.enable && config.programs.lookapp.enable;
+          cfg.desktop.noctalia.enable
+          && config.programs.kitty.enable
+          && config.programs.yazi.enable
+          && config.programs.lookapp.enable;
         message = "Desktop controller helpers require explicit Noctalia, Kitty, Brave and desktop files features.";
       }
     ];
+    xdg.configFile."xdg-desktop-portal-termfilechooser/config".text = ''
+      [filechooser]
+      cmd=${chooser}
+      default_dir=${config.home.homeDirectory}
+      open_mode=suggested
+      save_mode=suggested
+    '';
     home.packages = builtins.attrValues scripts;
     home.file = lib.mapAttrs' (
       name: package:
