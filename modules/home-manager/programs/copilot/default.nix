@@ -34,7 +34,8 @@ in
           readwritePaths = [
             rtkData
             "${config.xdg.cacheHome}/nix"
-          ];
+          ]
+          ++ lib.optional config.dotfiles.programs.beads-rust.enable config.dotfiles.programs.beads-rust.directory;
           readonlyPaths = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "${config.xdg.configHome}/rtk" ];
           deniedPaths = [
             "${config.home.homeDirectory}/.ssh"

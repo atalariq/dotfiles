@@ -8,6 +8,9 @@
 let
   toml = pkgs.formats.toml { };
   settings = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./template.toml)) {
+    shell_environment_policy.set = lib.optionalAttrs config.dotfiles.programs.beads-rust.enable {
+      DOTFILES_BEADS_DIR = config.dotfiles.programs.beads-rust.directory;
+    };
     # Workspace roots are more specific than this deny. Keep other home data
     # hidden; redundant nested denies break mount preparation in Codex 0.163.
     permissions.development.filesystem = {
@@ -16,6 +19,9 @@ let
       "${config.xdg.configHome}/rtk" = "read";
       "${config.xdg.dataHome}/rtk" = "write";
       "${config.xdg.cacheHome}/nix" = "write";
+    }
+    // lib.optionalAttrs config.dotfiles.programs.beads-rust.enable {
+      "${config.dotfiles.programs.beads-rust.directory}" = "write";
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
       "${config.home.homeDirectory}/Library/Application Support/rtk" = "write";

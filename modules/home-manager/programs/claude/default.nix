@@ -22,15 +22,18 @@ in
     home.packages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code ];
     xdg.configFile."dotfiles/templates/claude.json".text = builtins.toJSON (
       lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./template.json)) {
+        permissions.additionalDirectories = lib.optional config.dotfiles.programs.beads-rust.enable config.dotfiles.programs.beads-rust.directory;
         sandbox.filesystem = {
           allowRead = [
             rtkData
           ]
-          ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "${config.xdg.configHome}/rtk" ];
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "${config.xdg.configHome}/rtk" ]
+          ++ lib.optional config.dotfiles.programs.beads-rust.enable config.dotfiles.programs.beads-rust.directory;
           allowWrite = [
             rtkData
             "${config.xdg.cacheHome}/nix"
-          ];
+          ]
+          ++ lib.optional config.dotfiles.programs.beads-rust.enable config.dotfiles.programs.beads-rust.directory;
         };
       }
     );

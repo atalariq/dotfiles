@@ -27,18 +27,10 @@ agent:
     - code_execution
     - cronjob
 terminal:
-  # Native Docker backend detects rootless Podman directly. File tools use the
-  # same container environment. Launch from an authorized project, never HOME.
-  backend: docker
+  # Host execution is deliberate: br and Nix use their native host packages.
+  # Local mode has user access; manual approvals are not filesystem isolation.
+  backend: local
   cwd: .
-  docker_image: docker.io/nousresearch/hermes-sandbox@sha256:c7d8607d076f26a64e0bd6828f74e1764af43fe3281368188459bb693bfa7567
-  docker_mount_cwd_to_workspace: true
-  docker_volumes: []
-  docker_forward_env: []
-  docker_env: {}
-  container_persistent: false
-  container_cpu: 2
-  container_memory: 4096
   timeout: 180
   auto_source_bashrc: false
   shell_init_files: []

@@ -27,6 +27,7 @@
       gh.enable = true;
       lazygit.enable = true;
       codex.enable = true;
+      beads-rust.enable = true;
       agy.enable = true;
       copilot.enable = true;
       rtk.enable = true;

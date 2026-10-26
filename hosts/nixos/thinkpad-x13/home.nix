@@ -139,6 +139,7 @@
       tirith.enable = true;
       opencode.enable = true;
       codex.enable = true;
+      beads-rust.enable = true;
       agy.enable = true;
       copilot.enable = true;
       claude.enable = true;

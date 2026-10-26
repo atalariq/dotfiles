@@ -30,6 +30,47 @@ in
     xdg.configFile."opencode/opencode.jsonc".source = format.generate "opencode.json" (
       lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./config/opencode.jsonc)) {
         providers.omniroute.settings.baseURL = cfg.gatewayUrl;
+        permissions =
+          (builtins.fromJSON (builtins.readFile ./config/opencode.jsonc)).permissions
+          ++ lib.optionals config.dotfiles.programs.beads-rust.enable (
+            (map
+              (resource: {
+                action = "external_directory";
+                inherit resource;
+                effect = "allow";
+              })
+              [
+                config.dotfiles.programs.beads-rust.directory
+                "${config.dotfiles.programs.beads-rust.directory}/**"
+              ]
+            )
+            ++
+              map
+                (command: {
+                  action = "shell";
+                  resource = "br ${command}*";
+                  effect = "allow";
+                })
+                [
+                  "ready"
+                  "show"
+                  "list"
+                  "blocked"
+                  "coordination status"
+                  "update"
+                  "comments"
+                  "close"
+                  "sync --flush-only"
+                  "sync --import-only"
+                ]
+            ++ [
+              {
+                action = "shell";
+                resource = "br *--force*";
+                effect = "ask";
+              }
+            ]
+          );
       }
     );
     xdg.configFile."opencode/cli.json".source = ./config/cli.json;
