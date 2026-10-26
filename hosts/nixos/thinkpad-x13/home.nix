@@ -147,6 +147,7 @@
       opencode.enable = true;
       codex.enable = true;
       beads-rust.enable = true;
+      freesmlauncher.enable = true;
       tokscale.enable = true;
       crit.enable = true;
       agent-browser.enable = true;
