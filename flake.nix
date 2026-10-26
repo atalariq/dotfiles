@@ -90,7 +90,6 @@
         in
         {
           inherit (unstable)
-            herdr
             umbriel
             xdg-desktop-portal-umbriel
             noctalia-greeter

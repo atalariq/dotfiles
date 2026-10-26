@@ -1,10 +1,14 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
 }:
 {
+  programs.herdr.package =
+    lib.mkIf config.programs.herdr.enable
+      inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
   programs.herdr.settings = lib.mkIf config.programs.herdr.enable {
     "onboarding" = false;
     "theme" = {

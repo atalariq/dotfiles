@@ -140,6 +140,18 @@
       opencode.enable = true;
       codex.enable = true;
       beads-rust.enable = true;
+      tokscale.enable = true;
+      crit.enable = true;
+      agent-browser.enable = true;
+      codegraph.enable = true;
+      git-ai = {
+        enable = true;
+        repositories = [ "https://github.com/atalariq/dotfiles.git" ];
+      };
+      git-surgeon.enable = true;
+      nono.enable = true;
+      workmux.enable = true;
+      orca.enable = true;
       agy.enable = true;
       copilot.enable = true;
       claude.enable = true;
