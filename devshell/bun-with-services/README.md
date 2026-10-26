@@ -6,7 +6,7 @@ Run `nix develop`, or review `.envrc` and run `direnv allow` once. Entering the 
 
 Services are opt-in. See the service commands below; entering this shell never starts a container.
 
-Update `flake.lock` deliberately. Without Nix, install the same package versions listed in [VERSIONS.md](VERSIONS.md).
+Update `flake.lock` deliberately; it records the toolchain versions.
 
 ## Services
 
@@ -16,19 +16,18 @@ Optionally copy `.env.example` to `.env` and choose local credentials/ports.
 Use a distinct `COMPOSE_PROJECT_NAME` for projects that share a directory name.
 
 ```sh
-./services up postgres
-./services up redis
-./services up observability
-./services health
-./services status
-./services down
+podman-compose --profile postgres up -d
+podman-compose --profile redis up -d
+podman-compose --profile observability up -d
+podman-compose ps
+podman-compose down
 ```
 
-`up all` starts every profile. `stop` and `down` preserve volumes. Data deletion,
+`--profile '*' up -d` starts every profile. `stop` and `down` preserve volumes. Data deletion,
 migrations and seeds are separate, deliberate operations. Ports bind localhost.
 Images have verified Linux amd64/arm64 manifest digests. The observability
 profile accepts OTLP **metrics**, which Prometheus scrapes and Grafana displays
 through its provisioned Prometheus datasource. Logs and traces are not stored.
-The collector exposes its health extension; `health` checks the actual HTTP
-readiness endpoints. Bun reads the project `.env` for the health command. `.envrc` only loads
+The collector exposes its health extension; check HTTP readiness endpoints
+directly with curl and inspect compose health status. `.envrc` only loads
 the toolchain; it does not export service credentials. Review credentials, exposure and backups before server deployment.

@@ -1,0 +1,85 @@
+# Working on this repository
+
+## Start with the selected task
+
+- Read README.md, the owner-provided handoff/backlog, and the relevant host/module.
+  Inspect `git status --short` before editing. Verify recorded facts against source.
+- Work on one owner-selected slice at a time. Do not start the next automatically.
+- Codex plans and reviews by default; direct implementation requires an explicit
+  owner request. The owner orchestrates implementers. Do not invoke other agents,
+  background AI jobs, or skills.
+- Use this file as the canonical project guidance. If a tool does not load it,
+  include it explicitly in the task prompt rather than copying its instructions.
+
+## Find the configuration
+
+| Entry point | Responsibility |
+| --- | --- |
+| `flake.nix`, `flake.lock` | Inputs, package outputs, checks, and host entry points |
+| `Justfile` | Direct build, diff, apply, formatting, and update commands |
+| `hosts/nixos/thinkpad-x13` | NixOS system and desktop Home Manager selections |
+| `hosts/darwin/macpro-m4` | nix-darwin system and Home Manager selections |
+| `hosts/linux/lab`, `hosts/wsl/lab` | Standalone, headless Home Manager selections |
+| `modules/home-manager/common` | Overridable CLI defaults shared by every host |
+| `modules/home-manager/programs` | Application modules and colocated packages/configs |
+| `modules/home-manager/desktop` | Compositor and desktop-shell configuration |
+| `modules/home-manager/sources.nix` | Immutable/live source mapping and native theme adapters |
+| `modules/nixos`, `modules/darwin`, `modules/stylix` | System integration and appearance |
+| `devshell` | Independent project templates with their own flakes |
+
+The standalone outputs are `homeConfigurations.linux-lab` and
+`homeConfigurations.wsl-lab`. The system outputs are
+`nixosConfigurations.thinkpad-x13` and `darwinConfigurations.macpro-m4`.
+
+## Preserve the design and existing work
+
+- Preserve unrelated edits and the Git index. Do not reset, stage, commit, or push
+  unless requested. Preserve hardware identity, disk/encryption layout, authentication,
+  `stateVersion`, application data, and rollback generations unless the task requires changes.
+- Keep application modules opt-in. Shared scalar defaults use `lib.mkDefault`;
+  package lists merge normally. Hosts own identities, feature selections, and displays.
+- Program modules use `<program>/default.nix`; package-only directories may contain
+  just `package.nix`. `programs/integrations.nix` is an explicit exception imported
+  by the program index. Keep package derivations beside their consumers.
+- Prefer native Nix modules and application configuration. Do not add custom runtime
+  scripts, command dispatchers, or a new registry/framework for routine configuration.
+- Retain both immutable and live modes. Live mapping must reject foreign paths;
+  generated theme files still rebuild. Do not replace native configs with reduced examples.
+- Stylix owns themes; Noctalia owns desktop UI/polkit; Look owns launcher/clipboard.
+  TLP is the ThinkPad power manager. Retain GPU Screen Recorder for quick capture
+  and OBS for composed scenes. Avoid duplicate services and conflicting owners.
+- Keep credentials and writable login/runtime state outside Git and the Nix store.
+  Do not print decrypted secrets or overwrite runtime files from templates.
+- Add dependencies only for an established requirement. Preserve surviving lock pins
+  during cleanup; compare logical input/follows relationships when node IDs change.
+
+## Validate without activation
+
+- Read `Justfile` before running recipes. Format changed Nix files with `nixfmt`;
+  use `git diff --check`. Documentation-only changes need link/command checks,
+  not a full system rebuild. Do not add dependencies solely to validate prose.
+- `just check` runs the current-platform flake checks without updating the lockfile.
+  Evaluate affected host outputs and build affected packages/system closures as needed.
+  Use `--no-link` and retain command results outside the repository.
+- Git flakes omit untracked source files. If necessary, evaluate a filtered temporary
+  snapshot containing required source and new task files without changing the index.
+  Exclude Git metadata, build links, caches, and private runtime data. Point Nix at
+  `path:/absolute/snapshot` with `--no-update-lock-file --no-write-lock-file`.
+- Darwin builds require a Darwin builder. Record evaluation separately from native
+  builds, activation, and physical acceptance. Do not claim unavailable device tests passed.
+- The owner performs activation. Do not run `apply-*`, rebuild switch/boot/test,
+  Home Manager switch, or change running services/displays. Provide reviewed commands;
+  never request, capture, or bypass sudo credentials.
+
+## Leave a small handoff
+
+- Public README stays in English and contains project documentation, including the
+  AI usage disclosure. Keep local incidents, budgets, session history, and receipts out.
+- Update the owner-provided checkpoint outside Git; the default location is
+  `${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/handoff.md`. Keep plan/status files
+  and evidence outside the repository; do not recreate PLAN.md/PROMPT.md.
+- Record the selected slice, changed files, decisions, checks and outcomes, remaining
+  device tests/blockers, and the next slice. Distinguish implemented, validated,
+  needs-owner-test, and blocked. Replace stale status rather than appending transcripts.
+- Preserve exact failure evidence. Do not repeat an unchanged failure or weaken checks.
+  Stop after the selected slice and its checkpoint update.

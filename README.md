@@ -1,137 +1,174 @@
-<div align="center">
-
 # Dotfiles
 
-**A personal workspace, expressed in Nix.**
+NixOS, macOS, Linux, and WSL configurations with shared defaults and explicit
+per-host choices. Native application configs live alongside the Nix modules
+that install them.
 
-Umbriel · Mango fallback · Noctalia · Look · Stylix · Gruvbox · Fish · Neovim · Vim
+[Hosts](#hosts) · [Setup](#setup) · [Customization](#customization) · [Development](#development)
 
-[About](#about) · [Structure](#layoutstructure) · [Install](#install--apply) · [Reference](#quick-references)
+## Features
 
-![Desktop screenshot placeholder — replace after desktop acceptance](docs/assets/desktop-placeholder.svg)
+- **Desktop:** Umbriel, a Mango fallback session, Noctalia, and the Look launcher.
+- **Appearance:** Stylix themes, fonts, and application palettes.
+- **Terminal:** Fish, Starship, Git, Tmux, Yazi, Vim, and Neovim configured through nvf.
+- **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
+- **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
+- **Development:** Independent Bun, Go, and Rust flake templates; commands collected in a plain `Justfile`.
 
-*Placeholder, not a capture of the running desktop.*
+## Hosts
 
-</div>
+| Configuration | Platform | Manages |
+| --- | --- | --- |
+| `thinkpad-x13` | NixOS · x86_64 | System and Home Manager; Wayland desktop |
+| `macpro-m4` | macOS · Apple Silicon | nix-darwin and Home Manager |
+| `linux-lab` | Linux · x86_64 | Standalone Home Manager; command-line environment |
+| `wsl-lab` | Ubuntu WSL2 · x86_64 | Standalone Home Manager; command-line environment |
 
-## About
+The Linux and WSL lab configurations manage the user environment, not the host OS.
+Darwin builds require a Mac or a Darwin builder.
 
-A modular workspace for NixOS, macOS with nix-darwin, Linux with Home Manager,
-and WSL. Shared profiles describe workflows; hosts supply identity, platform and
-hardware. Nix is annotated directly, with an Indonesian handbook explaining the
-reasons and maintenance exercises. No Markdown/Org generation step is required.
+## Setup
 
-The ThinkPad defaults to Umbriel with Mango as a fallback, Noctalia Greeter,
-Noctalia's panel/lockscreen, Look's launcher/clipboard,
-Stylix Gruvbox, and TLP/tlp-pd. Project toolchains come from standalone devShells
-with direnv. Podman services are isolated in the Bun services template.
+Install Nix with `nix-command` and `flakes` enabled, then clone this repository.
+Adapt the username, home directory, Git identity, and host settings before use.
+For NixOS, provide hardware and filesystem settings for the target machine.
+New source files must be added to Git before they are included in a Git flake.
 
-## Layout/Structure
-
-```text
-flake.nix                       Inputs and flake-parts per-platform outputs
-hosts/                          Registry, host identity and device configuration
-profiles/                       Shared CLI, development, GUI, creative and gaming choices
-modules/home-manager/programs/  Alphabetical configured applications
-modules/home-manager/services/  User service integrations
-modules/home-manager/desktop/   Compositor and desktop session integrations
-modules/home-manager/appearance/ Stylix targets, adapters and theme switching
-modules/nixos/, modules/darwin/ System integrations for their respective OS
-packages/                       Shared nvf editor and pinned binary application packages
-lib/                            Host construction, native sources and command dispatcher
-devshell/                       Bun with services, Go and Rust templates
-themes/                         Shared schemes, fonts, icons and cursor
-tests/                          Configuration, runtime and command contracts
-docs/                           Indonesian handbook and verification evidence
-secrets/                        Encrypted SOPS data; private identities stay outside Git
-```
-
-Programs use upstream Home Manager options where available. An ordinary package
-belongs in a profile's `home.packages`; it does not need its own enable module.
-Profiles are reusable selections, not machine identities. Tmux and Vim retain
-independent native sources for copying to machines without Nix.
-
-## Prerequisites
-
-Nix with flakes/nix-command, Git, and internet for uncached inputs. Supported
-build platforms are `x86_64-linux`, `aarch64-linux`, and `aarch64-darwin`.
-Nixpkgs 26.11 removed Mac Intel support; no unsupported-platform bypass is used.
-Individual applications have narrower platform support: consult [the application
-notes](docs/applications.md). Evaluation is not a cross-platform runtime test.
-
-## Install & Apply
-
-Review [installation and recovery](docs/installation.md) first. Example hosts use
-`example` and must be adapted to the real identity before activation. Preserve
-existing stateVersion values and generate your own hardware configuration.
+Enter the development shell and inspect the available commands:
 
 ```sh
-nix develop                 # pinned Just, nh, formatters and shell tools
-just                        # list recipes
+nix develop
+just --list
 just check
-just build thinkpad-x13
-just build ubuntu-x86_64-linux
-just diff thinkpad-x13
-# After reviewing the generation and HOME ownership:
-just apply thinkpad-x13
 ```
 
-Plain Nix remains available: `nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link`.
-Apply checks platform, system type and username. Privileged system activation
-uses normal local authentication through nh. Building does not activate a profile.
+Build the configuration for the target machine:
 
-## Known Hosts
+```sh
+just build-thinkpad-x13
+just build-macpro-m4
+just build-linux-lab
+just build-wsl-lab
+```
 
-| Configuration | Platform | Purpose |
-| --- | --- | --- |
-| `thinkpad-x13` | x86_64-linux, NixOS | Existing AMD ThinkPad workstation |
-| `macos-example` | aarch64-darwin | nix-darwin with shared CLI/development |
-| `ubuntu-{x86_64,aarch64}-linux` | Linux, Home Manager | Generic distro examples |
-| `ubuntu-wsl-{x86_64,aarch64}-linux` | Linux, Home Manager | Existing Ubuntu WSL examples |
-| `nixos-wsl-{x86_64,aarch64}-linux` | NixOS-WSL | NixOS distribution under WSL |
+Each command builds one host. Builds use `--no-link` and do not activate a
+configuration. On an existing managed system, inspect the system closure changes
+with `just diff-thinkpad-x13` or `just diff-macpro-m4`.
 
-Braces above abbreviate two explicit output names; pass one real name to Just.
-The old `portable` output has been replaced by the Ubuntu examples without aliases.
+After reviewing the configuration and backing up conflicting files, run the
+matching `just apply-<host>` recipe on its target machine. Inspect [Justfile](Justfile)
+for the underlying commands. Home Manager activation can replace managed files
+and restart user services.
 
-## Quick References
+### macOS bootstrap
 
-| Task | Command or guide |
+Install Homebrew at its Apple Silicon prefix, `/opt/homebrew`, before activation.
+For the first nix-darwin activation:
+
+```sh
+nix build .#darwinConfigurations.macpro-m4.system --no-link
+sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake .#macpro-m4
+```
+
+Subsequent activations can use `just apply-macpro-m4`. If the Nix daemon is managed
+by a separate installer, set `nix.enable = false` in the host configuration before
+activation. Home Manager uses its built-in application integration; macOS may
+request App Management permission for the terminal.
+
+CLI tools, Kitty, and Pen come from Nix. The host also declares GUI applications
+through Homebrew. Activation leaves unlisted Homebrew packages installed and does
+not auto-update or upgrade them. Homebrew cask versions and application updaters
+are outside the Nix lockfile.
+
+### Linux and WSL
+
+Install Nix in the existing distribution before applying `linux-lab` or `wsl-lab`.
+User services such as sops-nix require systemd support; enable it in WSL when
+using those services. The configuration does not provision Windows or a WSL distro.
+
+## Customization
+
+[Common defaults](modules/home-manager/common/default.nix) select the shared CLI
+environment. Each host adds its own applications, system services, and displays.
+Most application modules are opt-in; package definitions stay next to their consumers.
+
+Override shared scalar defaults in the host's Home Manager module:
+
+```nix
+programs.fish.enable = false;
+programs.git.settings.user.email = "you@example.com";
+home.packages = [ pkgs.wget ]; # Adds to the shared package list.
+# home.packages = lib.mkForce [ pkgs.git ]; # Replaces the entire package list.
+```
+
+Include `pkgs` and `lib` in the module arguments when using them. Keep each host's
+`stateVersion` independent of package updates.
+
+### Themes and native files
+
+Select a theme with `dotfiles.appearance.theme` and rebuild. The default deployment
+uses immutable sources. To edit supported native files directly, add this to a
+Home Manager module with `config` in its arguments:
+
+```nix
+dotfiles.deployment = {
+  mode = "live";
+  checkout = "${config.home.homeDirectory}/.dotfiles";
+  allowThemedFiles = true;
+};
+```
+
+Set `checkout` to the actual repository location. Packages, plugins, and generated
+theme files still require a rebuild. `allowThemedFiles` explicitly accepts that
+limitation when live mode and appearance are enabled together.
+
+### Secrets
+
+Configure recipients in [.sops.yaml](.sops.yaml) and supply encrypted files using
+[the secrets module](modules/home-manager/services/secrets.nix). Keep private age
+identities outside the checkout and Nix store. The default identity location is
+`~/.config/sops/age/keys.txt`; restrict the directory to `0700` and the file to `0600`.
+Use separate device identities and retain a tested recovery recipient.
+
+Select actual encrypted files before enabling secrets. Credentials are decrypted
+at runtime rather than interpolated into Nix expressions. Treat dotenv files as
+data, not executable shell. Application login state and private SSH/GPG keys remain
+outside the repository.
+
+## Development
+
+| Location | Purpose |
 | --- | --- |
-| Select programs or add a host | [Configuration](docs/configuration.md), [installation](docs/installation.md#add-a-host) |
-| Enter a project shell | `nix flake init -t /path/to/dotfiles#go`; review, then `direnv allow` |
-| Toolchains and services | [Development](docs/development.md) |
-| Switch prebuilt theme | `dotfiles-theme set gruvbox-light`; [appearance](docs/themes.md) |
-| Power profiles and heavy work | `just power balanced`, `dotfiles-boost command`; [performance](docs/performance.md) |
-| Fast Nix build on ThinkPad | `just build-fast thinkpad-x13` |
-| Update deliberately | `just update nixpkgs` or `just update` |
-| Preview cleanup | `just clean` |
-| Execute reviewed cleanup | `just clean-apply` (retain five generations and 30 days) |
-| Format source | `just fmt` (generated hardware/device files excluded) |
-| Application decisions | [Applications](docs/applications.md) |
-| Desktop, SuperKey, shelf and capture | [Desktop guide](docs/desktop.md) |
-| Desktop migration evidence | [Traceability](docs/artifacts/desktop-migration.md) |
-| Test/build limitations | [Validation](docs/artifacts/validation.md) |
+| [hosts/](hosts/) | Platform, identity, application selection, and display settings |
+| [modules/home-manager/](modules/home-manager/) | Shared defaults and application configuration |
+| [modules/nixos/](modules/nixos/) | NixOS system integration |
+| [modules/darwin/](modules/darwin/) | macOS system defaults |
+| [modules/stylix/](modules/stylix/) | Theme palettes and adapters |
+| [devshell/](devshell/) | Independent project templates |
 
-## Notes
+Use `just fmt` to format Nix sources and `just check` to validate the flake and run
+its checks for the current platform. Update dependencies deliberately with
+`just update` or `just update nixpkgs`.
 
-Secrets, SDKs, projects, account state and device authorisation stay writable and
-outside the repository. Syncthing pairing is manual; its UI is localhost-only.
-Zotero is omitted by default. Noctalia does not generate app themes or record
-clipboard history. Look is the clipboard owner. Disk migration tools are not enabled.
+The [Bun](devshell/bun-with-services/README.md), [Go](devshell/go/README.md), and
+[Rust](devshell/rust/README.md) templates include their own usage instructions.
+Application-specific behavior is documented in the relevant module and native config.
 
-Keep private backups and existing generations until actual host acceptance.
-Build success does not establish desktop, power, audio or physical-device behaviour.
+## AI Usage Disclosure
 
-## Inspiration
+Parts of this configuration and its documentation were developed with AI assistance,
+including planning, implementation, and review. Design decisions and responsibility
+for the published configuration remain with the maintainer. Successful builds and
+automated checks do not imply activation or testing on physical hardware.
 
-[Ryan Yin](https://github.com/ryan4yin/nix-config) ·
-[Misterio's starter configs](https://github.com/Misterio77/nix-starter-configs) ·
-[Foundry](https://github.com/Misterio77/Foundry) ·
-[Calsjunior](https://github.com/Calsjunior/dotfiles) ·
-[natsukium](https://github.com/natsukium/dotfiles) ·
-[Waldir Borba](https://github.com/waldirborbajr/nixos-config)
+## Credits
 
-Licensed under [MIT](LICENSE).
+Built with [Home Manager](https://github.com/nix-community/home-manager),
+[nix-darwin](https://github.com/nix-darwin/nix-darwin),
+[Stylix](https://github.com/nix-community/stylix),
+[nvf](https://github.com/NotAShelf/nvf), and
+[sops-nix](https://github.com/Mic92/sops-nix).
 
-Desktop changes can be verified with `just desktop-smoke`; use the
-[immutable cutover guide](docs/cutover.md) for audited HOME relocation and recovery.
+## License
+
+[MIT](LICENSE)
