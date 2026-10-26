@@ -106,6 +106,13 @@
   };
   systemd.user.services.syncthing.Service.Environment = [ "STNODEFAULTFOLDER=1" ];
   dotfiles = {
+    deployment.liveApps = [
+      "espanso"
+      "vim"
+      "neovim"
+      "hermes"
+      "opencode"
+    ];
     appearance = {
       enable = true;
       gui = true;

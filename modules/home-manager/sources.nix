@@ -10,18 +10,19 @@ let
   # A path from another input cannot be mapped into this checkout.
   checkedPath =
     path:
-    assert lib.assertMsg
-      (config.dotfiles.deployment.mode != "live" || lib.hasPrefix (toString ../.. + "/") (toString path))
+    assert lib.assertMsg (lib.hasPrefix (toString ../.. + "/") (toString path))
       "dotfiles live sources must be inside this dotfiles source tree; foreign paths cannot be mapped to the checkout.";
     path;
-  source =
+  liveSource =
     path:
-    if config.dotfiles.deployment.mode == "immutable" then
-      path
-    else
-      config.lib.file.mkOutOfStoreSymlink "${checkout}/${
-        lib.removePrefix (toString ../.. + "/") (toString (checkedPath path))
-      }";
+    config.lib.file.mkOutOfStoreSymlink "${checkout}/${
+      lib.removePrefix (toString ../.. + "/") (toString (checkedPath path))
+    }";
+  source = path: if config.dotfiles.deployment.mode == "live" then liveSource path else path;
+  sourceFor =
+    app: path:
+    if builtins.elem app config.dotfiles.deployment.liveApps then liveSource path else source path;
+  themePath = path: if config.dotfiles.deployment.mode == "live" then checkedPath path else path;
   baseline = import ../stylix/source-palette.nix;
   roles = builtins.attrNames baseline;
   themedSource =
@@ -32,7 +33,7 @@ let
       pkgs.writeText (builtins.baseNameOf path) (
         lib.replaceStrings (map (role: baseline.${role}) roles) (map (
           role: config.lib.stylix.colors.${role}
-        ) roles) (builtins.readFile (checkedPath path))
+        ) roles) (builtins.readFile (themePath path))
       );
   themedDirectory =
     path:
@@ -47,9 +48,14 @@ let
               themedDirectory (path + "/${name}")
             else
               themedSource (path + "/${name}");
-        }) (builtins.readDir (checkedPath path))
+        }) (builtins.readDir (themePath path))
       );
 in
 {
-  inherit source themedSource themedDirectory;
+  inherit
+    source
+    sourceFor
+    themedSource
+    themedDirectory
+    ;
 }

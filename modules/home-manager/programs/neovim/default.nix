@@ -9,10 +9,13 @@
 let
   # Only native files can use live mode. Plugin/tool changes always rebuild.
   editor =
-    if config.dotfiles.deployment.mode == "live" then
+    if
+      config.dotfiles.deployment.mode == "live"
+      || builtins.elem "neovim" config.dotfiles.deployment.liveApps
+    then
       import ./package.nix {
         inherit inputs pkgs;
-        runtime = dotfilesLib.source ./config;
+        runtime = dotfilesLib.sourceFor "neovim" ./config;
       }
     else
       import ./package.nix { inherit inputs pkgs; };

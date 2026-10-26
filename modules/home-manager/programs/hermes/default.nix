@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  dotfilesLib,
   ...
 }:
 {
@@ -10,6 +11,6 @@
   config = lib.mkIf config.dotfiles.programs.hermes.enable {
     home.packages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.hermes-agent ];
     # Nix owns settings; upstream memories, sessions and OAuth files stay writable.
-    home.file.".hermes/config.yaml".source = ./config/config.yaml;
+    home.file.".hermes/config.yaml".source = dotfilesLib.sourceFor "hermes" ./config/config.yaml;
   };
 }

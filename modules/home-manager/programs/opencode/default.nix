@@ -3,6 +3,7 @@
   inputs,
   pkgs,
   lib,
+  dotfilesLib,
   ...
 }:
 let
@@ -73,7 +74,7 @@ in
           );
       }
     );
-    xdg.configFile."opencode/cli.json".source = ./config/cli.json;
+    xdg.configFile."opencode/cli.json".source = dotfilesLib.sourceFor "opencode" ./config/cli.json;
 
   };
 }

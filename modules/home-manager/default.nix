@@ -21,6 +21,19 @@
       default = "immutable";
       description = "Whether remaining native sources follow a generation or the checkout.";
     };
+    liveApps = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.enum [
+          "espanso"
+          "vim"
+          "neovim"
+          "hermes"
+          "opencode"
+        ]
+      );
+      default = [ ];
+      description = "Applications whose supported native files link to the checkout; generated settings still rebuild.";
+    };
     allowThemedFiles = lib.mkOption {
       type = lib.types.bool;
       default = false;
