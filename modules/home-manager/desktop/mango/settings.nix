@@ -138,7 +138,6 @@
     "is_floating:1,is_overlay:1,is_global:1,width:1080,height:720,app_id:termfilechooser"
     "is_floating:1,is_overlay:1,is_global:1,width:1080,height:720,title:termfilechooser"
     "is_floating:1,is_overlay:1,is_global:1,width:1080,height:720,app_id:termfilechooser,title:termfilechooser"
-    "is_floating:1,is_overlay:1,is_global:1,is_open_silent:1,width:300,height:200,offset_x:98,offset_y:-98,app_id:it.catboy.ripdrag"
     "is_floating:1,is_overlay:1,is_global:1,is_open_silent:1,width:300,height:200,offset_x:98,offset_y:-98,app_id:dragon-drop"
     "is_floating:1,is_overlay:1,app_id:Pinentry-gtk"
     "is_floating:1,is_overlay:1,app_id:pinentry"

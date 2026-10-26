@@ -160,7 +160,7 @@ in
           };
         }
         {
-          match.app_id = "^(com[.]gabm[.]satty|it[.]catboy[.]ripdrag|termfilechooser|files|org[.]gnome[.]Nautilus|pavucontrol|org[.]pulseaudio[.]pavucontrol|blueman-manager|org[.]blueman[.]Manager|nm-connection-editor|pinentry.*|.*PolicyKit.*|dev[.]noctalia[.]Noctalia|dev[.]noctalia[.]UmbrielSharePicker)$";
+          match.app_id = "^(com[.]gabm[.]satty|termfilechooser|files|org[.]gnome[.]Nautilus|pavucontrol|org[.]pulseaudio[.]pavucontrol|blueman-manager|org[.]blueman[.]Manager|nm-connection-editor|pinentry.*|.*PolicyKit.*|dev[.]noctalia[.]Noctalia|dev[.]noctalia[.]UmbrielSharePicker)$";
           default_floating = true;
         }
         {
