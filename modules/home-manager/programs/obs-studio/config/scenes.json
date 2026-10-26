@@ -1,0 +1,71 @@
+{
+  "name": "Recording",
+  "version": 2,
+  "resolution": { "x": 1920, "y": 1080 },
+  "current_scene": "Full screen",
+  "current_program_scene": "Full screen",
+  "scene_order": [
+    { "name": "Full screen" },
+    { "name": "Code focus" },
+    { "name": "Camera (optional)" }
+  ],
+  "sources": [
+    {
+      "name": "Screen",
+      "id": "pipewire-desktop-capture-source",
+      "settings": {},
+      "mixers": 0
+    },
+    {
+      "name": "Code",
+      "id": "pipewire-window-capture-source",
+      "settings": {},
+      "mixers": 0
+    },
+    {
+      "name": "Full screen",
+      "id": "scene",
+      "settings": {
+        "items": [
+          {
+            "name": "Screen",
+            "id": 1,
+            "visible": true,
+            "locked": true,
+            "pos": { "x": 0, "y": 0 },
+            "scale": { "x": 1, "y": 1 },
+            "align": 5,
+            "bounds_type": 2,
+            "bounds_align": 0,
+            "bounds": { "x": 1920, "y": 1080 }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Code focus",
+      "id": "scene",
+      "settings": {
+        "items": [
+          {
+            "name": "Code",
+            "id": 1,
+            "visible": true,
+            "locked": true,
+            "pos": { "x": 0, "y": 0 },
+            "scale": { "x": 1, "y": 1 },
+            "align": 5,
+            "bounds_type": 2,
+            "bounds_align": 0,
+            "bounds": { "x": 1920, "y": 1080 }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Camera (optional)",
+      "id": "scene",
+      "settings": { "items": [] }
+    }
+  ]
+}

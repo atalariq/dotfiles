@@ -47,7 +47,6 @@
       scrcpy
       lazysql
       kdePackages.kdenlive
-      reaper
       inkscape
       gimp
       blender

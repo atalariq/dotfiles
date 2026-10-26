@@ -10,9 +10,22 @@
 
   config = lib.mkIf config.dotfiles.programs.obs-studio.enable {
 
-    home.packages = [ pkgs.obs-studio ];
+    programs.obs-studio = {
+      enable = true;
+      plugins = [ pkgs.obs-studio-plugins.obs-move-transition ];
+    };
+    home.packages = [
+      pkgs.audacity
+      pkgs.ffmpeg
+    ]
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      pkgs.gpu-screen-recorder
+      pkgs.gpu-screen-recorder-gtk
+    ];
     # Runtime profiles are writable; seed manually from these optional templates.
-    xdg.configFile."dotfiles/templates/obs/basic.ini".source = ./config/basic.ini;
-    xdg.configFile."dotfiles/templates/obs/global.ini".source = ./config/global.ini;
+    xdg.configFile."dotfiles/templates/obs" = {
+      source = ./config;
+      recursive = true;
+    };
   };
 }
