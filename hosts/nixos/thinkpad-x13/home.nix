@@ -121,6 +121,7 @@
       umbriel = {
         enable = true;
         settings.output.eDP-1 = {
+          workspace_axis = "horizontal";
           mode = "1920x1200@60";
           position = [
             0
