@@ -5,6 +5,12 @@ default:
 check:
     nix flake check --no-update-lock-file --no-write-lock-file
 
+omniroute-status:
+    systemctl --user status podman-omniroute.service --no-pager
+
+omniroute-logs:
+    journalctl --user -u podman-omniroute.service -n 60 --no-pager
+
 fmt:
     find flake.nix hosts modules devshell -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +
 

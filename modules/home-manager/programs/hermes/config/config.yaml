@@ -1,18 +1,44 @@
 model:
   provider: custom
   base_url: http://127.0.0.1:20128/v1
-  default: coding-free
+  default: ds/deepseek-flash
+  api_key: ${OPENAI_API_KEY}
+  reasoning_echo: true
 fallback_providers: []
 toolsets:
-  - hermes-cli
+  - terminal
+  - file
+  - web
+  - todo
+  - delegation
+  - clarify
 agent:
   max_turns: 30
   api_max_retries: 2
   verify_on_stop: true
-  output_limit: 8192
+  run_budget_seconds: 1800
+  disabled_toolsets:
+    - browser
+    - computer_use
+    - connections
+    - memory
+    - session_search
+    - skills
+    - code_execution
+    - cronjob
 terminal:
-  backend: local
+  # Native Docker backend detects rootless Podman directly. File tools use the
+  # same container environment. Launch from an authorized project, never HOME.
+  backend: docker
   cwd: .
+  docker_image: docker.io/nousresearch/hermes-sandbox@sha256:c7d8607d076f26a64e0bd6828f74e1764af43fe3281368188459bb693bfa7567
+  docker_mount_cwd_to_workspace: true
+  docker_volumes: []
+  docker_forward_env: []
+  docker_env: {}
+  container_persistent: false
+  container_cpu: 2
+  container_memory: 4096
   timeout: 180
   auto_source_bashrc: false
   shell_init_files: []
@@ -22,22 +48,79 @@ compression:
   threshold: 0.7
   target_ratio: 0.3
 auxiliary:
-  compression:
+  # Explicit custom route for enabled side tasks; no surprise paid OpenRouter
+  # auto-chain if this local gateway is unavailable.
+  free_only: true
+  transient_retries: 1
+  compression: &gateway
     provider: custom
-    model: coding-free
+    model: ds/deepseek-flash
     base_url: http://127.0.0.1:20128/v1
     api_key: ${OPENAI_API_KEY}
+  vision: *gateway
+  skills_hub: *gateway
+  mcp: *gateway
+  memory_query_rewrite: *gateway
+  tts_audio_tags: *gateway
+  voice_chat: *gateway
+  triage_specifier: *gateway
+  kanban_decomposer: *gateway
+  profile_describer: *gateway
+  goal_judge: *gateway
+  curator: *gateway
+  monitor: *gateway
+  moa_reference: *gateway
+  moa_aggregator: *gateway
+  background_review:
+    <<: *gateway
+    enabled: false
   title_generation:
     enabled: false
+    model_upgrade_enabled: false
+  approval:
+    provider: custom
+    model: ds/deepseek-flash
+    base_url: http://127.0.0.1:20128/v1
+    api_key: ${OPENAI_API_KEY}
+  review:
+    provider: custom
+    model: ds/deepseek-flash
+    base_url: http://127.0.0.1:20128/v1
+    api_key: ${OPENAI_API_KEY}
 delegation:
   provider: custom
-  model: coding-free
+  model: ds/deepseek-flash
   base_url: http://127.0.0.1:20128/v1
   api_key: ${OPENAI_API_KEY}
   orchestrator_enabled: false
-  max_concurrent_children: 1
+  max_concurrent_children: 2
   max_spawn_depth: 1
   subagent_auto_approve: false
+  fallback_providers: []
+approvals:
+  # Ordinary commands already run without prompts. Keep dangerous operations
+  # interactive rather than spending tokens on an LLM approval classifier.
+  mode: manual
+  cron_mode: deny
+  single_query_mode: deny
+  unattended_mode: deny
+  deny:
+    - '*sudo *'
+    - '*doas *'
+    - '*git push*'
+    - '*git reset --hard*'
+    - '*git clean *'
+    - '*rm -rf *'
+    - '*sops decrypt*'
+    - '*sops -d*'
+    - '*nixos-rebuild *'
+    - '*home-manager switch*'
+    - '*darwin-rebuild *'
+security:
+  allow_lazy_installs: false
+cron:
+  catch_up_missed: false
+  allow_agent_scheduling: false
 curator:
   enabled: false
 display:

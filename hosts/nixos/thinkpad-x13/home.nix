@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../../../modules/home-manager/common
@@ -152,8 +152,12 @@
       yt-dlp.enable = true;
       obs-studio.enable = true;
       hermes.enable = true;
-      omniroute.enable = false; # Enable after encrypted env/provider onboarding.
+      omniroute.enable = true;
     };
-    services.secrets.enable = false; # Select actual per-app SOPS files first.
+    services.secrets = {
+      enable = true;
+      keyFile = "${config.home.homeDirectory}/.config/age/ssh-keys.txt";
+      files.aiProviders = ../../../secrets/thinkpad-x13/ai-providers.sops.yaml;
+    };
   };
 }

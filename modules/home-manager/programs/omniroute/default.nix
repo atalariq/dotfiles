@@ -23,11 +23,7 @@ in
     assertions = [
       {
         assertion = pkgs.stdenv.hostPlatform.isLinux;
-        message = "The local OmniRoute Quadlet requires Linux.";
-      }
-      {
-        assertion = secrets.enable && secrets.files.omniroute != null;
-        message = "OmniRoute requires its encrypted environment file before installing the service.";
+        message = "The local OmniRoute user service requires Linux.";
       }
     ];
     services.podman = {
@@ -39,30 +35,37 @@ in
         ports = [ "127.0.0.1:20128:20128" ];
         userNS = "keep-id";
         dropCapabilities = [ "ALL" ];
-        environmentFile = [ "${config.xdg.configHome}/sops-nix/secrets/omniroute-env" ];
+        # The pinned native bootstrap creates crypto material in DATA_DIR/server.env
+        # when no startup environment is supplied. Preserve this with the database.
+        environmentFile = lib.optional (
+          secrets.enable && secrets.files.omniroute != null
+        ) "${config.xdg.configHome}/sops-nix/secrets/omniroute-env";
         volumes = [ "${config.xdg.stateHome}/omniroute/data:/app/data" ];
         environment = {
           DATA_DIR = "/app/data";
           PORT = "20128";
           REQUIRE_API_KEY = "true";
-          NODE_OPTIONS = "--max-old-space-size=512";
-          OMNI_MAX_CONCURRENT_CONNECTIONS = "1";
+          # Native heap knob; leave room for SQLite, buffers and worker overhead.
+          OMNIROUTE_MEMORY_MB = "2048";
+          # Allow foreground agents, reviewers and auxiliary requests to overlap.
+          # This is backpressure, not a provider spending limit.
+          OMNI_MAX_CONCURRENT_CONNECTIONS = "8";
           OMNIROUTE_MCP_DESCRIPTION_COMPRESSION = "off";
         };
         extraPodmanArgs = [
-          "--memory=1g"
+          "--memory=3g"
           "--security-opt=no-new-privileges"
         ];
         extraConfig = {
           Unit = {
-            Requires = [ "sops-nix.service" ];
+            Requires = lib.optional (secrets.enable && secrets.files.omniroute != null) "sops-nix.service";
             After = [
-              "sops-nix.service"
               "network-online.target"
-            ];
+            ]
+            ++ lib.optional (secrets.enable && secrets.files.omniroute != null) "sops-nix.service";
           };
           Service = {
-            ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg "${config.xdg.stateHome}/omniroute/data"}";
+            ExecStartPre = "${pkgs.coreutils}/bin/install -d -m 0700 ${lib.escapeShellArg "${config.xdg.stateHome}/omniroute"} ${lib.escapeShellArg "${config.xdg.stateHome}/omniroute/data"}";
             Restart = "on-failure";
             RestartSec = 10;
             TimeoutStopSec = 45;
