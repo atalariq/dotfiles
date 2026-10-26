@@ -109,59 +109,62 @@ let
               "kitehost-nvim"
               "mdkite-nvim"
             ];
-          extraPackages = with pkgs; [
-            basedpyright
-            ruff
-            python3
-            python3Packages.debugpy
-            clang-tools
-            lldb
-            git
-            ripgrep
-            fd
-            fzf
-            curl
-            gzip
-            gcc
-            tree-sitter
-            nixd
-            nixfmt
-            lua-language-server
-            stylua
-            selene
-            bash-language-server
-            shellcheck
-            shfmt
-            marksman
-            rumdl
-            yaml-language-server
-            yamlfmt
-            yamllint
-            tombi
-            nodejs_24
-            bun
-            intelephense
-            vtsls
-            vscode-langservers-extracted
-            tailwindcss-language-server
-            emmet-language-server
-            oxfmt
-            prettier
-            oxlint
-            gopls
-            go
-            gofumpt
-            gotools
-            delve
-            rust-analyzer
-            rustfmt
-            typst
-            tinymist
-            typstyle
-            websocat
-            jdt-language-server
-            jdk17
-          ];
+          extraPackages =
+            with pkgs;
+            [
+              basedpyright
+              ruff
+              python3
+              python3Packages.debugpy
+              clang-tools
+              lldb
+              git
+              ripgrep
+              fd
+              fzf
+              curl
+              gzip
+              gcc
+              tree-sitter
+              nixd
+              nixfmt
+              lua-language-server
+              stylua
+              selene
+              bash-language-server
+              shellcheck
+              shfmt
+              marksman
+              rumdl
+              yaml-language-server
+              yamlfmt
+              yamllint
+              tombi
+              nodejs_24
+              bun
+              intelephense
+              vtsls
+              vscode-langservers-extracted
+              tailwindcss-language-server
+              emmet-language-server
+              oxfmt
+              prettier
+              oxlint
+              gopls
+              go
+              gofumpt
+              gotools
+              delve
+              rust-analyzer
+              rustfmt
+              typst
+              tinymist
+              typstyle
+              websocat
+              jdt-language-server
+              jdk17
+            ]
+            ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.wl-clipboard ];
           luaConfigRC.dotfiles = lib.nvim.dag.entryAfter [ "extraPluginConfigs" ] ''
             vim.g.dotfiles_config_dir = "${runtime}"
             vim.g.dotfiles_vale_config = "${./vale.ini}"
