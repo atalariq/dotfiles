@@ -99,11 +99,11 @@ in
       services.espanso = {
         enable = true;
         package = pkgs.espanso-wayland;
-        extraPackages = [
-          pkgs.bash
-          pkgs.curl
-        ];
       };
+      systemd.user.services.espanso.path = [
+        pkgs.bash
+        pkgs.curl
+      ];
     })
     (lib.mkIf config.dotfiles.desktop.fonts.enable {
       fonts.packages = with pkgs; [

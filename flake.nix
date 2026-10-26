@@ -3,7 +3,7 @@
 
   inputs = {
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-index-database = {
@@ -12,35 +12,41 @@
     };
     look = {
       url = "github:kunkka19xx/look";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Only the newer Herdr module is imported; stable Home Manager owns the rest.
+    home-manager-unstable = {
+      url = "github:nix-community/home-manager/6750249c69969d09d952efaf3fab88a2bdac7ec6";
+      flake = false;
+    };
     home-manager = {
-      url = "git+https://github.com/nix-community/home-manager?shallow=1";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     mangowm = {
       url = "github:mangowm/mango";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     noctalia = {
       url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     lerd = {
       url = "github:lerd-env/lerd-nixos";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     nvf = {
       url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
-      url = "github:nix-community/stylix";
+      url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
@@ -72,13 +78,70 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
+      # New desktop/editor applications stay on their tested unstable build graph.
+      # This is deliberately an application allowlist, not an unstable system overlay.
+      applicationOverlay =
+        _final: prev:
+        let
+          unstable = import inputs.nixpkgs-unstable {
+            system = prev.stdenv.hostPlatform.system;
+            config.allowUnfree = true;
+          };
+        in
+        {
+          inherit (unstable)
+            herdr
+            umbriel
+            xdg-desktop-portal-umbriel
+            noctalia-greeter
+            brave-origin
+            rtk
+            codex
+            claude-code
+            opencode
+            ;
+          # Avoid downgrading existing vault/collection formats and the tested
+          # OBS/plugin combination during the system release migration.
+          inherit (unstable)
+            anki
+            bitwarden-desktop
+            obs-studio
+            obs-studio-plugins
+            ;
+          inherit (unstable) neovim-unwrapped vimPlugins;
+        };
+      mkPkgs =
+        system:
+        import inputs.nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays = [ applicationOverlay ];
+        };
+      homeBackports = [
+        (
+          {
+            config,
+            lib,
+            pkgs,
+            ...
+          }:
+          import (inputs.home-manager-unstable + "/modules/programs/herdr.nix") {
+            inherit config pkgs;
+            # Herdr's upstream module also needs its native mutable-config helpers.
+            lib = lib // {
+              hm = lib.hm // {
+                generators =
+                  lib.hm.generators
+                  // (import (inputs.home-manager-unstable + "/modules/lib/generators.nix") { inherit lib; });
+              };
+            };
+          }
+        )
+      ];
       perSystem = lib.genAttrs systems (
         system:
         let
-          pkgs = import inputs.nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          pkgs = mkPkgs system;
           editor = import ./modules/home-manager/programs/neovim/package.nix { inherit inputs pkgs; };
         in
         {
@@ -101,6 +164,10 @@
               just
               sops
               age
+              nix-output-monitor
+              nix-tree
+              deadnix
+              statix
             ];
           };
           checks.neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''
@@ -114,12 +181,9 @@
       mkHome =
         host:
         inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = import inputs.nixpkgs {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
+          pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = { inherit inputs; };
-          modules = [ host ];
+          modules = [ host ] ++ homeBackports;
         };
     in
     {
@@ -132,9 +196,21 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./hosts/nixos/thinkpad-x13
+          (inputs.nixpkgs-unstable + "/nixos/modules/programs/wayland/umbriel.nix")
+          (inputs.nixpkgs-unstable + "/nixos/modules/services/display-managers/noctalia-greeter.nix")
+          # Preserve current fingerprint sandbox and greeter/pkexec integration.
+          (inputs.nixpkgs-unstable + "/nixos/modules/security/polkit.nix")
+          {
+            disabledModules = [ "security/polkit.nix" ];
+            # Override the service only; changing pkgs.polkit rebuilds unrelated
+            # stable desktop libraries and their dependants.
+            security.polkit.package = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux.polkit;
+          }
           inputs.home-manager.nixosModules.home-manager
           {
+            nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
+              sharedModules = homeBackports;
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs; };
@@ -151,7 +227,9 @@
           inputs.home-manager.darwinModules.home-manager
           {
             nixpkgs.config.allowUnfree = true;
+            nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
+              sharedModules = homeBackports;
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs; };
