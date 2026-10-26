@@ -47,6 +47,9 @@
       scrcpy
       lazysql
       kdePackages.kdenlive
+      wdisplays
+      wl-mirror
+      libva-utils
       inkscape
       gimp
       blender

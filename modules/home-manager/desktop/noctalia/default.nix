@@ -23,8 +23,11 @@
           polkit_agent = true;
           clipboard_enabled = false;
           font = config.stylix.fonts.sansSerif.name;
+          time_format = lib.mkDefault "{:%H:%M}";
+          telemetry_enabled = lib.mkDefault false;
         };
         bar.main = {
+          center = [ "clock" ];
           start = [
             "wallpaper"
             "workspaces"
