@@ -54,7 +54,6 @@
       godot
       nicotine-plus
       figma-linux
-      steam
       osu-lazer
       gzdoom
       mcpelauncher-ui-qt

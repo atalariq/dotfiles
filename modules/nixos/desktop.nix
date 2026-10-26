@@ -18,6 +18,27 @@ in
   # Session packages are independent of the one login greeter. The host chooses
   # its default; keeping Mango enabled does not replace the Umbriel default.
   config = lib.mkMerge [
+    (lib.mkIf config.dotfiles.gaming.steam.enable {
+      programs.gamemode = {
+        enable = true;
+        settings = {
+          general = {
+            # TLP owns EPP/platform policy. Keep amd-pstate-epp's powersave
+            # governor, including under iGPU load; boost via tlpctl launch.
+            desiredgov = "powersave";
+            igpu_desiredgov = "powersave";
+            renice = 5;
+            ioprio = 4;
+            inhibit_screensaver = 1;
+            disable_splitlock = 0;
+          };
+          cpu = {
+            park_cores = "no";
+            pin_cores = "no";
+          };
+        };
+      };
+    })
     (lib.mkIf config.dotfiles.desktop.mango.enable {
       programs.mango.enable = true;
       programs.mango.package = import ../home-manager/desktop/mango/package.nix { inherit inputs pkgs; };

@@ -50,6 +50,7 @@
       "networkmanager"
       "wheel"
       "kvm"
+      "gamemode"
     ];
     linger = true;
   };

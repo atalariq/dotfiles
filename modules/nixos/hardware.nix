@@ -6,6 +6,9 @@
 }:
 {
   config = lib.mkIf config.dotfiles.hardware.thinkpad.enable {
+    # Matches nixos-hardware's common AMD graphics recommendation without an
+    # extra input for settings already owned by this host.
+    hardware.amdgpu.initrd.enable = lib.mkDefault true;
     # TLP owns device policy; tlp-pd exposes that policy through the standard
     # desktop D-Bus interface. Never run power-profiles-daemon alongside it.
     services.power-profiles-daemon.enable = false;
@@ -28,6 +31,10 @@
         CPU_BOOST_ON_AC = 1;
         CPU_BOOST_ON_BAT = 1;
         CPU_BOOST_ON_SAV = 0;
+        # X13 Gen 2a firmware advertises all three through platform_profile.
+        PLATFORM_PROFILE_ON_AC = "performance";
+        PLATFORM_PROFILE_ON_BAT = "balanced";
+        PLATFORM_PROFILE_ON_SAV = "low-power";
         USB_EXCLUDE_AUDIO = 1;
         USB_EXCLUDE_PHONE = 1;
         # Existing charge thresholds and vendor thermal limits are retained.
