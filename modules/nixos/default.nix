@@ -18,7 +18,6 @@
   ];
   options.dotfiles = {
     system.base.enable = lib.mkEnableOption "the shared NixOS baseline";
-    desktop.capture.enable = lib.mkEnableOption "GPU Screen Recorder system integration";
     desktop.audio.enable = lib.mkEnableOption "PipeWire audio";
     desktop.bluetooth.enable = lib.mkEnableOption "Bluetooth integration";
     desktop.files.enable = lib.mkEnableOption "desktop removable-media services";

@@ -4,19 +4,6 @@
   pkgs,
   ...
 }:
-let
-  boost = pkgs.writeShellApplication {
-    name = "dotfiles-boost";
-    runtimeInputs = [ pkgs.tlp-pd ];
-    text = ''
-      if [ "$#" -eq 0 ]; then
-        echo 'Usage: dotfiles-boost command [arguments...]' >&2
-        exit 2
-      fi
-      exec tlpctl launch --profile performance -- "$@"
-    '';
-  };
-in
 {
   config = lib.mkIf config.dotfiles.hardware.thinkpad.enable {
     # TLP owns device policy; tlp-pd exposes that policy through the standard
@@ -52,7 +39,6 @@ in
       sandbox = true;
     };
     environment.systemPackages = [
-      boost
       pkgs.android-tools
     ];
     networking.firewall = {

@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  dotfilesLib,
   ...
 }:
 {
@@ -12,8 +11,7 @@
   config = lib.mkIf config.dotfiles.programs.claude.enable {
 
     home.packages = [ pkgs.claude-code ];
-    home.file.".claude/settings.json".source = dotfilesLib.source ./config/settings.json;
-    home.file.".claude/script".source = dotfilesLib.source ./config/script;
+    xdg.configFile."dotfiles/templates/claude.json".source = ./template.json;
 
   };
 }

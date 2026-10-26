@@ -18,7 +18,11 @@
       };
       services.gnome.gnome-keyring.enable = true;
       services.fprintd.enable = true;
+      security.polkit.enable = true;
+      # Polkit reads system policy paths, not the Home Manager profile.
+      environment.systemPackages = [ pkgs.bitwarden-desktop ];
       security.pam.services = {
+        polkit-1.fprintAuth = true;
         greetd = {
           fprintAuth = true;
           unixAuth = true;

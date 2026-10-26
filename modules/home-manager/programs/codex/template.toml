@@ -1,0 +1,5 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+# Copy manually only if ~/.codex/config.toml does not already exist.
+# Keep login, project trust and client-written state local. Choose your own model.
+sandbox_mode = "read-only"
+approval_policy = "on-request"

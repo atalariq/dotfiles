@@ -5,12 +5,12 @@
   ...
 }:
 {
-  # Catalogue imports declare features; profiles own the actual selection.
+  # Modules declare features; each host makes its own explicit selection.
   imports = [
     ./programs
     ./services/secrets.nix
     ./desktop
-    ./appearance
+    ../stylix
   ];
   options.dotfiles.deployment = {
     mode = lib.mkOption {
@@ -47,15 +47,7 @@
       && config.dotfiles.appearance.enable
       && config.dotfiles.deployment.allowThemedFiles
     ) "Live deployment: themed files remain immutable and require a rebuild.";
-    home.activation.checkDotfilesCheckout = lib.mkIf (config.dotfiles.deployment.mode == "live") (
-      lib.hm.dag.entryBefore [ "writeBoundary" ] ''
-        if [ ! -d ${lib.escapeShellArg config.dotfiles.deployment.checkout} ]; then
-          echo "Dotfiles checkout unavailable; has it moved? Update dotfiles.deployment.checkout before activating." >&2
-          exit 1
-        fi
-      ''
-    );
-    _module.args.dotfilesLib = import ../../lib/configuration.nix {
+    _module.args.dotfilesLib = import ./sources.nix {
       inherit lib config pkgs;
       checkout = config.dotfiles.deployment.checkout;
     };

@@ -1,83 +1,65 @@
 {
   config,
   lib,
-  pkgs,
   inputs,
   ...
 }:
 let
   cfg = config.dotfiles.services.secrets;
+  secretFile =
+    description:
+    lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      inherit description;
+    };
 in
 {
-  imports = [
-    inputs.sops-nix.homeManagerModules.sops
-  ];
-  options.dotfiles.services = {
-    secrets = {
-      enable = lib.mkEnableOption "per-application runtime secrets";
-      file = lib.mkOption {
-        type = lib.types.path;
-        default = ../../../secrets/secrets.yaml;
-        description = "Encrypted SOPS source. Plaintext must never enter the store.";
-      };
-      keyFile = lib.mkOption {
-        type = lib.types.str;
-        default = "${config.xdg.configHome}/sops/age/keys.txt";
-        description = "Existing private age identity, provisioned outside Git.";
-      };
-      applications = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
-        default = { };
-        example = {
-          hermes.DEEPSEEK_API_KEY = "DEEPSEEK_API_KEY_HERMES";
-        };
-        description = "Application names mapped to environment names and SOPS keys.";
-      };
+  imports = [ inputs.sops-nix.homeManagerModules.sops ];
+  options.dotfiles.services.secrets = {
+    enable = lib.mkEnableOption "application-scoped runtime SOPS files";
+    keyFile = lib.mkOption {
+      type = lib.types.str;
+      default = "${config.xdg.configHome}/sops/age/keys.txt";
+      description = "Private age identity provisioned outside the repository.";
+    };
+    files = {
+      hermes = secretFile "Encrypted YAML with an environment scalar containing Hermes dotenv data.";
+      opencode = secretFile "Encrypted YAML with a gateway_api_key scalar.";
+      omniroute = secretFile "Encrypted YAML with an environment scalar containing gateway dotenv data.";
     };
   };
-  config = lib.mkMerge [
-    (lib.mkIf cfg.enable {
-      sops = {
-        defaultSopsFile = cfg.file;
-        age.keyFile = cfg.keyFile;
-        secrets = lib.genAttrs (lib.unique (
-          lib.concatMap builtins.attrValues (builtins.attrValues cfg.applications)
-        )) (_: { });
+  config = lib.mkIf cfg.enable {
+    sops.age.keyFile = cfg.keyFile;
+    # Whole env scalars preserve dotenv escaping; no secrets are interpolated in Nix.
+    sops.secrets =
+      lib.optionalAttrs (cfg.files.hermes != null) {
+        hermes-env = {
+          sopsFile = cfg.files.hermes;
+          key = "environment";
+          path = "${config.home.homeDirectory}/.hermes/.env";
+          mode = "0600";
+        };
+      }
+      // lib.optionalAttrs (cfg.files.opencode != null) {
+        opencode-key = {
+          sopsFile = cfg.files.opencode;
+          key = "gateway_api_key";
+          mode = "0600";
+        };
+      }
+      // lib.optionalAttrs (cfg.files.omniroute != null) {
+        omniroute-env = {
+          sopsFile = cfg.files.omniroute;
+          key = "environment";
+          mode = "0600";
+        };
       };
-      # The wrapper reads runtime files only. It neither prints secret values
-      # nor exports unrelated credentials into the parent shell.
-      home.packages = lib.mapAttrsToList (
-        name: environment:
-        pkgs.writeShellScriptBin "${name}-with-secrets" ''
-          set -eu
-          ${lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (variable: key: ''
-              test -r ${lib.escapeShellArg config.sops.secrets.${key}.path} || {
-                echo "Secret unavailable: start sops-nix.service and provision its age key." >&2
-                exit 1
-              }
-              ${variable}="$(${pkgs.coreutils}/bin/cat ${lib.escapeShellArg config.sops.secrets.${key}.path})"
-              export ${variable}
-            '') environment
-          )}
-          if [ "$#" -eq 0 ]; then
-            echo "Usage: ${name}-with-secrets command [arguments...]" >&2
-            exit 2
-          fi
-          exec "$@"
-        ''
-      ) cfg.applications;
-      assertions = [
-        {
-          assertion = lib.all (
-            environment:
-            lib.all (name: builtins.match "[A-Za-z_][A-Za-z0-9_]*" name != null) (
-              builtins.attrNames environment
-            )
-          ) (builtins.attrValues cfg.applications);
-          message = "Secret environment names must be valid shell identifiers.";
-        }
-      ];
-    })
-  ];
+    assertions = [
+      {
+        assertion = cfg.files.hermes != null || cfg.files.opencode != null || cfg.files.omniroute != null;
+        message = "Enable secrets only after selecting actual encrypted per-application files.";
+      }
+    ];
+  };
 }

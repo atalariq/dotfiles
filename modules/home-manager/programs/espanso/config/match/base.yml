@@ -30,14 +30,6 @@ matches:
         type: date
         params:
           format: "%Y%m%d"
-  # Shell command
-  - trigger: ":ip"
-    replace: "{{ip}}"
-    vars:
-      - name: ip
-        type: shell
-        params:
-          cmd: "curl -s ifconfig.me"
   # Clipboard
   - triggers: [":paste", ":ppp"]
     replace: "{{clip}}"

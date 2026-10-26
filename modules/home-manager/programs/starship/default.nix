@@ -5,7 +5,7 @@
   ...
 }:
 let
-  baseline = import ../../../../themes/source-palette.nix;
+  baseline = import ../../../stylix/source-palette.nix;
   colours =
     if config.dotfiles.appearance.enable then
       config.lib.stylix.colors.withHashtag

@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/glm-5.3-flash-free",
+  "model": "omniroute/coding-free",
   "update": "disable",
   "mcp": {
     "servers": {}
@@ -16,12 +16,22 @@
     {
       "action": "read",
       "resource": "*.env*",
-      "effect": "ask"
+      "effect": "deny"
     },
     {
       "action": "read",
-      "resource": "*.env.example",
-      "effect": "allow"
+      "resource": "*.agekey",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "**/sops/age/*",
+      "effect": "deny"
+    },
+    {
+      "action": "read",
+      "resource": "**/sops-nix/secrets/**",
+      "effect": "deny"
     },
     {
       "action": "shell",
@@ -29,50 +39,43 @@
       "effect": "ask"
     },
     {
-      "action": "shell",
-      "resource": "git status *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "git diff *",
-      "effect": "allow"
-    },
-    {
-      "action": "shell",
-      "resource": "git push *",
-      "effect": "ask"
-    },
-    {
       "action": "external_directory",
       "resource": "*",
       "effect": "ask"
-    },
-    {
-      "action": "external_directory",
-      "resource": "~/Grimoire/*",
-      "effect": "allow"
-    },
-    {
-      "action": "edit",
-      "resource": "~/Grimoire/*",
-      "effect": "ask"
-    },
-    {
-      "action": "edit",
-      "resource": "~/Grimoire/logs/agents/opencode/*",
-      "effect": "allow"
     }
   ],
   "agents": {
     "title": {
-      "model": "opencode/glm-5.3-flash-free"
+      "model": "omniroute/coding-free"
     },
     "summary": {
-      "model": "opencode/glm-5.3-flash-free"
+      "model": "omniroute/coding-free"
     },
     "compaction": {
-      "model": "opencode/glm-5.3-flash-free"
+      "model": "omniroute/coding-free"
+    }
+  },
+  "providers": {
+    "omniroute": {
+      "name": "OmniRoute (local)",
+      "package": "@ai-sdk/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:20128/v1",
+        "apiKey": "{file:~/.config/sops-nix/secrets/opencode-key}"
+      },
+      "models": {
+        "coding-free": {
+          "name": "Free coding",
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        "coding-paid": {
+          "name": "Paid coding (disabled until budget verification)",
+          "disabled": true
+        }
+      }
     }
   }
 }

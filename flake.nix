@@ -2,16 +2,8 @@
   description = "Atalariq's NixOS and Home Manager configuration";
 
   inputs = {
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-index-database = {
@@ -71,64 +63,110 @@
 
   };
 
-  # Per-platform build products are separate from named machine configurations.
   outputs =
     inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+    let
+      lib = inputs.nixpkgs.lib;
       systems = [
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
       ];
-      perSystem =
-        { system, ... }:
+      perSystem = lib.genAttrs systems (
+        system:
         let
           pkgs = import inputs.nixpkgs {
             inherit system;
             config.allowUnfree = true;
           };
-          editor = import ./packages/neovim.nix { inherit inputs pkgs; };
+          editor = import ./modules/home-manager/programs/neovim/package.nix { inherit inputs pkgs; };
         in
         {
           packages = {
             neovim = editor;
             default = editor;
             home-manager = inputs.home-manager.packages.${system}.home-manager;
-            pencil-dev = pkgs.callPackage ./packages/pencil-dev.nix { };
+            pencil-dev = pkgs.callPackage ./modules/home-manager/programs/pen/package.nix { };
           }
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-            dotfiles-cutover = pkgs.callPackage ./packages/cutover.nix { };
-            desktop-smoke = pkgs.callPackage ./packages/desktop-smoke.nix { inherit inputs; };
-            mango = import ./packages/mango.nix { inherit inputs pkgs; };
-            pluto-shelf = pkgs.callPackage ./packages/pluto-shelf.nix { };
-            concat = pkgs.callPackage ./packages/concat.nix { };
+            mango = import ./modules/home-manager/desktop/mango/package.nix { inherit inputs pkgs; };
+            pluto-shelf = pkgs.callPackage ./modules/home-manager/desktop/pluto/package.nix { };
+            concat = pkgs.callPackage ./modules/home-manager/programs/concat/package.nix { };
           };
           formatter = pkgs.nixfmt;
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               nixfmt
-              ripgrep
-              coreutils
-              findutils
-              shellcheck
-              shfmt
-              fish
-              jq
               git
-              direnv
-              nix-direnv
               just
-              nh
+              sops
+              age
             ];
           };
-          checks = import ./tests { inherit inputs pkgs editor; };
+          checks.neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''
+            export HOME="$TMPDIR/home"
+            mkdir -p "$HOME"
+            nvim --headless -i NONE -n '+lua local ok, err = pcall(require, "conform"); if not ok or vim.v.errmsg ~= "" then io.stderr:write(tostring(err) .. vim.v.errmsg); vim.cmd("cquit 1") end; assert(package.loaded["plugins.cmp"]); assert(package.loaded["plugins.debug"]); assert(vim.fn.exists(":PackInstall") == 0)' +qa
+            touch "$out"
+          '';
+        }
+      );
+      mkHome =
+        host:
+        inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import inputs.nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+          extraSpecialArgs = { inherit inputs; };
+          modules = [ host ];
         };
-      flake = (import ./lib/hosts.nix { inherit inputs; }) // {
-        nixosModules.default = import ./modules/nixos;
-        darwinModules.default = import ./modules/darwin;
-        homeManagerModules.default = import ./modules/home-manager;
-        templates = import ./devshell;
-        lib.hostRegistry = import ./hosts;
+    in
+    {
+      packages = lib.mapAttrs (_: value: value.packages) perSystem;
+      formatter = lib.mapAttrs (_: value: value.formatter) perSystem;
+      devShells = lib.mapAttrs (_: value: value.devShells) perSystem;
+      checks = lib.mapAttrs (_: value: value.checks) perSystem;
+      nixosConfigurations.thinkpad-x13 = lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/nixos/thinkpad-x13
+          inputs.home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = { inherit inputs; };
+              users.atalariq = import ./hosts/nixos/thinkpad-x13/home.nix;
+            };
+          }
+        ];
       };
+      darwinConfigurations.macpro-m4 = inputs.nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/darwin/macpro-m4
+          inputs.home-manager.darwinModules.home-manager
+          {
+            nixpkgs.config.allowUnfree = true;
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = { inherit inputs; };
+              users.atalariq = import ./hosts/darwin/macpro-m4/home.nix;
+            };
+          }
+        ];
+      };
+      homeConfigurations = {
+        linux-lab = mkHome ./hosts/linux/lab;
+        wsl-lab = mkHome ./hosts/wsl/lab;
+      };
+      nixosModules.default = import ./modules/nixos;
+      darwinModules.default = import ./modules/darwin;
+      homeManagerModules.default = import ./modules/home-manager;
+      templates = import ./devshell;
     };
 }

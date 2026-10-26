@@ -1,8 +1,0 @@
-#!/bin/sh
-set -eu
-
-# Portal arguments: multiple, directory, save, suggested path, output, debug.
-path=$4
-output=$5
-# Only explicit selections count; quitting must never accept the working directory.
-exec kitty --title termfilechooser yazi --chooser-file="$output" "$path"

@@ -12,18 +12,6 @@ let
     inherit action;
     repeat = false;
   };
-  screenshotBinds =
-    lib.concatMapAttrs
-      (key: _: {
-        "${key}" = bind "spawn:shot area";
-        "Ctrl+${key}" = bind "spawn:shot screen";
-        "Alt+${key}" = bind "spawn:shot active";
-        "Shift+${key}" = bind "spawn:shot annotate";
-        "Mod+${key}" = bind "spawn:shot ocr";
-      })
-      {
-        Print = null;
-      };
   workspaceBinds = builtins.listToAttrs (
     lib.concatMap (n: [
       {
@@ -55,12 +43,8 @@ in
   config = lib.mkIf cfg.enable {
     assertions = [
       {
-        assertion =
-          pkgs.stdenv.hostPlatform.isLinux
-          && config.dotfiles.desktop.noctalia.enable
-          && config.dotfiles.desktop.helpers.enable
-          && config.dotfiles.programs.capture.enable;
-        message = "Umbriel requires Linux, Noctalia, desktop helpers and capture.";
+        assertion = pkgs.stdenv.hostPlatform.isLinux && config.dotfiles.desktop.noctalia.enable;
+        message = "Umbriel requires Linux and Noctalia.";
       }
     ];
     home.packages = [
@@ -110,29 +94,23 @@ in
       };
       keybinds =
         workspaceBinds
-        // builtins.listToAttrs (
-          map (shortcut: {
-            name = "Ctrl+Mod+Alt+${lib.optionalString shortcut.shift "Shift+"}${shortcut.key}";
-            value = bind "spawn:${shortcut.command}";
-          }) (import ../shortcuts.nix)
-        )
-        // screenshotBinds
+        // lib.optionalAttrs config.dotfiles.desktop.shelf.enable {
+          "Ctrl+Mod+Alt+S" = bind "spawn:pluto toggle";
+        }
         // {
           "Mod+Return" = bind "spawn:kitty";
           "Mod+Shift+Return" = bind "spawn:kitty";
           "Mod+W" = bind "spawn:brave-origin";
-          "Mod+Q" = bind "spawn:desktop-close";
           "Mod+Shift+Alt+Q" = bind "session-quit";
-          "Mod+Space" = bind "spawn:controller noctalia launcher";
-          "Mod+A" = bind "spawn:controller noctalia launcher";
-          "Mod+V" = bind "spawn:controller noctalia clipboard";
-          "Mod+E" = bind "spawn:controller noctalia emoji";
-          "Mod+C" = bind "spawn:controller noctalia control-center";
-          "Mod+N" = bind "spawn:controller noctalia notifications";
-          "Mod+Y" = bind "spawn:controller noctalia wallpaper";
-          "Mod+Comma" = bind "spawn:controller noctalia settings";
-          "Mod+Escape" = bind "spawn:controller noctalia session";
-          "Mod+P" = bind "spawn:desktop-window-info";
+          "Mod+Space" = bind "spawn:lookapp --toggle";
+          "Mod+A" = bind "spawn:lookapp --toggle";
+          "Mod+V" = bind "spawn:lookapp clipboard";
+          "Mod+E" = bind "spawn:lookapp --toggle";
+          "Mod+C" = bind "spawn:noctalia msg panel-toggle control-center";
+          "Mod+N" = bind "spawn:noctalia msg panel-toggle notifications";
+          "Mod+Y" = bind "spawn:noctalia msg panel-toggle wallpaper";
+          "Mod+Comma" = bind "spawn:noctalia msg settings-toggle";
+          "Mod+Escape" = bind "spawn:noctalia msg panel-toggle session";
           "Mod+H" = "window-focus-left";
           "Mod+J" = "window-focus-down";
           "Mod+K" = "window-focus-up";
@@ -155,16 +133,16 @@ in
           "Mod+Shift+Minus" = bind "window-move-to-scratchpad:terminal";
           "Mod+BracketLeft" = "workspace-previous";
           "Mod+BracketRight" = "workspace-next";
-          "XF86AudioRaiseVolume" = "spawn:controller volume up";
-          "XF86AudioLowerVolume" = "spawn:controller volume down";
-          "XF86AudioMute" = bind "spawn:controller volume mute";
-          "XF86AudioPlay" = bind "spawn:controller player toggle";
-          "XF86AudioNext" = bind "spawn:controller player next";
-          "XF86AudioPrev" = bind "spawn:controller player prev";
-          "XF86MonBrightnessUp" = "spawn:controller brightness up";
-          "XF86MonBrightnessDown" = "spawn:controller brightness down";
-          "XF86KbdBrightnessUp" = "spawn:controller kbdlight up";
-          "XF86KbdBrightnessDown" = "spawn:controller kbdlight down";
+          "XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up";
+          "XF86AudioLowerVolume" = "spawn:noctalia msg volume-down";
+          "XF86AudioMute" = bind "spawn:noctalia msg volume-mute";
+          "XF86AudioPlay" = bind "spawn:noctalia msg media toggle";
+          "XF86AudioNext" = bind "spawn:noctalia msg media next";
+          "XF86AudioPrev" = bind "spawn:noctalia msg media prev";
+          "XF86MonBrightnessUp" = "spawn:noctalia msg brightness-up";
+          "XF86MonBrightnessDown" = "spawn:noctalia msg brightness-down";
+          "XF86KbdBrightnessUp" = "spawn:brightnessctl --device=*kbd_backlight set 1+";
+          "XF86KbdBrightnessDown" = "spawn:brightnessctl --device=*kbd_backlight set 1-";
         };
       scratchpad = [
         {
@@ -197,7 +175,7 @@ in
       org.freedesktop.impl.portal.Secret=gnome-keyring
       org.freedesktop.impl.portal.ScreenCast=umbriel
       org.freedesktop.impl.portal.Screenshot=umbriel
-      org.freedesktop.impl.portal.FileChooser=termfilechooser
+      org.freedesktop.impl.portal.FileChooser=gtk
     '';
   };
 }

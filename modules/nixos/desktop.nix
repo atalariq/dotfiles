@@ -6,7 +6,7 @@
   ...
 }:
 let
-  style = import ../../themes/style.nix { inherit pkgs; };
+  style = import ../stylix/style.nix { inherit pkgs; };
   c = lib.mapAttrs (_: value: "#${value}") (
     builtins.removeAttrs style.base16Scheme [
       "scheme"
@@ -18,12 +18,9 @@ in
   # Session packages are independent of the one login greeter. The host chooses
   # its default; keeping Mango enabled does not replace the Umbriel default.
   config = lib.mkMerge [
-    (lib.mkIf config.dotfiles.desktop.capture.enable {
-      programs.gpu-screen-recorder.enable = true;
-    })
     (lib.mkIf config.dotfiles.desktop.mango.enable {
       programs.mango.enable = true;
-      programs.mango.package = import ../../packages/mango.nix { inherit inputs pkgs; };
+      programs.mango.package = import ../home-manager/desktop/mango/package.nix { inherit inputs pkgs; };
       # Upstream marks graphical-desktop enabled, which would otherwise default
       # PipeWire on. Preserve our explicit audio selection at normal priority.
       services.pipewire.enable = config.dotfiles.desktop.audio.enable;
@@ -38,7 +35,7 @@ in
       services.libinput.enable = true;
     })
     (lib.mkIf (config.dotfiles.desktop.mango.enable || config.dotfiles.desktop.umbriel.enable) {
-      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
+      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     })
     (lib.mkIf config.dotfiles.desktop.greeter.enable {
       services.displayManager.noctalia-greeter = {

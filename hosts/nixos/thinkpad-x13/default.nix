@@ -31,7 +31,7 @@
     layout = "us";
     variant = "";
   };
-  # Device input policy belongs to this host; portable/WSL profiles stay inert.
+  # Device input policy belongs to this host; headless hosts stay inert.
   services.keyd = {
     enable = true;
     keyboards.superkey = {
@@ -55,7 +55,6 @@
   };
   dotfiles = {
     system.base.enable = true;
-    desktop.capture.enable = true;
     desktop.audio.enable = true;
     desktop.bluetooth.enable = true;
     desktop.files.enable = true;

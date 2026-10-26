@@ -58,7 +58,7 @@
               "g"
               "C"
             ];
-            "run" = "cd ~/Repos/dotfiles";
+            "run" = "cd ~/.dotfiles";
           }
           {
             "on" = [
@@ -66,14 +66,6 @@
               "d"
             ];
             "run" = "cd ~/Downloads";
-          }
-          {
-            "on" = [
-              "g"
-              "r"
-            ];
-            "run" = "shell -- ya emit cd \"$(git rev-parse --show-toplevel)\"";
-            "desc" = "Go to git root folder";
           }
           {
             "on" = "q";
@@ -230,21 +222,6 @@
       imagemagick
     ]
   );
-  programs.fish.interactiveShellInit =
-    lib.mkIf (config.programs.yazi.enable && config.programs.fish.enable)
-      ''
-        function yazicd --description 'Open Yazi and follow its working directory'
-          set -l tmp (mktemp -t yazi-cwd.XXXXX)
-          command yazi $argv --cwd-file="$tmp"
-          set -l cwd (command cat -- "$tmp")
-          command rm -f -- "$tmp"
-          if test -n "$cwd"; and test "$cwd" != "$PWD"
-            cd -- "$cwd"
-          end
-        end
-        abbr -a fm yazi
-        abbr -a yy yazicd
-      '';
   xdg.configFile."yazi/plugins" = lib.mkIf config.programs.yazi.enable { source = ./config/plugins; };
 
 }

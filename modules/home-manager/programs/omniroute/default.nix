@@ -1,56 +1,75 @@
 {
   config,
-  pkgs,
   lib,
-  dotfilesLib,
+  pkgs,
   ...
 }:
 let
-  state = "${config.xdg.stateHome}/omniroute";
+  cfg = config.dotfiles.programs.omniroute;
+  secrets = config.dotfiles.services.secrets;
 in
 {
-
-  options.dotfiles.programs.omniroute.enable = lib.mkEnableOption "omniroute configuration";
-
-  config = lib.mkIf config.dotfiles.programs.omniroute.enable {
-
-    # Import this module explicitly after saving a public image pin in image.json.
-    systemd.user.services.omniroute = {
-      Unit = {
-        Description = "OmniRoute local gateway";
-        After = [ "network-online.target" ];
-        Wants = [ "network-online.target" ];
-        ConditionPathExists = "${state}/image.json";
-      };
-      Service = {
-        Type = "simple";
-        UMask = "0077";
-        StateDirectory = "omniroute";
-        StateDirectoryMode = "0700";
-        ExecStart = pkgs.writeShellScript "omniroute-start" ''
-          set -eu
-          image=$(${pkgs.jq}/bin/jq -er '
-            .image | select(type == "string" and
-              test("^docker\\.io/diegosouzapw/omniroute@sha256:[0-9a-f]{64}$"))
-          ' ${state}/image.json)
-          ${pkgs.coreutils}/bin/mkdir -p ${state}/data
-          exec ${pkgs.podman}/bin/podman run --rm --name dotfiles-omniroute --pull=never \
-            --userns=keep-id --user "$(${pkgs.coreutils}/bin/id -u):$(${pkgs.coreutils}/bin/id -g)" \
-            --publish 127.0.0.1:20128:20128 --memory 10g \
-            --cap-drop=ALL --security-opt=no-new-privileges \
-            --volume ${state}/data:/app/data:rw \
-            --env DATA_DIR=/app/data --env PORT=20128 \
-            --env NODE_OPTIONS=--max-old-space-size=8192 \
-            --env OMNI_MAX_CONCURRENT_CONNECTIONS=1 --env REQUIRE_API_KEY=true \
-            --env OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=off "$image"
-        '';
-        ExecStop = "${pkgs.podman}/bin/podman stop --ignore --time 30 dotfiles-omniroute";
-        Restart = "on-failure";
-        RestartSec = 10;
-        TimeoutStopSec = 45;
-      };
-      Install.WantedBy = [ "default.target" ];
+  options.dotfiles.programs.omniroute = {
+    enable = lib.mkEnableOption "OmniRoute rootless local gateway";
+    image = lib.mkOption {
+      type = lib.types.nullOr (
+        lib.types.strMatching "docker\\.io/diegosouzapw/omniroute@sha256:[0-9a-f]{64}"
+      );
+      default = "docker.io/diegosouzapw/omniroute@sha256:90f903d7e9245973dc23f7f0a3afc0c63502c9bd25961097843361689df6474b"; # 3.8.52, linux/amd64
+      description = "Verified OCI digest; null leaves the service uninstalled during onboarding.";
     };
-
+  };
+  config = lib.mkIf (cfg.enable && cfg.image != null) {
+    assertions = [
+      {
+        assertion = pkgs.stdenv.hostPlatform.isLinux;
+        message = "The local OmniRoute Quadlet requires Linux.";
+      }
+      {
+        assertion = secrets.enable && secrets.files.omniroute != null;
+        message = "OmniRoute requires its encrypted environment file before installing the service.";
+      }
+    ];
+    services.podman = {
+      enable = true;
+      autoUpdate.enable = false;
+      containers.omniroute = {
+        image = cfg.image;
+        autoStart = true;
+        ports = [ "127.0.0.1:20128:20128" ];
+        userNS = "keep-id";
+        dropCapabilities = [ "ALL" ];
+        environmentFile = [ "${config.xdg.configHome}/sops-nix/secrets/omniroute-env" ];
+        volumes = [ "${config.xdg.stateHome}/omniroute/data:/app/data" ];
+        environment = {
+          DATA_DIR = "/app/data";
+          PORT = "20128";
+          REQUIRE_API_KEY = "true";
+          NODE_OPTIONS = "--max-old-space-size=512";
+          OMNI_MAX_CONCURRENT_CONNECTIONS = "1";
+          OMNIROUTE_MCP_DESCRIPTION_COMPRESSION = "off";
+        };
+        extraPodmanArgs = [
+          "--memory=1g"
+          "--security-opt=no-new-privileges"
+        ];
+        extraConfig = {
+          Unit = {
+            Requires = [ "sops-nix.service" ];
+            After = [
+              "sops-nix.service"
+              "network-online.target"
+            ];
+          };
+          Service = {
+            ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${lib.escapeShellArg "${config.xdg.stateHome}/omniroute/data"}";
+            Restart = "on-failure";
+            RestartSec = 10;
+            TimeoutStopSec = 45;
+            UMask = "0077";
+          };
+        };
+      };
+    };
   };
 }

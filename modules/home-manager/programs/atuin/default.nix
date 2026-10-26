@@ -1,23 +1,17 @@
 {
   config,
   lib,
-  dotfilesLib,
   ...
 }:
 {
 
   config = lib.mkIf config.programs.atuin.enable {
 
-    programs.bash.initExtra = lib.mkIf config.programs.bash.enable (
-      lib.mkAfter ''
-        eval "$(${config.programs.atuin.package}/bin/atuin init bash)"
-      ''
-    );
     programs.atuin = {
       flags = [ "--disable-up-arrow" ];
       # Native Fish config owns its one conditional initialization hook.
       enableFishIntegration = config.programs.fish.enable;
-      enableBashIntegration = false;
+      enableBashIntegration = config.programs.bash.enable;
       enableZshIntegration = false;
       settings = {
         search_mode = "fuzzy";

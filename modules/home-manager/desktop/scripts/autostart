@@ -1,4 +1,0 @@
-#!/bin/sh
-# Compatibility entrypoint: systemd owns process lifetimes and deduplication.
-set -eu
-exec systemctl --user start noctalia.service look.service

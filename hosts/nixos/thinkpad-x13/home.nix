@@ -1,33 +1,97 @@
 { pkgs, ... }:
 {
   imports = [
-    ../../../modules/home-manager
-    ../../../profiles/cli.nix
-    ../../../profiles/development.nix
-    ../../../profiles/gui.nix
-    ../../../profiles/creative.nix
-    ../../../profiles/gaming.nix
+    ../../../modules/home-manager/common
   ];
   home = {
-    username = "atalariq";
+    sessionVariables.DOTFILES_HOST = "thinkpad-x13";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
+    packages = with pkgs; [
+      coreutils
+      findutils
+      gnugrep
+      gnused
+      diffutils
+      wget
+      gnutar
+      unzip
+      zip
+      delta
+      dust
+      hyperfine
+      tealdeer
+      usage
+      typos
+      brave-origin
+      google-chrome
+      nautilus
+      file-roller
+      adwaita-icon-theme
+      xdg-utils
+      libsecret
+      psmisc
+      discord
+      slack
+      anki
+      obsidian
+      readest
+      ncmpcpp
+      android-studio
+      podman
+      podman-compose
+      jetbrains.rust-rover
+      jetbrains.phpstorm
+      jetbrains.goland
+      localsend
+      scrcpy
+      lazysql
+      kdePackages.kdenlive
+      reaper
+      inkscape
+      gimp
+      blender
+      godot
+      nicotine-plus
+      figma-linux
+      steam
+      osu-lazer
+      gzdoom
+      mcpelauncher-ui-qt
+      mgba
+      mednafen
+      snes9x
+      pcsx2
+      (callPackage ../../../modules/home-manager/programs/concat/package.nix { })
+      (callPackage ../../../modules/home-manager/programs/pen/package.nix { })
+    ];
   };
-  xdg.enable = true;
-  programs.home-manager.enable = true;
   programs = {
-    git.settings.user = {
-      name = "Atalariq Barra Hadinugraha";
-      email = "atalariq.dev@outlook.com";
-      username = "atalariq";
-    };
+    atuin.enable = true;
+    fzf.enable = true;
+    yazi.enable = true;
+    delta.enable = true;
+    delta.enableGitIntegration = true;
+    jujutsu.enable = true;
+    television.enable = true;
+    kitty.enable = true;
+    fastfetch.enable = true;
+    herdr.enable = true;
+    lookapp.enable = true;
     jujutsu.settings.user = {
       name = "Atalariq Barra Hadinugraha";
       email = "atalariq.dev@outlook.com";
     };
-    fastfetch.enable = true;
-    herdr.enable = true;
-    lookapp.enable = true;
+    mangohud = {
+      enable = true;
+      enableSessionWide = false;
+      settings = {
+        fps = true;
+        frame_timing = true;
+        cpu_temp = true;
+        gpu_temp = true;
+      };
+    };
   };
   services.syncthing = {
     enable = true;
@@ -39,9 +103,12 @@
       options.startBrowser = false;
     };
   };
-  # No default Sync folder or implicit sharing. Runtime identity stays writable.
   systemd.user.services.syncthing.Service.Environment = [ "STNODEFAULTFOLDER=1" ];
   dotfiles = {
+    appearance = {
+      enable = true;
+      gui = true;
+    };
     desktop = {
       umbriel = {
         enable = true;
@@ -55,58 +122,35 @@
           workspaces = 9;
         };
       };
+      mango = {
+        enable = true;
+        monitorRules = [ "name:eDP-1,width:1920,height:1200,refresh:60,x:0,y:0,scale:1.25,vrr:0,rr:0" ];
+      };
       shelf.enable = true;
-      mango.enable = true;
-      mango.monitorConfig = "monitor_rule = name:eDP-1,width:1920,height:1200,refresh:60,x:0,y:0,scale:1.25,vrr:0,rr:0";
       noctalia.enable = true;
-      helpers.enable = true;
     };
     programs = {
+      gh.enable = true;
+      lazygit.enable = true;
+      neovim.enable = true;
+      typst.enable = true;
+      rtk.enable = true;
+      tirith.enable = true;
+      opencode.enable = true;
+      codex.enable = true;
+      claude.enable = true;
       espanso.enable = true;
       plane.enable = true;
-      linear.enable = true;
       btop.enable = true;
-      status.enable = true;
-      vimv.enable = true;
       mpd.enable = true;
       rmpc.enable = true;
       mpv.enable = true;
       aria2.enable = true;
       yt-dlp.enable = true;
-      jellyfin-helper.enable = true;
       obs-studio.enable = true;
-      capture.enable = true;
       hermes.enable = true;
-      omniroute.enable = true;
+      omniroute.enable = false; # Enable after encrypted env/provider onboarding.
     };
-    services.secrets.enable = true;
-    programs.rsync.enable = true;
+    services.secrets.enable = false; # Select actual per-app SOPS files first.
   };
-  home.packages = with pkgs; [
-    sops
-    age
-    gnupg
-    brave-origin
-    google-chrome
-    nautilus
-    file-roller
-    adwaita-icon-theme
-    xdg-utils
-    libsecret
-    psmisc
-    bitwarden-desktop
-    discord
-    slack
-    anki
-    obsidian
-    readest
-    ncmpcpp
-    android-studio
-    podman
-    podman-compose
-    jetbrains.rust-rover
-    jetbrains.phpstorm
-    jetbrains.goland
-  ];
-  # Zotero is intentionally omitted: opt in by adding pkgs.zotero here.
 }

@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  dotfilesLib,
   ...
 }:
 {
@@ -12,7 +11,7 @@
   config = lib.mkIf config.dotfiles.programs.codex.enable {
 
     home.packages = [ pkgs.codex ];
-    home.file.".codex/config.toml".source = dotfilesLib.source ./config/config.toml;
+    xdg.configFile."dotfiles/templates/codex.toml".source = ./template.toml;
 
   };
 }
