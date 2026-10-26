@@ -1,4 +1,7 @@
 # dotfiles/.sops.yaml
 creation_rules:
-  - path_regex: .*secrets\.yaml$
+  # Dedicated identity for the renewed AI credentials; keep legacy recipients below.
+  - path_regex: '^secrets/thinkpad-x13/ai-providers\.sops\.yaml$'
+    age: age1ke0n93k27htpwau0qqskjekjyrm5ztrvln7ewguyrz29rxt499qq48s773
+  - path_regex: (^secrets/secrets\.yaml$|^secrets/thinkpad-x13/[^/]+\.sops\.yaml$)
     age: age17q3dv06mpf2udvsd77ve4eadwkd9te0anvs5vlhu0auc7x8zl50sdr45lq
