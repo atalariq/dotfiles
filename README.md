@@ -124,6 +124,25 @@ Set `checkout` to the actual repository location. Packages, plugins, and generat
 theme files still require a rebuild. `allowThemedFiles` explicitly accepts that
 limitation when live mode and appearance are enabled together.
 
+Select individual applications instead when only some files need live editing:
+
+```nix
+dotfiles.deployment.liveApps = [ "espanso" "vim" "neovim" "hermes" "opencode" ];
+```
+
+This links Espanso's native files, Vim's vimrc, Neovim's Lua runtime, Hermes's
+configuration, and OpenCode's `cli.json` to their source files. Restart or reload
+the application after editing. OpenCode's main configuration, generated palettes,
+plugin selections, and compositor settings still require rebuilding. Writable
+account settings are deliberately kept separate: applications that replace their
+settings files can break a symlink. Edit the checkout files rather than asking an
+application to save over managed settings.
+
+Freesm Launcher is available through `dotfiles.programs.freesmlauncher.enable` on
+x86_64 Linux. Its official AppImage is pinned and wrapped for NixOS; Java 21 is
+included. Select a compatible Java version for each game instance. Existing
+worlds, launcher accounts, and instances are not migrated.
+
 ### Secrets
 
 Configure recipients in [.sops.yaml](.sops.yaml) and supply encrypted files using
@@ -228,8 +247,8 @@ Run it only after build and review. The flag prevents fallback to a textual
 password prompt in the agent tool. Without a desktop agent, authenticate and run
 `sudo` yourself in a local terminal; macOS and headless hosts use that path.
 Never pass passwords through chat, tool input, command arguments, or an askpass
-script. Hermes's container cannot elevate on the host; ask the owner to execute
-the reviewed host command. No privileged host sockets are mounted into it.
+script. Hermes uses local terminal execution and can request an approved host
+command; its command approvals do not provide filesystem isolation.
 
 #### OpenCode and Hermes
 
@@ -260,8 +279,9 @@ the Hermes CLI and manages `~/.hermes/config.yaml`; authentication and session d
 stay writable and application-owned. Hermes reads a separate gateway client key from `OPENAI_API_KEY` in its writable
 `~/.hermes/.env`. Create that file locally with mode `0600`; never source it or
 put the key in command arguments. Launch Hermes from an authorized project only.
-Its container includes its own tools, without host Nix or private home mounts.
-For Nix validation, use OpenCode's approved host commands or run the checks yourself.
+Its local terminal backend uses the host tools, including Nix and `br`. It runs
+with the user's filesystem access; command approvals are not an OS sandbox.
+Keep credentials outside the project and review commands that access private data.
 
 #### Local gateway
 
@@ -281,13 +301,62 @@ The gateway is local to Linux: a Mac client needs its own reachable gateway and
 `dotfiles.programs.opencode.gatewayUrl` set in its host configuration. Do not
 expose the dashboard directly to a network.
 
-Hermes uses its native container backend with rootless Podman and a pinned sandbox
-image. Launch it from the authorized project: that directory is mounted writable
-at `/workspace`. The native backend also mounts Hermes cache, attachment, and
-skills directories read-only; these may contain task data. This configuration does
-not register credential-file mounts or expose the host HOME or Nix daemon.
-Authenticate and test these boundaries before unattended work. Background inference schedules are
-disabled.
+Hermes runs terminals locally, without an additional container image. Background
+inference schedules are disabled. OmniRoute remains a separate rootless container
+service; it does not execute project development commands.
+
+#### Shared task queue
+
+Enable `dotfiles.programs.beads-rust.enable` to install Beads Rust (`br`). This
+repository tracks portable issues in `.beads/issues.jsonl`; databases, locks, and
+machine-local history remain ignored. Tasks describe their acceptance checks, and
+owner-dependent tasks remain deferred until those checks can be performed.
+
+Use the main checkout's queue for every worktree of this repository. The module
+exports `DOTFILES_BEADS_DIR` without redirecting Beads in unrelated projects. For
+example, substitute a unique tool/session actor and an issue ID from `ready`:
+
+```sh
+br ready --db "$DOTFILES_BEADS_DIR/beads.db" --brief --json
+br show ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --json
+br update ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --claim --actor opencode-session
+br comments add ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" 'Checks run, results, unresolved findings'
+# Close only after the issue acceptance criteria pass.
+br close ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --reason 'Verified outcome'
+br sync --db "$DOTFILES_BEADS_DIR/beads.db" --flush-only
+```
+
+Exclusive claims prevent two workers from owning the same issue. They do not lock
+files; use separate worktrees and coordinate overlapping modules. Do not steal
+claims or force imports. After receiving reviewed JSONL changes, run
+`br sync --db "$DOTFILES_BEADS_DIR/beads.db" --import-only`.
+Beads never commits or pushes changes. The owner coordinates queue commits and
+reviews integration; native agent authentication remains independent.
+
+Codex's development profile grants access only to the shared queue beneath the
+otherwise hidden home directory. Claude and Copilot templates include the same
+scoped directory; merge updated templates into existing writable settings.
+Antigravity can add it for a worktree session with
+`agy --effort high --add-dir "$DOTFILES_BEADS_DIR"`; Copilot supports
+`copilot --add-dir "$DOTFILES_BEADS_DIR"`. OpenCode has scoped directory
+permissions and Beads command rules; Hermes's local terminal can access the queue
+without an extra MCP server. No automatic cross-tool dispatcher is installed.
+
+Additional tools are independently opt-in under `dotfiles.programs`: `tokscale`,
+`crit`, `agent-browser`, `codegraph`, `git-ai`, `git-surgeon`, `nono`, `herdr`,
+`workmux`, and `orca`. Installing them does not start workers, index projects,
+launch browsers, or authorize network uploads. Workmux can use the existing Tmux
+installation. Orca remains an explicit trial.
+
+Crit and git-ai provide writable configuration templates at
+`~/.config/dotfiles/templates/{crit,git-ai}.json`. Before enabling git-ai hooks,
+merge its template into `~/.git-ai/config.json`: local prompt storage, telemetry
+and updates disabled, and an explicit `repositories` allowlist configured in the
+Home Manager module. The module requires a nonempty allowlist because an empty native list permits
+every repository. Transcript streaming, sweeping, and daemon-log uploads are also
+disabled in the template. Crit's template disables share targets; merge it into
+`~/.crit.config.json` before using review-sharing features. Neither template
+overwrites an existing account configuration or installs hooks automatically.
 
 ## Development
 
