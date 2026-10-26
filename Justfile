@@ -5,6 +5,11 @@ default:
 check:
     nix flake check --no-update-lock-file --no-write-lock-file
 
+# Advisory checks; neither command rewrites source.
+lint:
+    deadnix --fail flake.nix hosts modules
+    statix check .
+
 omniroute-status:
     systemctl --user status podman-omniroute.service --no-pager
 

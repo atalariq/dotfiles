@@ -14,6 +14,8 @@ that install them.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
 - **Development:** Independent Bun, Go, and Rust flake templates; commands collected in a plain `Justfile`.
+- **Coding agents:** Native account authentication for Codex, Antigravity, and Copilot;
+  optional OpenCode and Hermes through a local OmniRoute gateway.
 
 ## Hosts
 
@@ -135,6 +137,158 @@ at runtime rather than interpolated into Nix expressions. Treat dotenv files as
 data, not executable shell. Application login state and private SSH/GPG keys remain
 outside the repository.
 
+### Coding agents
+
+Enable tools independently with `dotfiles.programs.<name>.enable`. The desktop
+hosts select Codex, Antigravity (`agy`), Copilot, and Claude Code. Gemini CLI is a
+separate opt-in module. Authentication and account model selection happen in each
+application; Nix never manages login tokens.
+
+Agent CLIs and RTK come from the pinned `llm-agents` input, independently of
+the system package channel. OpenCode uses its `opencode2` package and executable
+for V2 configs.
+Update this toolchain with `just update llm-agents`, then build and review before
+activation; updates remain explicit and reproducible through `flake.lock`.
+
+Run the native CLIs from the authorized project directory. Seed the writable
+settings described below before using the bare Claude, Antigravity, or Copilot
+commands.
+
+| Command | Configuration and authentication |
+| --- | --- |
+| `codex --profile development` | Managed workspace profile; native OpenAI account login |
+| `agy --effort high` | Native auto mode and sandbox settings; Google sign-in |
+| `copilot` | Native sandbox and manual permissions; GitHub sign-in |
+| `claude` | Native user settings seeded from the template; Claude authentication |
+| `opencode2 --standalone` | Private server with the managed OpenCode V2 configuration |
+| `hermes` | Managed Home Manager configuration through OmniRoute |
+
+The Codex profile, Antigravity session effort, and OpenCode private-server flag
+remain explicit command-line choices. No aliases or wrappers are required.
+Privileged operations and activation require explicit approval. Model availability
+depends on account entitlement; there is no automatic cross-agent fallback or
+shared authentication store.
+
+Copilot saves routine tool approvals per project through its native permission
+prompts and `/permissions`; retain manual review for privileged or publishing
+commands. Saved approvals remain application-owned. Its
+[saved permissions format](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference#permissions-configjson)
+does not support deny rules. To retain the explicit destructive Git and release
+restrictions, run:
+
+```sh
+copilot --deny-tool 'shell(git push:*)' --deny-tool 'shell(git reset:*)' --deny-tool 'shell(git clean:*)' --deny-tool 'shell(gh release:*)'
+```
+
+The Codex development profile permits networking, including the local Nix daemon,
+and writes to the Nix cache and RTK state. Other home files remain hidden outside
+the workspace. External handoff access needs a separate, scoped approval. On Linux,
+Claude's sandbox cannot allow just one Unix socket; Nix daemon access therefore
+remains a separate permission decision instead of enabling all local sockets.
+
+Claude, Antigravity, and Copilot keep writable native settings. Seed their templates
+once after activation; the following commands refuse to overwrite existing files:
+
+```sh
+umask 077
+mkdir -p ~/.claude ~/.gemini/antigravity-cli ~/.copilot
+(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/claude.json" > ~/.claude/settings.json)
+(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/agy.json" > ~/.gemini/antigravity-cli/settings.json)
+(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/copilot.json" > ~/.copilot/settings.json)
+```
+
+If profiles already exist, merge the templates manually. To load the managed
+Claude template without changing existing user settings, run
+`claude --settings "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/claude.json"`.
+Keep root `AGENTS.md` as the project guidance. For a different agent, pass its path explicitly if the tool
+does not discover it. Cross-tool progress belongs in a short external handoff at
+`~/.local/state/dotfiles/handoff.md`: objective, changed files, verification,
+unresolved findings, and next action. Start each continuation by checking the diff.
+
+#### Privileged operations
+
+Agents may request approval for `sudo`, `doas`, `pkexec`, and activation commands.
+Approval of a command and OS authentication are separate steps. Review the complete
+command before approving it; do not save a blanket approval for privilege tools.
+Codex keeps its native on-request policy. Claude keeps strict sandbox retries and excludes only named privilege commands,
+which have explicit ask rules. Copilot uses manual permission mode with project-scoped saved approvals
+and per-command sandbox bypass available; resumed sessions retain
+their previous mode, so inspect `/permissions` and `/sandbox` before proceeding.
+Antigravity uses its native ask rules and sandbox review. These settings do not
+provide unrestricted or passwordless root access.
+
+On a Linux desktop with a registered polkit authentication agent, a privileged
+command can request the system authentication dialog:
+
+```sh
+pkexec --disable-internal-agent /run/current-system/sw/bin/nixos-rebuild switch --flake "$PWD#thinkpad-x13"
+```
+
+Run it only after build and review. The flag prevents fallback to a textual
+password prompt in the agent tool. Without a desktop agent, authenticate and run
+`sudo` yourself in a local terminal; macOS and headless hosts use that path.
+Never pass passwords through chat, tool input, command arguments, or an askpass
+script. Hermes's container cannot elevate on the host; ask the owner to execute
+the reviewed host command. No privileged host sockets are mounted into it.
+
+#### OpenCode and Hermes
+
+OpenCode uses the V2 configuration schema. Start it in the authorized project
+with `opencode2 --standalone`; the private server loads the current configuration
+instead of reusing a background server. Connect the `omniroute` integration with
+`/connect`, using a gateway client key, then select
+`omniroute/ds/deepseek-flash` in `/models`. Thinking mode uses high effort.
+`omniroute/ds/deepseek-v4-pro` is an explicit alternative for demanding tasks;
+both routes use the paid DeepSeek API. Neither step limits provider spending.
+
+Build can delegate focused searches to Explore and reviews to `reviewer`.
+The reviewer cannot edit, execute shell commands, or delegate. Build and reviewer
+have 40- and 12-step limits respectively; continue a session when more work is
+needed. These are loop guards, not monetary limits. Ask for review when the risk
+justifies it, and require the actual validation commands and results before
+accepting an implementation.
+
+Routine file edits and selected Git/Nix checks are allowed. External directories,
+unlisted commands, and content searches require approval. In this OpenCode
+version, `grep` checks the search expression rather than each result's read rule;
+read denials therefore do not protect secrets from an approved search or shell
+command. Keep plaintext credentials outside project directories, review requested
+search scope, and do not use `--auto`. There is no OS sandbox for OpenCode here.
+
+The Home Manager module `modules/home-manager/programs/hermes/default.nix` installs
+the Hermes CLI and manages `~/.hermes/config.yaml`; authentication and session data
+stay writable and application-owned. Hermes reads a separate gateway client key from `OPENAI_API_KEY` in its writable
+`~/.hermes/.env`. Create that file locally with mode `0600`; never source it or
+put the key in command arguments. Launch Hermes from an authorized project only.
+Its container includes its own tools, without host Nix or private home mounts.
+For Nix validation, use OpenCode's approved host commands or run the checks yourself.
+
+#### Local gateway
+
+`dotfiles.programs.omniroute.enable` installs a Linux-only rootless Podman service
+with a pinned image, persistent data, and a loopback-only port. After activation,
+open **<http://127.0.0.1:20128/dashboard>**. Configure providers, client API keys,
+and routing in the native dashboard. The API base URL is
+`http://127.0.0.1:20128/v1`; `just omniroute-status` and `just omniroute-logs`
+inspect the service.
+
+Native bootstrap creates private startup keys in the gateway data directory.
+Back up the entire directory, including `server.env` and the database, together.
+SOPS can supply an optional startup environment instead. Upstream provider keys
+and gateway client keys are separate credentials. DeepSeek routing uses its paid
+official API; account caps and usage monitoring remain provider responsibilities.
+The gateway is local to Linux: a Mac client needs its own reachable gateway and
+`dotfiles.programs.opencode.gatewayUrl` set in its host configuration. Do not
+expose the dashboard directly to a network.
+
+Hermes uses its native container backend with rootless Podman and a pinned sandbox
+image. Launch it from the authorized project: that directory is mounted writable
+at `/workspace`. The native backend also mounts Hermes cache, attachment, and
+skills directories read-only; these may contain task data. This configuration does
+not register credential-file mounts or expose the host HOME or Nix daemon.
+Authenticate and test these boundaries before unattended work. Background inference schedules are
+disabled.
+
 ## Development
 
 | Location | Purpose |
@@ -149,6 +303,21 @@ outside the repository.
 Use `just fmt` to format Nix sources and `just check` to validate the flake and run
 its checks for the current platform. Update dependencies deliberately with
 `just update` or `just update nixpkgs`.
+
+Nixpkgs, Home Manager, nix-darwin, and Stylix use the 26.05 release branches.
+The lockfile pins exact revisions; a small explicit unstable application selection
+preserves newer desktop, editor, and agent support. Release branches alone do not
+replace the lockfile, and updates never select a fallback automatically.
+
+The development shell includes `nom`, `nix-tree`, `deadnix`, and `statix`.
+`just lint` reports source findings without rewriting files. Television-enabled
+hosts include Nix search through `tv nix`; its indexes update independently of
+the flake and are discovery aids rather than the installed package inventory.
+
+RTK is available explicitly on desktop hosts. Prefer concise native commands
+first; use RTK for repetitive output and recover original diagnostics before
+debugging failures. No global rewrite hook, context proxy, or mandatory skill
+framework is enabled.
 
 The [Bun](devshell/bun-with-services/README.md), [Go](devshell/go/README.md), and
 [Rust](devshell/rust/README.md) templates include their own usage instructions.
