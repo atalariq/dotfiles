@@ -27,6 +27,9 @@
       gh.enable = true;
       lazygit.enable = true;
       codex.enable = true;
+      agy.enable = true;
+      copilot.enable = true;
+      rtk.enable = true;
       claude.enable = true;
       opencode.enable = true;
     };

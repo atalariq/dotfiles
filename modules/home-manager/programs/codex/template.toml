@@ -1,5 +1,28 @@
 #:schema https://developers.openai.com/codex/config-schema.json
-# Copy manually only if ~/.codex/config.toml does not already exist.
-# Keep login, project trust and client-written state local. Choose your own model.
-sandbox_mode = "read-only"
+# Loaded with `codex --profile development`; login and base config stay local.
+# The module adds per-host private-path restrictions to this named profile.
 approval_policy = "on-request"
+default_permissions = "development"
+model_provider = "openai"
+forced_login_method = "chatgpt"
+allow_login_shell = false
+web_search = "cached"
+
+[shell_environment_policy]
+inherit = "core"
+
+[permissions.development]
+extends = ":workspace"
+
+[permissions.development.filesystem]
+":workspace_roots" = "write"
+
+# Linux's network-disabled sandbox also blocks the Nix daemon's Unix socket.
+# Networking is enabled in this workspace profile; filesystem restrictions remain.
+[permissions.development.network]
+enabled = true
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+max_depth = 1

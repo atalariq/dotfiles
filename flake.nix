@@ -95,10 +95,6 @@
             xdg-desktop-portal-umbriel
             noctalia-greeter
             brave-origin
-            rtk
-            codex
-            claude-code
-            opencode
             ;
           # Avoid downgrading existing vault/collection formats and the tested
           # OBS/plugin combination during the system release migration.

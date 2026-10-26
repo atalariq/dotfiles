@@ -1,0 +1,21 @@
+{
+  "autoUpdate": false,
+  "permissions": {
+    "disableBypassPermissionsMode": "allow-auto-only"
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowBypass": true,
+    "auth": {
+      "git": false,
+      "gh": false
+    }
+  },
+  "defaultMode": "autopilot",
+  "defaultPermissionMode": "manual",
+  "storeTokenPlaintext": false,
+  "remoteExport": false,
+  "remoteSessions": false,
+  "respectGitignore": true,
+  "includeCoAuthoredBy": false
+}

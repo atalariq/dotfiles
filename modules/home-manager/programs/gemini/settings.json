@@ -1,0 +1,14 @@
+{
+  "general": {
+    "defaultApprovalMode": "auto_edit",
+    "enableAutoUpdate": false,
+    "enableAutoUpdateNotification": false
+  },
+  "security": {
+    "toolSandboxing": true,
+    "disableYoloMode": true,
+    "folderTrust": { "enabled": true },
+    "environmentVariableRedaction": { "enabled": true }
+  },
+  "telemetry": { "enabled": false }
+}

@@ -139,6 +139,8 @@
       tirith.enable = true;
       opencode.enable = true;
       codex.enable = true;
+      agy.enable = true;
+      copilot.enable = true;
       claude.enable = true;
       espanso.enable = true;
       plane.enable = true;
