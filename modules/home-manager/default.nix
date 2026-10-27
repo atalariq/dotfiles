@@ -10,6 +10,7 @@
     ./programs
     ./ai.nix
     ./services/secrets.nix
+    ./services/syncthing.nix
     ./desktop
     ../stylix
   ];

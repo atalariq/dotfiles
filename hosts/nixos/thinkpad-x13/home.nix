@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 {
   imports = [
     ../../../modules/home-manager/common
@@ -7,64 +7,6 @@
     sessionVariables.DOTFILES_HOST = "thinkpad-x13";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
-    packages = with pkgs; [
-      coreutils
-      findutils
-      gnugrep
-      gnused
-      diffutils
-      wget
-      gnutar
-      unzip
-      zip
-      delta
-      dust
-      hyperfine
-      tealdeer
-      usage
-      typos
-      brave-origin
-      google-chrome
-      nautilus
-      file-roller
-      adwaita-icon-theme
-      xdg-utils
-      libsecret
-      psmisc
-      discord
-      slack
-      anki
-      obsidian
-      readest
-      ncmpcpp
-      android-studio
-      podman
-      podman-compose
-      jetbrains.rust-rover
-      jetbrains.phpstorm
-      jetbrains.goland
-      localsend
-      scrcpy
-      lazysql
-      kdePackages.kdenlive
-      wdisplays
-      wl-mirror
-      libva-utils
-      inkscape
-      gimp
-      blender
-      godot
-      nicotine-plus
-      figma-linux
-      osu-lazer
-      gzdoom
-      mcpelauncher-ui-qt
-      mgba
-      mednafen
-      snes9x
-      pcsx2
-      (callPackage ../../../modules/home-manager/programs/concat/package.nix { })
-    ];
   };
   programs = {
     atuin.enable = true;
@@ -91,19 +33,17 @@
       };
     };
   };
-  services.syncthing = {
-    enable = true;
-    guiAddress = "127.0.0.1:8384";
-    overrideDevices = false;
-    overrideFolders = false;
-    settings = {
-      folders = { };
-      options.startBrowser = false;
-    };
-  };
-  systemd.user.services.syncthing.Service.Environment = [ "STNODEFAULTFOLDER=1" ];
   dotfiles = {
     ai.enable = true;
+    bundles = {
+      cli.enable = true;
+      comms.enable = true;
+      core.enable = true;
+      dev.enable = true;
+      gaming.enable = true;
+      gui.enable = true;
+      media.enable = true;
+    };
     deployment.liveApps = [
       "espanso"
       "vim"
@@ -143,8 +83,8 @@
       neovim.enable = true;
       typst.enable = true;
       freesmlauncher.enable = true;
-      # Optional agent experiments remain independently opt-in. The core bundle
-      # installs integration and usage tools without starting workers or hooks.
+      # Optional agent experiments remain independently opt-in. The AI module
+      # installs clients and helpers without starting workers or hooks.
       agy.enable = true;
       copilot.enable = true;
       espanso.enable = true;
@@ -156,11 +96,14 @@
       yt-dlp.enable = true;
       obs-studio.enable = true;
     };
-    services.secrets = {
-      enable = true;
-      keyFile = "${config.home.homeDirectory}/.config/age/ssh-keys.txt";
-      files.aiProviders = ../../../secrets/thinkpad-x13/ai-providers.sops.yaml;
-      files.credentials = ../../../secrets/thinkpad-x13/credentials.sops.yaml;
+    services = {
+      syncthing.enable = true;
+      secrets = {
+        enable = true;
+        keyFile = "${config.home.homeDirectory}/.config/age/ssh-keys.txt";
+        files.aiProviders = ../../../secrets/thinkpad-x13/ai-providers.sops.yaml;
+        files.credentials = ../../../secrets/thinkpad-x13/credentials.sops.yaml;
+      };
     };
   };
 }
