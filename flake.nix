@@ -128,6 +128,11 @@
               nix-tree
               deadnix
               statix
+              alejandra
+              comma
+              angrr
+              dix
+              nixd
               devenv
             ];
           };
