@@ -58,22 +58,25 @@ in
       "format" = "on [$hostname](bold red) [$ssh_symbol](bold blue) ";
       "disabled" = false;
     };
-    # A readable per-shell badge. The native module only exposes one colour, so
-    # the distinction is the text itself: bash/fsh/zsh/nu are unambiguous and
-    # sit right before the character.
-    "shell" = {
-      "disabled" = false;
-      "style" = "bold blue";
-      "bash_indicator" = "bash";
-      "fish_indicator" = "fsh";
-      "zsh_indicator" = "zsh";
-      "nu_indicator" = "nu";
-      "elvish_indicator" = "elv";
-      "xonsh_indicator" = "xsh";
-      "tcsh_indicator" = "tcsh";
-      "ion_indicator" = "ion";
-      "powershell_indicator" = "psh";
-      "cmd_indicator" = "cmd";
+    # Per-shell badge with its own colour. The native shell module only accepts
+    # one colour and always renders next to the character, so each shell gets a
+    # custom module gated on STARSHIP_SHELL (exported by every starship init).
+    # Custom modules expand at $custom, i.e. at the end of the info line.
+    "shell"."disabled" = true;
+    "custom"."shell-fish" = {
+      "command" = "true";
+      "when" = ''test "$STARSHIP_SHELL" = fish'';
+      "format" = "[fish](bold cyan) ";
+    };
+    "custom"."shell-bash" = {
+      "command" = "true";
+      "when" = ''test "$STARSHIP_SHELL" = bash'';
+      "format" = "[bash](bold green) ";
+    };
+    "custom"."shell-zsh" = {
+      "command" = "true";
+      "when" = ''test "$STARSHIP_SHELL" = zsh'';
+      "format" = "[zsh](bold yellow) ";
     };
     palettes.${if config.dotfiles.appearance.enable then "base16" else "dotfiles"} = lib.mapAttrs (
       _: role: colours.${role}
