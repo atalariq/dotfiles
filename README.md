@@ -15,7 +15,7 @@ that install them.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
 - **Development:** Independent Bun, Go, and Rust flake templates; commands collected in a plain `Justfile`.
 - **Coding agents:** Native account authentication for Codex, Antigravity, and Copilot;
-  optional OpenCode and Hermes through a local OmniRoute gateway.
+  direct DeepSeek/OpenRouter connections for OpenCode and Hermes; optional local gateway.
 
 ## Hosts
 
@@ -127,16 +127,52 @@ limitation when live mode and appearance are enabled together.
 Select individual applications instead when only some files need live editing:
 
 ```nix
-dotfiles.deployment.liveApps = [ "espanso" "vim" "neovim" "hermes" "opencode" ];
+dotfiles.deployment.liveApps = [ "espanso" "vim" "neovim" "fish" "mango" "umbriel" "noctalia" ];
 ```
 
-This links Espanso's native files, Vim's vimrc, Neovim's Lua runtime, Hermes's
-configuration, and OpenCode's `cli.json` to their source files. Restart or reload
-the application after editing. OpenCode's main configuration, generated palettes,
-plugin selections, and compositor settings still require rebuilding. Writable
-account settings are deliberately kept separate: applications that replace their
-settings files can break a symlink. Edit the checkout files rather than asking an
-application to save over managed settings.
+This links Espanso's native files, Vim's vimrc, Neovim's Lua runtime, Fish
+customization, and the native desktop fragments to their source files. Restart
+or reload the application after editing. Generated palettes, plugin selections,
+and host-specific desktop fragments still require rebuilding.
+
+OpenCode and Hermes rewrite their native profiles, so those files stay writable
+and application-owned. Home Manager supplies seeds under `dotfiles/templates`,
+not runtime symlinks that a native command can replace. This repo's
+`.opencode/opencode.jsonc` links the canonical native policy without overriding
+the global provider/model selection. Hermes uses its writable native YAML.
+Older `liveApps` selections for these two tools remain accepted and warn that
+they do not synchronize the working profile. Generated seeds still rebuild.
+
+Fish's native customization file is `fish/conf.d/99-dotfiles.fish` under the XDG
+config directory. It runs before the generated `config.fish`; Home Manager shell
+integrations and Stylix still rebuild. Validate edits with
+`fish --no-config --no-execute <file>`, then reload with `source <file>` inside
+Fish or start a new shell. Invalid Fish commands report errors; a failed reload
+can leave earlier commands applied, so validate first. Removing commands from the
+file does not undo their effects in an existing shell. Start a new shell after
+switching back to immutable mode; history and universal variables stay writable.
+
+Reload Vim edits with `:source ~/.vimrc` or start a new Vim process. A failed
+`:source` reports native errors and may leave earlier settings applied. Validate
+in a separate Vim process before reloading your working session. Switching back
+to immutable mode requires a Home Manager rebuild; it leaves undo files intact.
+
+Mango, Umbriel, and Noctalia use native include files with explicit load order.
+Edit behavior and bindings in their colocated `config/` directories under
+`modules/home-manager/desktop/`. Nix still generates host displays, conditional
+integrations, and Stylix colors. Immutable mode uses the same native source
+snapshot; live mode uses Home Manager's `mkOutOfStoreSymlink`. Writable Noctalia
+settings remain application-owned. Native validators check a complete immutable
+copy of the include tree during builds, even when the deployed links are live.
+
+Neovim's Lua runtime lives in
+`modules/home-manager/programs/neovim/config/`, rather than `~/.config/nvim`.
+With Neovim selected in `liveApps`, edit that checkout directly and restart Neovim
+for a reliable full reload; Lua `require` caches modules within a running process.
+`:DotfilesConfig` or `<leader>sN` opens the canonical source picker and explains
+whether edits are live or require rebuilding. The native Fish `nvimc` helper opens
+the same picker after the updated configuration has been installed.
+Packages, plugins, parsers, and external language tools still rebuild through nvf.
 
 Freesm Launcher is available through `dotfiles.programs.freesmlauncher.enable` on
 x86_64 Linux. Its official AppImage is pinned and wrapped for NixOS; Java 21 is
@@ -158,205 +194,127 @@ outside the repository.
 
 ### Coding agents
 
-Enable tools independently with `dotfiles.programs.<name>.enable`. The desktop
-hosts select Codex, Antigravity (`agy`), Copilot, and Claude Code. Gemini CLI is a
-separate opt-in module. Authentication and account model selection happen in each
-application; Nix never manages login tokens.
+Enable the integrated bundle in a host's Home Manager configuration:
 
-Agent CLIs and RTK come from the pinned `llm-agents` input, independently of
-the system package channel. OpenCode uses its `opencode2` package and executable
-for V2 configs.
-Update this toolchain with `just update llm-agents`, then build and review before
-activation; updates remain explicit and reproducible through `flake.lock`.
+```nix
+dotfiles.ai.enable = true;
+# Individual tools remain overridable, for example:
+dotfiles.programs.hermes.enable = false;
+```
 
-Run the native CLIs from the authorized project directory. Seed the writable
-settings described below before using the bare Claude, Antigravity, or Copilot
-commands.
+The bundle selects Codex, Claude Code, OpenCode, Hermes, Beads Rust, CodeGraph,
+RTK, and Tokscale. It does not start workers, index projects, install shell
+rewrite hooks, or purchase provider access. Antigravity, Copilot, Gemini, and
+other experiments remain independently opt-in with
+`dotfiles.programs.<name>.enable`. The desktop hosts explicitly select
+Antigravity and Copilot for optional use.
 
-| Command | Configuration and authentication |
+Agent packages come from the pinned `llm-agents` input. Update them deliberately
+with `just update llm-agents`, then build and review before activation. OpenCode
+V2 uses the `opencode2` executable.
+
+Home Manager activation creates **absent** native profiles from the managed
+seeds with private file permissions. These are writable copies, so native
+commands can save preferences. Rebuilds preserve existing files, symlinks,
+authentication, sessions, models, and UI settings. Updated seeds are available
+under `~/.config/dotfiles/templates`; an existing profile needs a selective
+reviewed migration to adopt changed settings. No credential enters the Nix store.
+
+| Command | First-use authentication and role |
 | --- | --- |
-| `codex --profile development` | Managed workspace profile; native OpenAI account login |
-| `agy --effort high` | Native auto mode and sandbox settings; Google sign-in |
-| `copilot` | Native sandbox and manual permissions; GitHub sign-in |
-| `claude` | Native user settings seeded from the template; Claude authentication |
-| `opencode2 --standalone` | Private server with the managed OpenCode V2 configuration |
-| `hermes` | Managed Home Manager configuration through OmniRoute |
+| `codex` | Native account/API setup; trusted project implementation and review |
+| `claude` | Native authentication; trusted project implementation and review |
+| `opencode2` | `/connect` to DeepSeek, then select the direct model; draft implementation |
+| `hermes` | Native provider setup or private `DEEPSEEK_API_KEY`; optional parallel coordinator |
+| `agy --effort high` | Google sign-in; draft implementation |
+| `copilot` | GitHub sign-in; native project permission review |
 
-The Codex profile, Antigravity session effort, and OpenCode private-server flag
-remain explicit command-line choices. No aliases or wrappers are required.
-Privileged operations and activation require explicit approval. Model availability
-depends on account entitlement; there is no automatic cross-agent fallback or
-shared authentication store.
+DeepSeek is the fresh-profile default for OpenCode and Hermes. OpenRouter is an
+explicit alternative selected through the native provider settings. There is no
+configured automatic paid provider fallback. Provider balances, billing fees,
+and usage caps remain separate; a local configuration cannot impose one shared
+spending cap across independent accounts. Subscription providers remain optional.
 
-Copilot saves routine tool approvals per project through its native permission
-prompts and `/permissions`; retain manual review for privileged or publishing
-commands. Saved approvals remain application-owned. Its
-[saved permissions format](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference#permissions-configjson)
-does not support deny rules. To retain the explicit destructive Git and release
-restrictions, run:
+Run the tools in the assigned project or worktree. Routine edits and validation
+use native permission and sandbox facilities. Privilege, activation, publishing,
+and destructive operations retain separate review. OpenCode and local Hermes
+execution are not OS filesystem sandboxes. Existing running servers and sessions
+retain their settings until reloaded; `opencode2 --standalone` creates an isolated
+server without restarting the shared one.
+
+Codex's fresh profile includes the status line and development permissions; its
+base config remains writable. This repository also supplies project defaults.
+Claude's Linux sandbox keeps local socket access restricted, so Nix daemon
+access can require a separate native approval. Copilot uses native saved project
+approvals. Hermes retains hard-denied protected commands because its pinned
+version does not provide an arbitrary interactive ask list.
+
+#### Integration and coordination
+
+Enabling CodeGraph registers its native MCP command in fresh profiles of the
+enabled clients. Stable executable names survive package upgrades. Existing
+profiles retain their servers until selectively updated. Project indexing is a
+separate explicit action; use the CLI when a client has not loaded its MCP server.
+RTK is available for selected noisy output, and [Tokscale](modules/home-manager/programs/tokscale/README.md)
+runs on demand; unpriced models can appear with zero cost and must be treated as
+unknown. Neither
+starts an automatic background collector or intercepts all shell commands.
+
+Use a single agent by default. For independent parallel tasks, follow the
+[native workflow](docs/agent-workflow.md): shared Beads claims, separate worktrees,
+explicit write scopes, bounded worker processes, and review before integration.
+Hermes is optional and admits at most two external workers. Parallel workers
+consume their providers' quotas; they do not multiply an account's allowance.
+
+Beads Rust (`br`, not `bd`) owns task status. Every worktree uses the main
+checkout's `.beads` store through per-command `--db` or `BEADS_DIR`.
+`DOTFILES_BEADS_DIR` points to it without redirecting unrelated projects.
 
 ```sh
-copilot --deny-tool 'shell(git push:*)' --deny-tool 'shell(git reset:*)' --deny-tool 'shell(git clean:*)' --deny-tool 'shell(gh release:*)'
+br coordination status --db "$DOTFILES_BEADS_DIR/beads.db" --json
+br ready --db "$DOTFILES_BEADS_DIR/beads.db" --brief --json
+br show ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --json
+br update ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --claim --actor tool-session
+br comments add ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" 'Checks, results, next action'
+br sync --db "$DOTFILES_BEADS_DIR/beads.db" --flush-only
 ```
 
-The Codex development profile permits networking, including the local Nix daemon,
-and writes to the Nix cache and RTK state. Other home files remain hidden outside
-the workspace. External handoff access needs a separate, scoped approval. On Linux,
-Claude's sandbox cannot allow just one Unix socket; Nix daemon access therefore
-remains a separate permission decision instead of enabling all local sockets.
-
-Claude, Antigravity, and Copilot keep writable native settings. Seed their templates
-once after activation; the following commands refuse to overwrite existing files:
-
-```sh
-umask 077
-mkdir -p ~/.claude ~/.gemini/antigravity-cli ~/.copilot
-(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/claude.json" > ~/.claude/settings.json)
-(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/agy.json" > ~/.gemini/antigravity-cli/settings.json)
-(set -C; cat "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/copilot.json" > ~/.copilot/settings.json)
-```
-
-If profiles already exist, merge the templates manually. To load the managed
-Claude template without changing existing user settings, run
-`claude --settings "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/templates/claude.json"`.
-Keep root `AGENTS.md` as the project guidance. For a different agent, pass its path explicitly if the tool
-does not discover it. Cross-tool progress belongs in a short external handoff at
-`~/.local/state/dotfiles/handoff.md`: objective, changed files, verification,
-unresolved findings, and next action. Start each continuation by checking the diff.
+Claims reserve issues, not files. The coordinator prevents overlapping write
+scopes. Task handoffs belong in issue comments; detailed local receipts live in
+the main checkout's ignored `.beads/artifacts/ISSUE/SESSION/`. Historical external
+checkpoints remain archives. Only the owner coordinates shared queue commits.
 
 #### Privileged operations
 
-Agents may request approval for `sudo`, `doas`, `pkexec`, and activation commands.
-Approval of a command and OS authentication are separate steps. Review the complete
-command before approving it; do not save a blanket approval for privilege tools.
-Codex keeps its native on-request policy. Claude keeps strict sandbox retries and excludes only named privilege commands,
-which have explicit ask rules. Copilot uses manual permission mode with project-scoped saved approvals
-and per-command sandbox bypass available; resumed sessions retain
-their previous mode, so inspect `/permissions` and `/sandbox` before proceeding.
-Antigravity uses its native ask rules and sandbox review. These settings do not
-provide unrestricted or passwordless root access.
-
-On a Linux desktop with a registered polkit authentication agent, a privileged
-command can request the system authentication dialog:
+Build and review first. The owner authorizes activation and authenticates using
+the normal OS mechanism. On a Linux desktop with an authentication agent, a
+reviewed command can use:
 
 ```sh
 pkexec --disable-internal-agent /run/current-system/sw/bin/nixos-rebuild switch --flake "$PWD#thinkpad-x13"
 ```
 
-Run it only after build and review. The flag prevents fallback to a textual
-password prompt in the agent tool. Without a desktop agent, authenticate and run
-`sudo` yourself in a local terminal; macOS and headless hosts use that path.
-Never pass passwords through chat, tool input, command arguments, or an askpass
-script. Hermes uses local terminal execution and can request an approved host
-command; its command approvals do not provide filesystem isolation.
+Without that desktop agent, the owner runs the command in their terminal. Never
+pass passwords through chat, agent stdin, command arguments, or askpass helpers.
 
-#### OpenCode and Hermes
+#### Optional local gateway and experiments
 
-OpenCode uses the V2 configuration schema. Start it in the authorized project
-with `opencode2 --standalone`; the private server loads the current configuration
-instead of reusing a background server. Connect the `omniroute` integration with
-`/connect`, using a gateway client key, then select
-`omniroute/ds/deepseek-flash` in `/models`. Thinking mode uses high effort.
-`omniroute/ds/deepseek-v4-pro` is an explicit alternative for demanding tasks;
-both routes use the paid DeepSeek API. Neither step limits provider spending.
+`dotfiles.programs.omniroute.enable` remains available on Linux, but the default
+host selection uses direct providers. Enabling it declares a pinned rootless
+Podman service with a loopback dashboard at <http://127.0.0.1:20128/dashboard>.
+Configure its provider accounts and client keys in the native dashboard, then
+select that endpoint explicitly in each client. It is not required by the bundle.
 
-Build can delegate focused searches to Explore and reviews to `reviewer`.
-The reviewer cannot edit, execute shell commands, or delegate. Build and reviewer
-have 40- and 12-step limits respectively; continue a session when more work is
-needed. These are loop guards, not monetary limits. Ask for review when the risk
-justifies it, and require the actual validation commands and results before
-accepting an implementation.
+Disabling the service preserves its private data under
+`~/.local/state/omniroute/data`. Back up the database and `server.env` together;
+provider keys and gateway client keys are separate credentials. Review stopping
+an existing gateway before activation when other clients still depend on it.
 
-Routine file edits and selected Git/Nix checks are allowed. External directories,
-unlisted commands, and content searches require approval. In this OpenCode
-version, `grep` checks the search expression rather than each result's read rule;
-read denials therefore do not protect secrets from an approved search or shell
-command. Keep plaintext credentials outside project directories, review requested
-search scope, and do not use `--auto`. There is no OS sandbox for OpenCode here.
-
-The Home Manager module `modules/home-manager/programs/hermes/default.nix` installs
-the Hermes CLI and manages `~/.hermes/config.yaml`; authentication and session data
-stay writable and application-owned. Hermes reads a separate gateway client key from `OPENAI_API_KEY` in its writable
-`~/.hermes/.env`. Create that file locally with mode `0600`; never source it or
-put the key in command arguments. Launch Hermes from an authorized project only.
-Its local terminal backend uses the host tools, including Nix and `br`. It runs
-with the user's filesystem access; command approvals are not an OS sandbox.
-Keep credentials outside the project and review commands that access private data.
-
-#### Local gateway
-
-`dotfiles.programs.omniroute.enable` installs a Linux-only rootless Podman service
-with a pinned image, persistent data, and a loopback-only port. After activation,
-open **<http://127.0.0.1:20128/dashboard>**. Configure providers, client API keys,
-and routing in the native dashboard. The API base URL is
-`http://127.0.0.1:20128/v1`; `just omniroute-status` and `just omniroute-logs`
-inspect the service.
-
-Native bootstrap creates private startup keys in the gateway data directory.
-Back up the entire directory, including `server.env` and the database, together.
-SOPS can supply an optional startup environment instead. Upstream provider keys
-and gateway client keys are separate credentials. DeepSeek routing uses its paid
-official API; account caps and usage monitoring remain provider responsibilities.
-The gateway is local to Linux: a Mac client needs its own reachable gateway and
-`dotfiles.programs.opencode.gatewayUrl` set in its host configuration. Do not
-expose the dashboard directly to a network.
-
-Hermes runs terminals locally, without an additional container image. Background
-inference schedules are disabled. OmniRoute remains a separate rootless container
-service; it does not execute project development commands.
-
-#### Shared task queue
-
-Enable `dotfiles.programs.beads-rust.enable` to install Beads Rust (`br`). This
-repository tracks portable issues in `.beads/issues.jsonl`; databases, locks, and
-machine-local history remain ignored. Tasks describe their acceptance checks, and
-owner-dependent tasks remain deferred until those checks can be performed.
-
-Use the main checkout's queue for every worktree of this repository. The module
-exports `DOTFILES_BEADS_DIR` without redirecting Beads in unrelated projects. For
-example, substitute a unique tool/session actor and an issue ID from `ready`:
-
-```sh
-br ready --db "$DOTFILES_BEADS_DIR/beads.db" --brief --json
-br show ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --json
-br update ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --claim --actor opencode-session
-br comments add ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" 'Checks run, results, unresolved findings'
-# Close only after the issue acceptance criteria pass.
-br close ISSUE --db "$DOTFILES_BEADS_DIR/beads.db" --reason 'Verified outcome'
-br sync --db "$DOTFILES_BEADS_DIR/beads.db" --flush-only
-```
-
-Exclusive claims prevent two workers from owning the same issue. They do not lock
-files; use separate worktrees and coordinate overlapping modules. Do not steal
-claims or force imports. After receiving reviewed JSONL changes, run
-`br sync --db "$DOTFILES_BEADS_DIR/beads.db" --import-only`.
-Beads never commits or pushes changes. The owner coordinates queue commits and
-reviews integration; native agent authentication remains independent.
-
-Codex's development profile grants access only to the shared queue beneath the
-otherwise hidden home directory. Claude and Copilot templates include the same
-scoped directory; merge updated templates into existing writable settings.
-Antigravity can add it for a worktree session with
-`agy --effort high --add-dir "$DOTFILES_BEADS_DIR"`; Copilot supports
-`copilot --add-dir "$DOTFILES_BEADS_DIR"`. OpenCode has scoped directory
-permissions and Beads command rules; Hermes's local terminal can access the queue
-without an extra MCP server. No automatic cross-tool dispatcher is installed.
-
-Additional tools are independently opt-in under `dotfiles.programs`: `tokscale`,
-`crit`, `agent-browser`, `codegraph`, `git-ai`, `git-surgeon`, `nono`, `herdr`,
-`workmux`, and `orca`. Installing them does not start workers, index projects,
-launch browsers, or authorize network uploads. Workmux can use the existing Tmux
-installation. Orca remains an explicit trial.
-
-Crit and git-ai provide writable configuration templates at
-`~/.config/dotfiles/templates/{crit,git-ai}.json`. Before enabling git-ai hooks,
-merge its template into `~/.git-ai/config.json`: local prompt storage, telemetry
-and updates disabled, and an explicit `repositories` allowlist configured in the
-Home Manager module. The module requires a nonempty allowlist because an empty native list permits
-every repository. Transcript streaming, sweeping, and daemon-log uploads are also
-disabled in the template. Crit's template disables share targets; merge it into
-`~/.crit.config.json` before using review-sharing features. Neither template
-overwrites an existing account configuration or installs hooks automatically.
+Tools such as Tirith, Crit, agent-browser, git-ai, git-surgeon, Nono, Workmux,
+Herdr, and Orca remain optional. Installing a package alone does not prove agent
+integration. Enable an integration after its intended workflow has been verified.
+For git-ai, configure a nonempty repository allowlist and review its private
+configuration before enabling hooks; retain the module's upload restrictions.
 
 ## Development
 
