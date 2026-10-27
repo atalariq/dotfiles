@@ -40,6 +40,8 @@
           "command(nixos-rebuild)"
           "command(darwin-rebuild)"
           "command(home-manager switch)"
+          "command(just apply-)"
+          "command(nix run)"
         ];
         deny = [
           "command(git reset)"
@@ -55,5 +57,20 @@
         ];
       };
     };
+    # Merge only this named entry into the writable native MCP map. agy owns
+    # unrelated servers and any authentication associated with them.
+    xdg.configFile."dotfiles/templates/agy-mcp.json" =
+      lib.mkIf config.dotfiles.programs.codegraph.enable
+        {
+          text = builtins.toJSON {
+            mcpServers.codegraph = {
+              command = "codegraph";
+              args = [
+                "serve"
+                "--mcp"
+              ];
+            };
+          };
+        };
   };
 }

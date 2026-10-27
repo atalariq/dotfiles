@@ -106,6 +106,7 @@
   };
   systemd.user.services.syncthing.Service.Environment = [ "STNODEFAULTFOLDER=1" ];
   dotfiles = {
+    ai.enable = true;
     deployment.liveApps = [
       "espanso"
       "vim"
@@ -145,27 +146,11 @@
       lazygit.enable = true;
       neovim.enable = true;
       typst.enable = true;
-      rtk.enable = true;
-      tirith.enable = true;
-      opencode.enable = true;
-      codex.enable = true;
-      beads-rust.enable = true;
       freesmlauncher.enable = true;
-      tokscale.enable = true;
-      crit.enable = true;
-      agent-browser.enable = true;
-      codegraph.enable = true;
-      git-ai = {
-        enable = true;
-        repositories = [ "https://github.com/atalariq/dotfiles.git" ];
-      };
-      git-surgeon.enable = true;
-      nono.enable = true;
-      workmux.enable = true;
-      orca.enable = true;
+      # Optional agent experiments remain independently opt-in. The core bundle
+      # installs integration and usage tools without starting workers or hooks.
       agy.enable = true;
       copilot.enable = true;
-      claude.enable = true;
       espanso.enable = true;
       plane.enable = true;
       btop.enable = true;
@@ -175,8 +160,8 @@
       aria2.enable = true;
       yt-dlp.enable = true;
       obs-studio.enable = true;
-      hermes.enable = true;
-      omniroute.enable = true;
+      # Direct providers are the default. Keep OmniRoute opt-in and its state
+      # untouched; applying this generation stops its previous user service.
     };
     services.secrets = {
       enable = true;

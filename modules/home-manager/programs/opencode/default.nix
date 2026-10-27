@@ -9,15 +9,17 @@
 let
   cfg = config.dotfiles.programs.opencode;
   format = pkgs.formats.json { };
+  native = builtins.fromJSON (builtins.readFile ./config/opencode.jsonc);
+  seed = lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./config/providers.json)) native;
 in
 {
 
   options.dotfiles.programs.opencode = {
     enable = lib.mkEnableOption "opencode configuration";
     gatewayUrl = lib.mkOption {
-      type = lib.types.str;
-      default = "http://127.0.0.1:20128/v1";
-      description = "Reachable OmniRoute API endpoint; remote hosts need a secure gateway connection.";
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Optional OmniRoute API endpoint; null keeps direct providers only.";
     };
   };
 
@@ -26,55 +28,83 @@ in
     # V2 schemas require opencode2; the opencode attribute still packages V1.
     home.packages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode2 ];
     # Keep the directory writable for local plugins and their dependencies.
-    # /connect stores the gateway client key in native writable auth state.
-    # OMNIROUTE_API_KEY is also supported; never reuse the upstream provider key.
-    xdg.configFile."opencode/opencode.jsonc".source = format.generate "opencode.json" (
-      lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./config/opencode.jsonc)) {
-        providers.omniroute.settings.baseURL = cfg.gatewayUrl;
-        permissions =
-          (builtins.fromJSON (builtins.readFile ./config/opencode.jsonc)).permissions
-          ++ lib.optionals config.dotfiles.programs.beads-rust.enable (
-            (map
-              (resource: {
-                action = "external_directory";
-                inherit resource;
+    # /connect stores provider credentials in native writable auth state.
+    # DeepSeek is direct; OpenRouter and any gateway are explicit model choices.
+    # Native CLI/MCP commands rewrite these settings. Keep the working profile
+    # writable and provide a seed, rather than replacing its account/UI choices.
+    xdg.configFile."dotfiles/templates/opencode.jsonc".source = format.generate "opencode.json" (
+      lib.recursiveUpdate seed {
+        providers = lib.optionalAttrs (cfg.gatewayUrl != null) {
+          omniroute = (builtins.fromJSON (builtins.readFile ./config/gateway.json)) // {
+            settings.baseURL = cfg.gatewayUrl;
+          };
+        };
+        mcp.servers = lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+          codegraph = {
+            type = "local";
+            command = [
+              "codegraph"
+              "serve"
+              "--mcp"
+            ];
+          };
+        };
+        permissions = [
+          {
+            action = "*";
+            resource = "*";
+            effect = "allow";
+          }
+          {
+            action = "external_directory";
+            resource = "*";
+            effect = "ask";
+          }
+        ]
+        ++ native.permissions
+        ++ lib.optionals config.dotfiles.programs.beads-rust.enable (
+          (map
+            (resource: {
+              action = "external_directory";
+              inherit resource;
+              effect = "allow";
+            })
+            [
+              config.dotfiles.programs.beads-rust.directory
+              "${config.dotfiles.programs.beads-rust.directory}/**"
+            ]
+          )
+          ++
+            map
+              (command: {
+                action = "shell";
+                resource = "br ${command}*";
                 effect = "allow";
               })
               [
-                config.dotfiles.programs.beads-rust.directory
-                "${config.dotfiles.programs.beads-rust.directory}/**"
+                "ready"
+                "show"
+                "list"
+                "blocked"
+                "coordination status"
+                "update"
+                "comments"
+                "close"
+                "sync --flush-only"
+                "sync --import-only"
               ]
-            )
-            ++
-              map
-                (command: {
-                  action = "shell";
-                  resource = "br ${command}*";
-                  effect = "allow";
-                })
-                [
-                  "ready"
-                  "show"
-                  "list"
-                  "blocked"
-                  "coordination status"
-                  "update"
-                  "comments"
-                  "close"
-                  "sync --flush-only"
-                  "sync --import-only"
-                ]
-            ++ [
-              {
-                action = "shell";
-                resource = "br *--force*";
-                effect = "ask";
-              }
-            ]
-          );
+          ++ [
+            {
+              action = "shell";
+              resource = "br *--force*";
+              effect = "ask";
+            }
+          ]
+        );
       }
     );
-    xdg.configFile."opencode/cli.json".source = dotfilesLib.sourceFor "opencode" ./config/cli.json;
+    xdg.configFile."dotfiles/templates/opencode-cli.json".source =
+      dotfilesLib.sourceFor "opencode" ./config/cli.json;
 
   };
 }

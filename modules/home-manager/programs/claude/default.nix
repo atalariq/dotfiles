@@ -18,6 +18,8 @@ in
 
   config = lib.mkIf config.dotfiles.programs.claude.enable {
 
+    # Local Git work remains sandboxed; AGENTS limits commit authority to assigned
+    # worktrees. Native permissions are not a CWD-specific Git-index ACL.
     # llm-agents supplies bubblewrap/socat through the Claude wrapper.
     home.packages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code ];
     xdg.configFile."dotfiles/templates/claude.json".text = builtins.toJSON (
@@ -37,6 +39,22 @@ in
         };
       }
     );
+
+    # Native MCP state remains writable; provisioning creates this seed only when absent.
+    xdg.configFile."dotfiles/templates/claude-mcp.json" =
+      lib.mkIf config.dotfiles.programs.codegraph.enable
+        {
+          text = builtins.toJSON {
+            mcpServers.codegraph = {
+              type = "stdio";
+              command = "codegraph";
+              args = [
+                "serve"
+                "--mcp"
+              ];
+            };
+          };
+        };
 
   };
 }

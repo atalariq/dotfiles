@@ -3,8 +3,6 @@
 # The module adds per-host private-path restrictions to this named profile.
 approval_policy = "on-request"
 default_permissions = "development"
-model_provider = "openai"
-forced_login_method = "chatgpt"
 allow_login_shell = false
 web_search = "cached"
 
@@ -26,3 +24,7 @@ enabled = true
 enabled = true
 max_concurrent_threads_per_session = 3
 max_depth = 1
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "git-branch", "context-used", "five-hour-limit", "run-state"]
+status_line_use_colors = true

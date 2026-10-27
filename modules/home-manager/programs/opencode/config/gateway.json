@@ -1,0 +1,41 @@
+{
+  "name": "OmniRoute (optional)",
+  "package": "@opencode/ai/providers/openai-compatible",
+  "env": [
+    "OMNIROUTE_API_KEY"
+  ],
+  "models": {
+    "ds/deepseek-flash": {
+      "name": "DeepSeek V4.1 Flash (official API via OmniRoute)",
+      "limit": {
+        "context": 1000000,
+        "output": 32768
+      },
+      "capabilities": {
+        "tools": true
+      },
+      "body": {
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "high"
+      }
+    },
+    "ds/deepseek-v4-pro": {
+      "name": "DeepSeek V4 Pro (official API via OmniRoute; opt-in)",
+      "limit": {
+        "context": 1000000,
+        "output": 32768
+      },
+      "capabilities": {
+        "tools": true
+      },
+      "body": {
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "high"
+      }
+    }
+  }
+}

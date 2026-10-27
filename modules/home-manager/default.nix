@@ -8,6 +8,7 @@
   # Modules declare features; each host makes its own explicit selection.
   imports = [
     ./programs
+    ./ai.nix
     ./services/secrets.nix
     ./desktop
     ../stylix
@@ -59,11 +60,19 @@
         message = "Live deployment with appearance generates immutable themed files: edits to those files require a rebuild. Set dotfiles.deployment.allowThemedFiles = true to explicitly accept this limitation.";
       }
     ];
-    warnings = lib.optional (
-      config.dotfiles.deployment.mode == "live"
-      && config.dotfiles.appearance.enable
-      && config.dotfiles.deployment.allowThemedFiles
-    ) "Live deployment: themed files remain immutable and require a rebuild.";
+    warnings =
+      lib.optional (
+        config.dotfiles.deployment.mode == "live"
+        && config.dotfiles.appearance.enable
+        && config.dotfiles.deployment.allowThemedFiles
+      ) "Live deployment: themed files remain immutable and require a rebuild."
+      ++
+        lib.optional
+          (lib.any (app: builtins.elem app config.dotfiles.deployment.liveApps) [
+            "hermes"
+            "opencode"
+          ])
+          "Hermes/OpenCode native profiles remain writable; legacy liveApps entries do not synchronize runtime profiles. Use native config edits or project configuration for runtime changes.";
     _module.args.dotfilesLib = import ./sources.nix {
       inherit lib config pkgs;
       checkout = config.dotfiles.deployment.checkout;

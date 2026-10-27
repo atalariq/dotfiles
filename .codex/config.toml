@@ -1,0 +1,27 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+# Native project defaults; preserve the user's model, UI and account settings.
+approval_policy = "on-request"
+default_permissions = "dotfiles-workspace"
+allow_login_shell = false
+
+[permissions.dotfiles-workspace]
+extends = ":workspace"
+
+[permissions.dotfiles-workspace.filesystem]
+":workspace_roots" = "write"
+"~/.cache/nix" = "write"
+"~/.local/share/rtk" = "write"
+"~/.ssh" = "deny"
+"~/.gnupg" = "deny"
+"~/.config/age" = "deny"
+"~/.config/sops" = "deny"
+"~/.config/sops-nix" = "deny"
+
+# Native Nix daemon operations need Unix-socket access on Linux.
+[permissions.dotfiles-workspace.network]
+enabled = true
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+max_depth = 1

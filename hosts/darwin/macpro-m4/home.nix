@@ -18,6 +18,7 @@
     yazi.enable = true;
   };
   dotfiles = {
+    ai.enable = true;
     appearance = {
       enable = true;
       gui = true;
@@ -26,13 +27,8 @@
       neovim.enable = true;
       gh.enable = true;
       lazygit.enable = true;
-      codex.enable = true;
-      beads-rust.enable = true;
       agy.enable = true;
       copilot.enable = true;
-      rtk.enable = true;
-      claude.enable = true;
-      opencode.enable = true;
     };
   };
 }

@@ -47,5 +47,22 @@ in
         };
       }
     );
+    # Native MCP state remains writable; provisioning creates this seed only when absent.
+    xdg.configFile."dotfiles/templates/copilot-mcp.json" =
+      lib.mkIf config.dotfiles.programs.codegraph.enable
+        {
+          text = builtins.toJSON {
+            mcpServers.codegraph = {
+              type = "local";
+              command = "codegraph";
+              args = [
+                "serve"
+                "--mcp"
+              ];
+              tools = [ "*" ];
+            };
+          };
+        };
+
   };
 }

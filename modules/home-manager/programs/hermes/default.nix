@@ -3,14 +3,22 @@
   lib,
   pkgs,
   inputs,
-  dotfilesLib,
   ...
 }:
 {
-  options.dotfiles.programs.hermes.enable = lib.mkEnableOption "Hermes CLI through the local gateway";
+  options.dotfiles.programs.hermes.enable =
+    lib.mkEnableOption "Hermes CLI with direct provider configuration";
   config = lib.mkIf config.dotfiles.programs.hermes.enable {
     home.packages = [ inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.hermes-agent ];
-    # Nix owns settings; upstream memories, sessions and OAuth files stay writable.
-    home.file.".hermes/config.yaml".source = dotfilesLib.sourceFor "hermes" ./config/config.yaml;
+    # Hermes rewrites its native profile. Keep it writable and seed/merge only
+    # selected preferences; authentication, sessions and local toolsets survive.
+    xdg.configFile."dotfiles/templates/hermes.yaml".text =
+      builtins.readFile ./config/config.yaml
+      + lib.optionalString config.dotfiles.programs.codegraph.enable ''
+        mcp_servers:
+          codegraph:
+            command: codegraph
+            args: [serve, --mcp]
+      '';
   };
 }
