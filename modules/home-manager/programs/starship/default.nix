@@ -59,6 +59,10 @@ in
       "format" = "on [$hostname](bold red) [$ssh_symbol](bold blue) ";
       "disabled" = false;
     };
+    "shell" = {
+      "disabled" = false;
+      "style" = "bold blue";
+    };
     palettes.${if config.dotfiles.appearance.enable then "base16" else "dotfiles"} = lib.mapAttrs (
       _: role: colours.${role}
     ) roles;

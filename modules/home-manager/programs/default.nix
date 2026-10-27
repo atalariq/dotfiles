@@ -3,10 +3,7 @@ let
   entries = builtins.readDir ./.;
 in
 {
-  imports = [
-    ./integrations.nix
-  ]
-  ++ map (name: ./. + "/${name}") (
+  imports = map (name: ./. + "/${name}") (
     builtins.filter (
       name:
       entries.${name} == "directory"

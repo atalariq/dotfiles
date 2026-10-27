@@ -59,8 +59,7 @@ The standalone outputs are `homeConfigurations.linux-lab` and
 - Keep application modules opt-in. Shared scalar defaults use `lib.mkDefault`;
   package lists merge normally. Hosts own identities, feature selections, and displays.
 - Program modules use `<program>/default.nix`; package-only directories may contain
-  just `package.nix`. `programs/integrations.nix` is an explicit exception imported
-  by the program index. Keep package derivations beside their consumers.
+  just `package.nix`. Keep package derivations beside their consumers.
 - Prefer native Nix modules and application configuration. Do not add custom runtime
   scripts, command dispatchers, or a new registry/framework for routine configuration.
 - Use whole-directory links for pure native config trees; retain selective links
