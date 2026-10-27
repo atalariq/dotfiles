@@ -119,6 +119,10 @@
           formatter = pkgs.nixfmt;
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
+              # Interactive bash so a nested `bash` keeps readline: prompt
+              # escapes, history and programmable completion work inside the
+              # devshell instead of falling back to stdenv's non-interactive one.
+              bashInteractive
               nixfmt
               git
               just
