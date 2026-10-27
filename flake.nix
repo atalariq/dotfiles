@@ -24,10 +24,6 @@
       url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    lerd = {
-      url = "github:lerd-env/lerd-nixos";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     nvf = {
       url = "github:NotAShelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -132,6 +128,7 @@
               nix-tree
               deadnix
               statix
+              devenv
             ];
           };
           checks.neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''

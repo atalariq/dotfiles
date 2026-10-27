@@ -362,8 +362,11 @@ first; use RTK for repetitive output and recover original diagnostics before
 debugging failures. No global rewrite hook, context proxy, or mandatory skill
 framework is enabled.
 
-The [Bun](devshell/bun-with-services/README.md), [Go](devshell/go/README.md), and
-[Rust](devshell/rust/README.md) templates include their own usage instructions.
+The [Bun](devshell/bun-with-services/README.md), [Go](devshell/go/README.md),
+[Rust](devshell/rust/README.md), and [PHP](devshell/php/README.md) templates
+include their own usage instructions. The PHP template uses `devenv` rather than
+a standalone flake: copy its `devenv.yaml` and `devenv.nix` into a project, then
+use `just dev` and `just dev-up` from that directory.
 Application-specific behavior is documented in the relevant module and native config.
 
 ## AI Usage Disclosure

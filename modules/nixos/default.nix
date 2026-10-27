@@ -32,7 +32,6 @@
     security.ssh.enable = lib.mkEnableOption "the OpenSSH server";
     security.secrets.enable = lib.mkEnableOption "sops-nix runtime secrets";
     development.podman.enable = lib.mkEnableOption "rootless Podman";
-    development.lerd.enable = lib.mkEnableOption "Lerd .test development";
     hardware.thinkpad.enable = lib.mkEnableOption "balanced X13 AMD defaults";
     gaming.steam.enable = lib.mkEnableOption "Steam system integration";
   };

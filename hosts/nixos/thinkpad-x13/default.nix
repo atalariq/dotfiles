@@ -70,7 +70,6 @@
     security.ssh.enable = false;
     security.secrets.enable = true;
     development.podman.enable = true;
-    development.lerd.enable = true;
     hardware.thinkpad.enable = true;
     gaming.steam.enable = true;
   };
