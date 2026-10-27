@@ -294,6 +294,8 @@ consume their providers' quotas; they do not multiply an account's allowance.
 Beads Rust (`br`, not `bd`) owns task status. Every worktree uses the main
 checkout's `.beads` store through per-command `--db` or `BEADS_DIR`.
 `DOTFILES_BEADS_DIR` points to it without redirecting unrelated projects.
+Beads Viewer (`bv`) reads the same `.beads` store for a graph-aware TUI; it is a
+viewer, so keep `br` as the only writer.
 
 ```sh
 br coordination status --db "$DOTFILES_BEADS_DIR/beads.db" --json

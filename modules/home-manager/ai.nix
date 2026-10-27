@@ -67,6 +67,7 @@ in
         opencode.enable = lib.mkDefault true;
         hermes.enable = lib.mkDefault true;
         beads-rust.enable = lib.mkDefault true;
+        beads-viewer.enable = lib.mkDefault true;
         codegraph.enable = lib.mkDefault true;
         # Helper binaries stay opt-out: they are inert until an agent calls
         # them, and native `crit install` / `agent-browser mcp` own the wiring.
