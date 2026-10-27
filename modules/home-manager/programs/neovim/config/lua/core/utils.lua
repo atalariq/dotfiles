@@ -1,3 +1,4 @@
+-- Nix: modules/00-core.nix (shared helpers for the plugin modules)
 -- lua/core/utils.lua
 local M = {}
 

@@ -1,3 +1,4 @@
+-- Nix: modules/20-plugins.nix (fzf-lua), modules/00-core.nix (rg/fd/fzf/git), modules/90-runtime.nix (:DotfilesConfig globals)
 -- --- fzf-lua ---------------------------------------------
 require("fzf-lua").setup({
   "borderless",

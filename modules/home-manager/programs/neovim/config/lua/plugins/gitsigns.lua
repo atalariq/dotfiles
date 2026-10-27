@@ -1,3 +1,4 @@
+-- Nix: modules/20-plugins.nix (gitsigns-nvim), modules/00-core.nix (git)
 require("gitsigns").setup({
   signs = {
     add = { text = "▎" },

@@ -1,3 +1,4 @@
+-- Nix: modules/00-core.nix (nvf globals and runtimepath; keymaps stay here)
 -- core keymaps
 
 local map = vim.keymap.set

@@ -1,3 +1,4 @@
+-- Nix: modules/00-core.nix (nvf globals and runtimepath; runtime values stay here)
 -- core editor options
 
 vim.opt.termguicolors = true

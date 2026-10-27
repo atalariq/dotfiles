@@ -1,3 +1,4 @@
+-- Nix: modules/30-lsp.nix (formatters), modules/90-runtime.nix (dotfiles_vale_config)
 local conform = require("conform")
 local root_has = require("core.utils").root_has
 

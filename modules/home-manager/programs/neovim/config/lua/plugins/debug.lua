@@ -1,3 +1,4 @@
+-- Nix: modules/30-lsp.nix (delve, lldb, debugpy adapters)
 local executable = require("core.utils").executable
 
 local dap = require("dap")

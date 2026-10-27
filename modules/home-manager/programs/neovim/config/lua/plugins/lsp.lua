@@ -1,3 +1,4 @@
+-- Nix: modules/30-lsp.nix (servers and DAP binaries on PATH; no Mason)
 -- Shared language tooling: prefer system binaries from PATH.
 -- No Mason here. If a server/formatter/linter is missing, install it through the
 -- system package manager or the language toolchain that actually owns it.

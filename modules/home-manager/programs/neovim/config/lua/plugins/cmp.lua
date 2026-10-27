@@ -1,3 +1,4 @@
+-- Nix: modules/20-plugins.nix (blink.cmp packages), modules/30-lsp.nix (lazydev source)
 -- Completion via blink.cmp
 
 local cmp = require("blink.cmp")

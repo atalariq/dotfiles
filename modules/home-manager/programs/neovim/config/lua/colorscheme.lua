@@ -1,3 +1,4 @@
+-- Nix: modules/10-ui.nix (mini.base16 plugin; Stylix owns the generated palette)
 -- The portable palette is an ordinary Lua file; missing optional assets are safe.
 local has_palette, theme = pcall(require, "theme.palette")
 local selected = (vim.env.XDG_CONFIG_HOME or (vim.env.HOME .. "/.config")) .. "/dotfiles-theme/neovim.lua"

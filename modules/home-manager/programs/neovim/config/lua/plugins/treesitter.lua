@@ -1,3 +1,4 @@
+-- Nix: modules/40-languages.nix (parser set; Lua only attaches installed parsers)
 -- Parsers are built by Nix; FileType only attaches installed parsers.
 -- https://mise.jdx.dev/mise-cookbook/neovim.html
 require("vim.treesitter.query").add_predicate("is-mise?", function(_, _, bufnr, _)

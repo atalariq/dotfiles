@@ -1,3 +1,4 @@
+-- Nix: modules/00-core.nix (nvf globals and runtimepath; autocmds stay here)
 -- core autocommands
 
 local function augroup(name)

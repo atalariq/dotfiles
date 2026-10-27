@@ -1,3 +1,4 @@
+-- Nix: modules/40-languages.nix (marksman, rumdl, mdkite; ftplugin-local options stay here)
 vim.opt_local.spell = true
 vim.opt_local.spelllang = { "id", "en" }
 vim.opt_local.wrap = false

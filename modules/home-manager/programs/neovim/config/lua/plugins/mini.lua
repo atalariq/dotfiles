@@ -1,3 +1,4 @@
+-- Nix: modules/10-ui.nix (statusline, tabline, icons, clue), modules/20-plugins.nix (mini.* packages)
 -- mini.nvim plugins
 
 if vim.g.have_nerd_font then

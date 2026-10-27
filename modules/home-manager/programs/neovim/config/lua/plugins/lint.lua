@@ -1,3 +1,4 @@
+-- Nix: modules/30-lsp.nix (linters), modules/90-runtime.nix (dotfiles_config_dir, dotfiles_vale_config)
 local lint = require("lint")
 
 local linters = {

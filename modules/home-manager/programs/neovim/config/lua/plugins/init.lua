@@ -1,3 +1,4 @@
+-- Nix: modules/20-plugins.nix (plugin availability), modules/10-ui.nix (mini UI plugins)
 -- nvf owns plugin sources and parser builds. Keep Lua for the established
 -- keymaps and plugin behaviour; startup never installs or updates software.
 -- load plugin configs

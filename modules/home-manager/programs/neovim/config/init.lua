@@ -1,3 +1,4 @@
+-- Nix: modules/00-core.nix (build-time globals and aliases), modules/90-runtime.nix (runtimepath and dotfiles_* globals); leader keys stay here
 -- Neovim behaviour; nvf supplies the reproducible plugin and tool package.
 
 -- leader key must be set before loading anything
