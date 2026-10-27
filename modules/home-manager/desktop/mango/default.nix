@@ -53,7 +53,7 @@ in
       enable = true;
       package = import ./package.nix { inherit inputs pkgs; };
       systemd.enable = true;
-      autostart_sh = "systemctl --user start noctalia.service look.service";
+      autostart_sh = "systemctl --user start noctalia.service";
       settings = {
         monitor_rule = cfg.monitorRules;
         # The native binds file ends in resize mode. Select default explicitly

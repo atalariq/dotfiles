@@ -1,13 +1,9 @@
 {
   config,
-  inputs,
   lib,
   ...
 }:
 {
-  imports = [
-    inputs.look.homeModules.default
-  ];
   programs = {
     television = lib.mkIf config.programs.television.enable {
       enableFishIntegration = config.programs.fish.enable;

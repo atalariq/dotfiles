@@ -78,7 +78,6 @@
     kitty.enable = true;
     fastfetch.enable = true;
     herdr.enable = true;
-    lookapp.enable = true;
     jujutsu.settings.user = {
       name = "Atalariq Barra Hadinugraha";
       email = "atalariq.dev@outlook.com";

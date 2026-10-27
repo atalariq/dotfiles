@@ -49,7 +49,7 @@ in
       # bar/lockscreen/usability files are included first; host overrides win.
       settings.shell = {
         polkit_agent = true;
-        clipboard_enabled = false;
+        clipboard_enabled = true;
         font = config.stylix.fonts.sansSerif.name;
       };
     };

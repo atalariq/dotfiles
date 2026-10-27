@@ -346,27 +346,6 @@
         "type": "github"
       }
     },
-    "look": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ],
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1792829268,
-        "narHash": "sha256-vK5WDNW/zDO/vd5+2iJK8UmX0uYAQqv1zD+FIq1DK14=",
-        "owner": "kunkka19xx",
-        "repo": "look",
-        "rev": "c52825e59341d5c6c38359f07c8c2728cca9f03a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kunkka19xx",
-        "repo": "look",
-        "type": "github"
-      }
-    },
     "mangowm": {
       "inputs": {
         "flake-parts": "flake-parts_2",
@@ -633,7 +612,6 @@
         "kitehost-nvim": "kitehost-nvim",
         "lerd": "lerd",
         "llm-agents": "llm-agents",
-        "look": "look",
         "mangowm": "mangowm",
         "mdkite-nvim": "mdkite-nvim",
         "nix-darwin": "nix-darwin",
@@ -646,27 +624,6 @@
         "pathfinder-nvim": "pathfinder-nvim",
         "sops-nix": "sops-nix",
         "stylix": "stylix"
-      }
-    },
-    "rust-overlay": {
-      "inputs": {
-        "nixpkgs": [
-          "look",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791189933,
-        "narHash": "sha256-Y8eN7ki0Urx4Ojf4w1xSpWg8uk/3lJqK+E0Oth77rH0=",
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "rev": "e60029353d0c48d216bc4b065168ccd4079c166f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "oxalica",
-        "repo": "rust-overlay",
-        "type": "github"
       }
     },
     "scenefx": {

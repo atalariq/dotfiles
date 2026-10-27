@@ -28,10 +28,9 @@
 "Mod+W" = { action = "spawn:brave-origin", repeat = false }
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Shift+Alt+Q" = { action = "session-quit", repeat = false }
-"Mod+Space" = { action = "spawn:lookapp --toggle", repeat = false }
-"Mod+A" = { action = "spawn:lookapp --toggle", repeat = false }
-"Mod+V" = { action = "spawn:lookapp clipboard", repeat = false }
-"Mod+E" = { action = "spawn:lookapp --toggle", repeat = false }
+"Mod+Space" = { action = "spawn:noctalia msg panel-toggle launcher", repeat = false }
+"Mod+V" = { action = "spawn:noctalia msg panel-toggle clipboard", repeat = false }
+"Mod+E" = { action = "spawn:noctalia msg panel-toggle launcher /emo", repeat = false }
 "Mod+C" = { action = "spawn:noctalia msg panel-toggle control-center", repeat = false }
 "Mod+N" = { action = "spawn:noctalia msg panel-toggle notifications", repeat = false }
 "Mod+Y" = { action = "spawn:noctalia msg panel-toggle wallpaper", repeat = false }

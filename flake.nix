@@ -10,10 +10,6 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    look = {
-      url = "github:kunkka19xx/look";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Only the newer Herdr module is imported; stable Home Manager owns the rest.

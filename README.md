@@ -8,7 +8,8 @@ that install them.
 
 ## Features
 
-- **Desktop:** Umbriel, a Mango fallback session, Noctalia, and the Look launcher.
+- **Desktop:** Umbriel, a Mango fallback session, and Noctalia for the launcher,
+  clipboard, screenshots, and bar.
 - **Appearance:** Stylix themes, fonts, and application palettes.
 - **Terminal:** Fish, Starship, Git, Tmux, Yazi, Vim, and Neovim configured through nvf.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.

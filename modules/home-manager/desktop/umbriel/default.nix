@@ -57,9 +57,9 @@ in
       '';
     };
     # The pinned HM has no Umbriel module. Retain the packaged session launcher,
-    # Noctalia/Look startup, selected Shelf binding, and host-owned outputs.
+    # Noctalia startup, selected Shelf binding, and host-owned outputs.
     dotfiles.desktop.umbriel.settings = {
-      general.autostart = [ "systemctl --user start noctalia.service look.service" ];
+      general.autostart = [ "systemctl --user start noctalia.service" ];
       keybinds = lib.optionalAttrs config.dotfiles.desktop.shelf.enable {
         "Ctrl+Mod+Alt+S" = {
           action = "spawn:pluto toggle";
