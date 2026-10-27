@@ -27,7 +27,7 @@ in
       hermes = secretFile "Encrypted YAML with an environment scalar containing Hermes dotenv data.";
       opencode = secretFile "Encrypted YAML with a gateway_api_key scalar.";
       aiProviders = secretFile "Encrypted YAML with OpenRouter and DeepSeek provider API key scalars.";
-      lastfm = secretFile "Encrypted YAML with an mpdscribble_conf scalar containing the Last.fm client configuration.";
+      credentials = secretFile "Encrypted YAML with non-AI credentials (AUR, GitHub, Google Tasks) and the mpdscribble Last.fm configuration.";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -61,11 +61,17 @@ in
           mode = "0600";
         };
       }
-      // lib.optionalAttrs (cfg.files.lastfm != null) {
-        # mpdscribble reads its own config file; the service stays inactive
-        # until this file exists, so scrobbling is opt-in per host.
+      // lib.optionalAttrs (cfg.files.credentials != null) {
+        # Whole decrypted document for manual reference, plus the mpdscribble
+        # document that its service conditions on. Nothing is interpolated in Nix.
+        credentials = {
+          sopsFile = cfg.files.credentials;
+          key = "";
+          path = "${config.xdg.configHome}/sops-nix/credentials.yaml";
+          mode = "0600";
+        };
         "mpdscribble-conf" = {
-          sopsFile = cfg.files.lastfm;
+          sopsFile = cfg.files.credentials;
           key = "mpdscribble_conf";
           path = "${config.home.homeDirectory}/.config/mpdscribble/mpdscribble.conf";
           mode = "0600";
@@ -77,7 +83,7 @@ in
           cfg.files.hermes != null
           || cfg.files.opencode != null
           || cfg.files.aiProviders != null
-          || cfg.files.lastfm != null;
+          || cfg.files.credentials != null;
         message = "Enable secrets only after selecting actual encrypted per-application files.";
       }
     ];

@@ -3,5 +3,9 @@ creation_rules:
   # Dedicated identity for the renewed AI credentials; keep legacy recipients below.
   - path_regex: '^secrets/thinkpad-x13/ai-providers\.sops\.yaml$'
     age: age1ke0n93k27htpwau0qqskjekjyrm5ztrvln7ewguyrz29rxt499qq48s773
+  # Non-AI credentials (AUR, GitHub, Google Tasks, mpdscribble). Shares the
+  # local identity so the owner can edit it from this machine.
+  - path_regex: '^secrets/thinkpad-x13/credentials\.sops\.yaml$'
+    age: age1ke0n93k27htpwau0qqskjekjyrm5ztrvln7ewguyrz29rxt499qq48s773
   - path_regex: (^secrets/secrets\.yaml$|^secrets/thinkpad-x13/[^/]+\.sops\.yaml$)
     age: age17q3dv06mpf2udvsd77ve4eadwkd9te0anvs5vlhu0auc7x8zl50sdr45lq
