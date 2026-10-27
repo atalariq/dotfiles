@@ -26,6 +26,7 @@
 "Mod+Return" = { action = "spawn:kitty", repeat = false }
 "Mod+Shift+Return" = { action = "spawn:kitty", repeat = false }
 "Mod+W" = { action = "spawn:brave-origin", repeat = false }
+"Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Shift+Alt+Q" = { action = "session-quit", repeat = false }
 "Mod+Space" = { action = "spawn:lookapp --toggle", repeat = false }
 "Mod+A" = { action = "spawn:lookapp --toggle", repeat = false }
