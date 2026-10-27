@@ -37,6 +37,14 @@
 "Mod+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
 "Mod+Escape" = { action = "spawn:noctalia msg panel-toggle session", repeat = false }
 
+# Screenshots and recording. Noctalia owns capture; OBS toggles through its
+# local obs-websocket endpoint.
+"Print" = { action = "spawn:noctalia msg screenshot-region", repeat = false }
+"Shift+Print" = { action = "spawn:noctalia msg screenshot-fullscreen", repeat = false }
+"Alt+Print" = { action = "spawn:noctalia msg screenshot-window", repeat = false }
+"Ctrl+Print" = { action = "spawn:noctalia msg screenshot-annotate", repeat = false }
+"Mod+Alt+R" = { action = "spawn:obs-cmd recording toggle", repeat = false }
+
 # Window/column navigation.
 "Mod+H" = "window-focus-left"
 "Mod+J" = "window-focus-down"

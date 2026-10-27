@@ -19,7 +19,7 @@ app_id = "^scratchpad$"
 default_floating = true
 
 [window_rule.match]
-app_id = "^(com[.]gabm[.]satty|termfilechooser|files|org[.]gnome[.]Nautilus|pavucontrol|org[.]pulseaudio[.]pavucontrol|blueman-manager|org[.]blueman[.]Manager|nm-connection-editor|pinentry.*|.*PolicyKit.*|dev[.]noctalia[.]Noctalia|dev[.]noctalia[.]UmbrielSharePicker)$"
+app_id = "^(termfilechooser|files|org[.]gnome[.]Nautilus|pavucontrol|org[.]pulseaudio[.]pavucontrol|blueman-manager|org[.]blueman[.]Manager|nm-connection-editor|pinentry.*|.*PolicyKit.*|dev[.]noctalia[.]Noctalia|dev[.]noctalia[.]UmbrielSharePicker)$"
 
 [[window_rule]]
 default_floating = true

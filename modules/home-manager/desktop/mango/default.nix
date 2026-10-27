@@ -53,7 +53,11 @@ in
       enable = true;
       package = import ./package.nix { inherit inputs pkgs; };
       systemd.enable = true;
-      autostart_sh = "systemctl --user start noctalia.service";
+      autostart_sh = ''
+        systemctl --user start noctalia.service
+        # OBS stays resident in the tray so obs-cmd can toggle recording.
+        obs --minimize-to-tray &
+      '';
       settings = {
         monitor_rule = cfg.monitorRules;
         # The native binds file ends in resize mode. Select default explicitly

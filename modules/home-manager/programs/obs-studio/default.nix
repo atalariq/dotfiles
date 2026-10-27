@@ -19,13 +19,18 @@
       pkgs.ffmpeg
     ]
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-      pkgs.gpu-screen-recorder
-      pkgs.gpu-screen-recorder-gtk
+      pkgs.obs-cmd
     ];
     # Runtime profiles are writable; seed manually from these optional templates.
     xdg.configFile."dotfiles/templates/obs" = {
       source = ./config;
       recursive = true;
     };
+    # Local obs-websocket endpoint used by obs-cmd. obs-websocket binds
+    # 127.0.0.1; first_load=false stops it from generating a password.
+    # Schema verified against obs-websocket 5.7.4 Config.cpp (PARAM_* keys).
+    xdg.configFile."obs-studio/plugin_config/obs-websocket/config.json".text = ''
+      {"alerts_enabled":false,"auth_required":false,"first_load":false,"server_enabled":true,"server_password":"","server_port":4455}
+    '';
   };
 }

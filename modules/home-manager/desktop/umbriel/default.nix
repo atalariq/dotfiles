@@ -59,7 +59,11 @@ in
     # The pinned HM has no Umbriel module. Retain the packaged session launcher,
     # Noctalia startup, selected Shelf binding, and host-owned outputs.
     dotfiles.desktop.umbriel.settings = {
-      general.autostart = [ "systemctl --user start noctalia.service" ];
+      general.autostart = [
+        "systemctl --user start noctalia.service"
+        # OBS stays resident in the tray so obs-cmd can toggle recording.
+        "obs --minimize-to-tray"
+      ];
       keybinds = lib.optionalAttrs config.dotfiles.desktop.shelf.enable {
         "Ctrl+Mod+Alt+S" = {
           action = "spawn:pluto toggle";
