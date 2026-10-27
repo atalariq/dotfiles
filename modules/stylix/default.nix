@@ -95,7 +95,7 @@ in
         stylix =
           (import ./style.nix {
             inherit pkgs;
-            theme = cfg.theme;
+            inherit (cfg) theme;
           })
           // {
             cursor =

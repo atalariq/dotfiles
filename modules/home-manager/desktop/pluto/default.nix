@@ -13,7 +13,7 @@ in
   options.dotfiles.desktop.shelf = {
     enable = lib.mkEnableOption "Pluto drop shelf";
     settings = lib.mkOption {
-      type = format.type;
+      inherit (format) type;
       default = { };
       description = "Declarative Pluto configuration; user state remains in XDG_DATA_HOME/pluto.";
     };

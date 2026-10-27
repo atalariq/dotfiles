@@ -1,7 +1,6 @@
 # Explicit Base16 data avoids an import-from-derivation YAML parser during
 # foreign-platform evaluation. Values match the pinned base16-schemes release.
-{ ... }:
-{
+_: {
   gruvbox-dark = {
     polarity = "dark";
     scheme = {

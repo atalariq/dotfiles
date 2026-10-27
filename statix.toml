@@ -1,0 +1,7 @@
+# W20 asks to merge repeated attribute prefixes into one nested set. NixOS
+# module options are intentionally written as dotted paths (options.dotfiles.*,
+# services.gnome.*, systemd.user.services.*), so merging them would obscure the
+# module structure. Every other lint stays enforced; ignore paths keep the
+# default .direnv exclusion.
+disabled = [ "repeated_keys" ]
+ignore = [ ".direnv" ]
