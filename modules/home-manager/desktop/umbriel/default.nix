@@ -8,9 +8,18 @@
 let
   cfg = config.dotfiles.desktop.umbriel;
   format = pkgs.formats.toml { };
+  # The scrolling axis is a module-wide default, not host boilerplate: every
+  # declared output inherits it unless the host overrides that output.
+  settings =
+    cfg.settings
+    // lib.optionalAttrs (cfg.settings ? output) {
+      output = lib.mapAttrs (
+        _: output: { workspace_axis = cfg.workspaceAxis; } // output
+      ) cfg.settings.output;
+    };
   # Umbriel expands includes first and applies this generated host/theme body
   # last. Only native behavior is live; feature/output/theme changes rebuild.
-  root = entry: cfg.settings // { include.files = [ entry ]; };
+  root = entry: settings // { include.files = [ entry ]; };
   generated = format.generate "umbriel-config.toml" (
     root "${config.xdg.configHome}/umbriel/native/config.toml"
   );
@@ -25,6 +34,14 @@ in
 {
   options.dotfiles.desktop.umbriel = {
     enable = lib.mkEnableOption "Umbriel scrolling desktop";
+    workspaceAxis = lib.mkOption {
+      type = lib.types.enum [
+        "horizontal"
+        "vertical"
+      ];
+      default = "vertical";
+      description = "Scrolling axis applied to every output unless the host overrides it.";
+    };
     settings = lib.mkOption {
       inherit (format) type;
       default = { };
