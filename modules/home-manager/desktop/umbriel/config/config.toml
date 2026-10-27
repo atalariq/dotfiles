@@ -1,11 +1,15 @@
 # Umbriel native configuration. Later includes override earlier scalar values;
 # the including file itself wins last. Rule lists preserve their source order.
+# Keybinds are split per concern; their [keybinds] tables merge per key.
 [include]
 files = [
   "general.toml",
   "input.toml",
   "layout.toml",
   "appearance.toml",
-  "keybinds.toml",
+  "keybinds/workspaces.toml",
+  "keybinds/windows.toml",
+  "keybinds/apps-and-panels.toml",
+  "keybinds/screenshots-and-media.toml",
   "rules.toml",
 ]

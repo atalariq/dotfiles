@@ -1,0 +1,24 @@
+# Window focus and movement, column movement, layout and scratchpad controls.
+
+[keybinds]
+"Mod+H" = "window-focus-left"
+"Mod+J" = "window-focus-down"
+"Mod+K" = "window-focus-up"
+"Mod+L" = "window-focus-right"
+"Mod+Left" = "window-focus-left"
+"Mod+Down" = "window-focus-down"
+"Mod+Up" = "window-focus-up"
+"Mod+Right" = "window-focus-right"
+"Mod+Shift+H" = "column-move-left"
+"Mod+Shift+J" = "window-move-down"
+"Mod+Shift+K" = "window-move-up"
+"Mod+Shift+L" = "column-move-right"
+
+"Mod+Shift+Space" = { action = "window-toggle-floating", repeat = false }
+"Mod+Shift+F" = { action = "window-toggle-fullscreen", repeat = false }
+"Mod+M" = { action = "window-toggle-maximize-to-edges", repeat = false }
+"Mod+O" = { action = "overview-toggle", repeat = false }
+"Mod+X" = "window-cycle-primary-extent"
+"Mod+Minus" = { action = "scratchpad-toggle:terminal", repeat = false }
+"Mod+Grave" = { action = "scratchpad-toggle:terminal", repeat = false }
+"Mod+Shift+Minus" = { action = "window-move-to-scratchpad:terminal", repeat = false }
