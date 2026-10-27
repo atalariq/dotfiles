@@ -17,20 +17,26 @@
     xdg.configFile."dotfiles/templates/claude.json".source = ./template.json;
 
     # Native MCP state remains writable; provisioning creates this seed only when absent.
-    xdg.configFile."dotfiles/templates/claude-mcp.json" =
-      lib.mkIf config.dotfiles.programs.codegraph.enable
-        {
-          text = builtins.toJSON {
-            mcpServers.codegraph = {
-              type = "stdio";
-              command = "codegraph";
-              args = [
-                "serve"
-                "--mcp"
-              ];
-            };
+    xdg.configFile."dotfiles/templates/claude-mcp.json".text = builtins.toJSON {
+      mcpServers =
+        lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+          codegraph = {
+            type = "stdio";
+            command = "codegraph";
+            args = [
+              "serve"
+              "--mcp"
+            ];
+          };
+        }
+        // lib.optionalAttrs config.dotfiles.programs.agent-browser.enable {
+          agent-browser = {
+            type = "stdio";
+            command = "agent-browser";
+            args = [ "mcp" ];
           };
         };
+    };
 
   };
 }

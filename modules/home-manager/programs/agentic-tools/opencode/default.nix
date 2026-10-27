@@ -22,16 +22,26 @@ in
     # writable and seed a minimal default (direct DeepSeek + opt-out of sharing).
     xdg.configFile."dotfiles/templates/opencode.jsonc".source = format.generate "opencode.json" (
       lib.recursiveUpdate seed {
-        mcp.servers = lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
-          codegraph = {
-            type = "local";
-            command = [
-              "codegraph"
-              "serve"
-              "--mcp"
-            ];
+        mcp.servers =
+          lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+            codegraph = {
+              type = "local";
+              command = [
+                "codegraph"
+                "serve"
+                "--mcp"
+              ];
+            };
+          }
+          // lib.optionalAttrs config.dotfiles.programs.agent-browser.enable {
+            agent-browser = {
+              type = "local";
+              command = [
+                "agent-browser"
+                "mcp"
+              ];
+            };
           };
-        };
       }
     );
 

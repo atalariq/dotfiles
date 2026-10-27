@@ -68,6 +68,12 @@ in
         hermes.enable = lib.mkDefault true;
         beads-rust.enable = lib.mkDefault true;
         codegraph.enable = lib.mkDefault true;
+        # Helper binaries stay opt-out: they are inert until an agent calls
+        # them, and native `crit install` / `agent-browser mcp` own the wiring.
+        agent-browser.enable = lib.mkDefault true;
+        crit.enable = lib.mkDefault true;
+        tirith.enable = lib.mkDefault true;
+        workmux.enable = lib.mkDefault true;
         rtk.enable = lib.mkDefault true;
         tokscale.enable = lib.mkDefault true;
       };

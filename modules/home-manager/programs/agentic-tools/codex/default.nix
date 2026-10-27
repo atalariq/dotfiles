@@ -8,15 +8,22 @@
 let
   toml = pkgs.formats.toml { };
   settings = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./template.toml)) {
-    mcp_servers = lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
-      codegraph = {
-        command = "codegraph";
-        args = [
-          "serve"
-          "--mcp"
-        ];
+    mcp_servers =
+      lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+        codegraph = {
+          command = "codegraph";
+          args = [
+            "serve"
+            "--mcp"
+          ];
+        };
+      }
+      // lib.optionalAttrs config.dotfiles.programs.agent-browser.enable {
+        agent-browser = {
+          command = "agent-browser";
+          args = [ "mcp" ];
+        };
       };
-    };
   };
 in
 {

@@ -18,18 +18,23 @@
     };
     # Merge only this named entry into the writable native MCP map. agy owns
     # unrelated servers and any authentication associated with them.
-    xdg.configFile."dotfiles/templates/agy-mcp.json" =
-      lib.mkIf config.dotfiles.programs.codegraph.enable
-        {
-          text = builtins.toJSON {
-            mcpServers.codegraph = {
-              command = "codegraph";
-              args = [
-                "serve"
-                "--mcp"
-              ];
-            };
+    xdg.configFile."dotfiles/templates/agy-mcp.json".text = builtins.toJSON {
+      mcpServers =
+        lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+          codegraph = {
+            command = "codegraph";
+            args = [
+              "serve"
+              "--mcp"
+            ];
+          };
+        }
+        // lib.optionalAttrs config.dotfiles.programs.agent-browser.enable {
+          agent-browser = {
+            command = "agent-browser";
+            args = [ "mcp" ];
           };
         };
+    };
   };
 }

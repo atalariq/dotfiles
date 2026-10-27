@@ -23,21 +23,28 @@
     # defaults into a writable profile when it does not exist yet.
     xdg.configFile."dotfiles/templates/copilot.json".source = ./settings.json;
     # Native MCP state remains writable; provisioning creates this seed only when absent.
-    xdg.configFile."dotfiles/templates/copilot-mcp.json" =
-      lib.mkIf config.dotfiles.programs.codegraph.enable
-        {
-          text = builtins.toJSON {
-            mcpServers.codegraph = {
-              type = "local";
-              command = "codegraph";
-              args = [
-                "serve"
-                "--mcp"
-              ];
-              tools = [ "*" ];
-            };
+    xdg.configFile."dotfiles/templates/copilot-mcp.json".text = builtins.toJSON {
+      mcpServers =
+        lib.optionalAttrs config.dotfiles.programs.codegraph.enable {
+          codegraph = {
+            type = "local";
+            command = "codegraph";
+            args = [
+              "serve"
+              "--mcp"
+            ];
+            tools = [ "*" ];
+          };
+        }
+        // lib.optionalAttrs config.dotfiles.programs.agent-browser.enable {
+          agent-browser = {
+            type = "local";
+            command = "agent-browser";
+            args = [ "mcp" ];
+            tools = [ "*" ];
           };
         };
+    };
 
   };
 }

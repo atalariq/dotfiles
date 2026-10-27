@@ -264,14 +264,26 @@ because its pinned version has no arbitrary interactive ask list.
 
 #### Integration and coordination
 
-Enabling CodeGraph registers its native MCP command in fresh profiles of the
-enabled clients. Stable executable names survive package upgrades. Existing
-profiles retain their servers until selectively updated. Project indexing is a
-separate explicit action; use the CLI when a client has not loaded its MCP server.
-RTK is available for selected noisy output, and [Tokscale](modules/home-manager/programs/agentic-helpers/tokscale/README.md)
-runs on demand; unpriced models can appear with zero cost and must be treated as
-unknown. Neither
-starts an automatic background collector or intercepts all shell commands.
+The helper bundle installs CodeGraph, agent-browser, crit, RTK, tirith,
+Tokscale and workmux. Fresh profiles seed two MCP servers: CodeGraph and
+agent-browser (`agent-browser mcp`). Stable executable names survive package
+upgrades; existing profiles keep their own server lists until you update them.
+
+Wiring stays native and reversible:
+
+```sh
+crit install claude-code   # also: codex, opencode, github-copilot, hermes
+agent-browser mcp          # stdio server already seeded for the enabled clients
+rtk git status             # compact output for noisy commands
+tokscale clients           # where usage comes from; then `tokscale models`
+workmux add <name>         # worktree + tmux window per parallel task
+```
+
+Project indexing is a separate explicit action; use the CLI when a client has
+not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-helpers/tokscale/README.md)
+runs on demand and unpriced models can appear with zero cost, which must be
+treated as unknown. None of these tools starts a background collector or
+intercepts all shell commands.
 
 Use a single agent by default. For independent parallel tasks, follow the
 [native workflow](docs/agent-workflow.md): shared Beads claims, separate worktrees,
