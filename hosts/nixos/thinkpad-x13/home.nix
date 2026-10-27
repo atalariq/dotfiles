@@ -1,48 +1,21 @@
 { config, ... }:
 {
   imports = [
-    ../../../modules/home-manager/common
+    ../../../modules/home-manager
   ];
   home = {
     sessionVariables.DOTFILES_HOST = "thinkpad-x13";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
   };
-  programs = {
-    atuin.enable = true;
-    fzf.enable = true;
-    yazi.enable = true;
-    delta.enable = true;
-    delta.enableGitIntegration = true;
-    jujutsu.enable = true;
-    television.enable = true;
-    kitty.enable = true;
-    fastfetch.enable = true;
-    jujutsu.settings.user = {
-      name = "Atalariq Barra Hadinugraha";
-      email = "atalariq.dev@outlook.com";
-    };
-    mangohud = {
-      enable = true;
-      enableSessionWide = false;
-      settings = {
-        fps = true;
-        frame_timing = true;
-        cpu_temp = true;
-        gpu_temp = true;
-      };
-    };
-  };
   dotfiles = {
     ai.enable = true;
     bundles = {
-      cli.enable = true;
-      comms.enable = true;
-      core.enable = true;
-      dev.enable = true;
-      gaming.enable = true;
+      "terminal-tools".enable = true;
       gui.enable = true;
-      media.enable = true;
+      "jetbrains-ides".enable = true;
+      gaming.enable = true;
+      podman.enable = true;
     };
     deployment.liveApps = [
       "espanso"
@@ -79,16 +52,19 @@
     };
     programs = {
       gh.enable = true;
-      lazygit.enable = true;
+      glab.enable = true;
       neovim.enable = true;
       typst.enable = true;
-      freesmlauncher.enable = true;
+      atuin.enable = true;
+      yazi.enable = true;
+      television.enable = true;
+      kitty.enable = true;
+      fastfetch.enable = true;
+      mangohud.enable = true;
       # Optional agent experiments remain independently opt-in. The AI module
       # installs clients and helpers without starting workers or hooks.
       agy.enable = true;
-      copilot.enable = true;
       espanso.enable = true;
-      btop.enable = true;
       # mpd owns the daemon, rmpc client, MPRIS bridge and Last.fm scrobbler.
       mpd.enable = true;
       mpv.enable = true;

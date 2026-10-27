@@ -6,10 +6,11 @@
   ...
 }:
 {
+  options.dotfiles.programs.atuin.enable = lib.mkEnableOption "Atuin shell history";
 
-  config = lib.mkIf config.programs.atuin.enable {
-
+  config = lib.mkIf config.dotfiles.programs.atuin.enable {
     programs.atuin = {
+      enable = true;
       # Keep the CLI compatible with the existing 18.23 history schema/daemon.
       package =
         lib.mkDefault
@@ -31,6 +32,5 @@
         };
       };
     };
-
   };
 }

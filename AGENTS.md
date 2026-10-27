@@ -36,7 +36,7 @@
 | `hosts/nixos/thinkpad-x13` | NixOS system and desktop Home Manager selections |
 | `hosts/darwin/macpro-m4` | nix-darwin system and Home Manager selections |
 | `hosts/linux/lab`, `hosts/wsl/lab` | Standalone, headless Home Manager selections |
-| `modules/home-manager/common` | Overridable CLI defaults shared by every host |
+| `modules/home-manager/default.nix` | Shared identity, XDG and Home Manager defaults |
 | `modules/home-manager/programs` | Application modules and colocated packages/configs |
 | `modules/home-manager/desktop` | Compositor and desktop-shell configuration |
 | `modules/home-manager/sources.nix` | Immutable/live source mapping and native theme adapters |

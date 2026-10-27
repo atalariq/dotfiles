@@ -91,8 +91,11 @@ using those services. The configuration does not provision Windows or a WSL dist
 
 ## Customization
 
-[Common defaults](modules/home-manager/common/default.nix) select the shared CLI
-environment. Each host adds its own applications, system services, and displays.
+The shared environment lives under `modules/home-manager/programs/`. The `shell`,
+`core`, `nix`, `git`, `direnv`, `tmux` and `vim` modules are enabled by default
+(the "sunnah muakkad" set, overridable); everything else — `terminal-tools`,
+`gui`, `jetbrains-ides`, `gaming`, `podman` and individual applications — is
+opt-in. Each host adds its own applications, system services, and displays.
 Most application modules are opt-in; package definitions stay next to their consumers.
 
 Override shared scalar defaults in the host's Home Manager module:
@@ -175,10 +178,11 @@ whether edits are live or require rebuilding. The native Fish `nvimc` helper ope
 the same picker after the updated configuration has been installed.
 Packages, plugins, parsers, and external language tools still rebuild through nvf.
 
-Freesm Launcher is available through `dotfiles.programs.freesmlauncher.enable` on
-x86_64 Linux. Its official AppImage is pinned and wrapped for NixOS; Java 21 is
-included. Select a compatible Java version for each game instance. Existing
-worlds, launcher accounts, and instances are not migrated.
+Freesm Launcher ships inside the `gaming` package bundle
+(`dotfiles.bundles.gaming.enable`) on x86_64 Linux. Its official AppImage is
+pinned and wrapped for NixOS; Java 21 is included. Select a compatible Java
+version for each game instance. Existing worlds, launcher accounts, and
+instances are not migrated.
 
 ### Secrets
 
@@ -226,12 +230,12 @@ OpenCode and Hermes, schema references, update checks off, co-author opt-outs,
 CodeGraph as the single MCP server). Permissions, sandbox paths, approval
 lists, extra MCP servers and UI preferences are owned by each tool, which
 rewrites its own profile on normal use. Add capability through the native
-commands (`codex mcp add`, `claude mcp add`, `agy mcp add`, `copilot mcp add`,
+commands (`codex mcp add`, `claude mcp add`, `agy mcp add`,
 `opencode mcp add --global`) instead of growing the Nix seed.
 
-Agent CLIs live under `modules/home-manager/programs/agentic-tools/` and the
-supporting binaries under `agentic-helpers/`. Both trees declare their imports
-explicitly; the top-level program index only sees the two parents.
+Agent CLIs and supporting helpers live together under
+`modules/home-manager/programs/agentic-stack/`; the parent declares its imports
+explicitly and the top-level program index only sees the single directory.
 
 | Command | First-use authentication and role |
 | --- | --- |
@@ -240,7 +244,6 @@ explicitly; the top-level program index only sees the two parents.
 | `opencode2` | `/connect` to DeepSeek, then select the direct model; draft implementation |
 | `hermes` | Native provider setup or private `DEEPSEEK_API_KEY`; optional parallel coordinator |
 | `agy --effort high` | Google sign-in; draft implementation |
-| `copilot` | GitHub sign-in; native project permission review |
 
 DeepSeek is the fresh-profile default for OpenCode and Hermes. OpenRouter is an
 explicit alternative selected through the native provider settings. There is no
@@ -280,7 +283,7 @@ workmux add <name>         # worktree + tmux window per parallel task
 ```
 
 Project indexing is a separate explicit action; use the CLI when a client has
-not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-helpers/tokscale/README.md)
+not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-stack/tokscale/README.md)
 runs on demand and unpriced models can appear with zero cost, which must be
 treated as unknown. None of these tools starts a background collector or
 intercepts all shell commands.
@@ -326,7 +329,7 @@ pass passwords through chat, agent stdin, command arguments, or askpass helpers.
 
 #### Optional experiments
 
-Tools such as Tirith, Crit, agent-browser, git-ai, git-surgeon, and Workmux
+Tools such as Tirith, Crit, agent-browser, git-ai, and Workmux
 remain optional. Installing a package alone does not prove agent
 integration. Enable an integration after its intended workflow has been verified.
 For git-ai, configure a nonempty repository allowlist and review its private

@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  imports = [ ../../../modules/home-manager/common ];
+  imports = [ ../../../modules/home-manager ];
   home = {
     sessionVariables.DOTFILES_HOST = "linux-lab";
     homeDirectory = "/home/atalariq";

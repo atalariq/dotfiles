@@ -117,8 +117,8 @@ in
               kitty.enable = config.programs.kitty.enable;
               fish.enable = config.programs.fish.enable;
               fzf.enable = config.programs.fzf.enable;
-              btop.enable = config.dotfiles.programs.btop.enable;
-              bat.enable = config.dotfiles.programs.bat.enable;
+              btop.enable = config.programs.btop.enable;
+              bat.enable = config.programs.bat.enable;
               yazi.enable = config.programs.yazi.enable;
             };
           };

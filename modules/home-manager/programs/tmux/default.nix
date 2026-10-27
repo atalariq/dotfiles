@@ -7,7 +7,11 @@
 }:
 {
 
-  options.dotfiles.programs.tmux.enable = lib.mkEnableOption "tmux configuration";
+  options.dotfiles.programs.tmux.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = "tmux configuration";
+  };
 
   config = lib.mkIf config.dotfiles.programs.tmux.enable {
 

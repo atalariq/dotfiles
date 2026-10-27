@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ../../../modules/home-manager/common
+    ../../../modules/home-manager
   ];
   home = {
     sessionVariables.DOTFILES_HOST = "macpro-m4";
@@ -10,9 +10,7 @@
   };
   targets.darwin.copyApps.enable = true;
   programs = {
-    delta.enable = true;
-    kitty.enable = true;
-    yazi.enable = true;
+    zsh.enable = true;
   };
   dotfiles = {
     ai.enable = true;
@@ -23,9 +21,10 @@
     programs = {
       neovim.enable = true;
       gh.enable = true;
-      lazygit.enable = true;
+      glab.enable = true;
+      kitty.enable = true;
+      yazi.enable = true;
       agy.enable = true;
-      copilot.enable = true;
     };
   };
 }

@@ -2,6 +2,7 @@
   config,
   lib,
   inputs,
+  pkgs,
   ...
 }:
 let
@@ -31,6 +32,11 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [
+      sops
+      age
+      gnupg
+    ];
     sops.age.keyFile = cfg.keyFile;
     # Whole env scalars preserve dotenv escaping; no secrets are interpolated in Nix.
     sops.secrets =

@@ -114,7 +114,7 @@
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             mango = import ./modules/home-manager/desktop/mango/package.nix { inherit inputs pkgs; };
             pluto-shelf = pkgs.callPackage ./modules/home-manager/desktop/pluto/package.nix { };
-            concat = pkgs.callPackage ./modules/home-manager/programs/concat/package.nix { };
+            concat = pkgs.callPackage ./modules/home-manager/programs/gui/concat.nix { };
           };
           formatter = pkgs.nixfmt;
           devShells.default = pkgs.mkShell {

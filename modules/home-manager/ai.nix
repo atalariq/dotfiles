@@ -25,11 +25,6 @@ let
       target = "${config.home.homeDirectory}/.gemini/antigravity-cli/settings.json";
     }
     {
-      enable = programs.copilot.enable;
-      template = "copilot.json";
-      target = "${config.home.homeDirectory}/.copilot/settings.json";
-    }
-    {
       enable = programs.opencode.enable;
       template = "opencode.jsonc";
       target = "${config.xdg.configHome}/opencode/opencode.jsonc";
@@ -43,11 +38,6 @@ let
       enable = programs.agy.enable && programs.codegraph.enable;
       template = "agy-mcp.json";
       target = "${config.home.homeDirectory}/.gemini/config/mcp_config.json";
-    }
-    {
-      enable = programs.copilot.enable && programs.codegraph.enable;
-      template = "copilot-mcp.json";
-      target = "${config.home.homeDirectory}/.copilot/mcp-config.json";
     }
     {
       enable = programs.claude.enable && programs.codegraph.enable;

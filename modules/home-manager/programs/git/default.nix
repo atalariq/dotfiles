@@ -2,12 +2,19 @@
   config,
   lib,
   pkgs,
+  dotfilesLib,
   ...
 }:
 {
-  programs.git = lib.mkIf config.programs.git.enable {
-    lfs.enable = true;
-    settings = {
+  programs.git = {
+    enable = lib.mkDefault true;
+    lfs.enable = lib.mkIf config.programs.git.enable true;
+    settings = lib.mkIf config.programs.git.enable {
+      "user" = {
+        name = lib.mkDefault "Atalariq Barra Hadinugraha";
+        email = lib.mkDefault "atalariq.dev@outlook.com";
+        username = lib.mkDefault "atalariq";
+      };
       "core" = {
         "editor" = "vim";
         "autocrlf" = "input";
@@ -49,7 +56,22 @@
         "dft" = "-c diff.external=difft diff";
       };
     };
-    ignores = lib.splitString "\n" (builtins.readFile ./config/gitignore_global);
+    ignores = lib.mkIf config.programs.git.enable (
+      lib.splitString "\n" (builtins.readFile ./config/gitignore_global)
+    );
   };
-  home.packages = lib.mkIf config.programs.git.enable [ pkgs.difftastic ];
+
+  programs.delta = {
+    enable = lib.mkDefault true;
+    enableGitIntegration = lib.mkDefault true;
+  };
+
+  home.packages = lib.mkIf config.programs.git.enable [
+    pkgs.difftastic
+    pkgs.lazygit
+  ];
+
+  xdg.configFile."lazygit" = lib.mkIf config.programs.git.enable {
+    source = dotfilesLib.themedDirectory ./config/lazygit;
+  };
 }

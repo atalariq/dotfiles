@@ -7,7 +7,11 @@
 }:
 {
 
-  options.dotfiles.programs.vim.enable = lib.mkEnableOption "vim configuration";
+  options.dotfiles.programs.vim.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    description = "vim configuration";
+  };
 
   config = lib.mkIf config.dotfiles.programs.vim.enable {
 

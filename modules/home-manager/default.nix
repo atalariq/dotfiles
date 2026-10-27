@@ -52,6 +52,9 @@
     };
   };
   config = {
+    home.username = lib.mkDefault "atalariq";
+    xdg.enable = lib.mkDefault true;
+    programs.home-manager.enable = lib.mkDefault true;
     assertions = [
       {
         assertion =
