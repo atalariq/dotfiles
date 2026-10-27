@@ -58,9 +58,22 @@ in
       "format" = "on [$hostname](bold red) [$ssh_symbol](bold blue) ";
       "disabled" = false;
     };
+    # A readable per-shell badge. The native module only exposes one colour, so
+    # the distinction is the text itself: bash/fsh/zsh/nu are unambiguous and
+    # sit right before the character.
     "shell" = {
       "disabled" = false;
       "style" = "bold blue";
+      "bash_indicator" = "bash";
+      "fish_indicator" = "fsh";
+      "zsh_indicator" = "zsh";
+      "nu_indicator" = "nu";
+      "elvish_indicator" = "elv";
+      "xonsh_indicator" = "xsh";
+      "tcsh_indicator" = "tcsh";
+      "ion_indicator" = "ion";
+      "powershell_indicator" = "psh";
+      "cmd_indicator" = "cmd";
     };
     palettes.${if config.dotfiles.appearance.enable then "base16" else "dotfiles"} = lib.mapAttrs (
       _: role: colours.${role}
