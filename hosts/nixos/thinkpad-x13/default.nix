@@ -56,6 +56,7 @@
   };
   dotfiles = {
     system.base.enable = true;
+    system.appimage.enable = true;
     desktop.audio.enable = true;
     desktop.bluetooth.enable = true;
     desktop.files.enable = true;

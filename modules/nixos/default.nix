@@ -18,6 +18,7 @@
   ];
   options.dotfiles = {
     system.base.enable = lib.mkEnableOption "the shared NixOS baseline";
+    system.appimage.enable = lib.mkEnableOption "AppImage binfmt support";
     desktop.audio.enable = lib.mkEnableOption "PipeWire audio";
     desktop.bluetooth.enable = lib.mkEnableOption "Bluetooth integration";
     desktop.files.enable = lib.mkEnableOption "desktop removable-media services";
@@ -49,6 +50,13 @@
       programs.bash.enable = true;
       programs.nix-ld.enable = true;
       environment.systemPackages = [ pkgs.bubblewrap ];
+    })
+    (lib.mkIf config.dotfiles.system.appimage.enable {
+      # nixpkgs adds appimage-run to systemPackages but keeps binfmt separate.
+      programs.appimage = {
+        enable = true;
+        binfmt = true;
+      };
     })
     (lib.mkIf config.dotfiles.security.ssh.enable { services.openssh.enable = true; })
     (lib.mkIf config.dotfiles.gaming.steam.enable {
