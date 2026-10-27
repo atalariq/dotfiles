@@ -13,18 +13,6 @@ lint:
 fmt:
     find flake.nix hosts modules devshell -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +
 
-# Copy devshell/php/{devenv.yaml,devenv.nix} into a project directory first;
-# devenv writes devenv.lock there on first use. Run from that directory: the
-# repository root has no devenv.nix of its own.
-
-# Project-local PHP 8.4, MariaDB and Caddy shell.
-dev:
-    devenv shell
-
-# Start the template's php-fpm pool, MariaDB and Caddy web server.
-dev-up:
-    devenv up
-
 update *inputs:
     nix flake update {{ inputs }}
 
@@ -66,12 +54,3 @@ apply-wsl-lab:
     test "$(uname -s)" = Linux
     test "$(id -un)" = atalariq
     nix run .#home-manager -- switch --flake .#wsl-lab
-
-build-fast-thinkpad-x13:
-    tlpctl launch --profile performance -- nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --max-jobs 1 --cores 8 --no-link
-
-power profile:
-    tlpctl set {{ quote(profile) }}
-
-boost +command:
-    tlpctl launch --profile performance -- {{ command }}
