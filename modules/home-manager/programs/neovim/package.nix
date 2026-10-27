@@ -2,6 +2,8 @@
   inputs,
   pkgs,
   runtime ? ./config,
+  configSource ? null,
+  liveRuntime ? false,
 }:
 let
   # nvf owns the reproducible package, while native Lua preserves behaviour.
@@ -167,6 +169,8 @@ let
             ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.wl-clipboard ];
           luaConfigRC.dotfiles = lib.nvim.dag.entryAfter [ "extraPluginConfigs" ] ''
             vim.g.dotfiles_config_dir = "${runtime}"
+            vim.g.dotfiles_source_dir = ${if configSource == null then "nil" else builtins.toJSON configSource}
+            vim.g.dotfiles_live_runtime = ${builtins.toJSON liveRuntime}
             vim.g.dotfiles_vale_config = "${./vale.ini}"
             vim.opt.runtimepath:prepend("${runtime}")
             vim.opt.runtimepath:append("${runtime}/after")

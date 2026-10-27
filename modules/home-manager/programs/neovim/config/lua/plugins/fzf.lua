@@ -10,6 +10,28 @@ end, { desc = "Buffers" })
 vim.keymap.set("n", "<leader>sc", function()
   require("fzf-lua").files({ cwd = "~/.config" })
 end, { desc = "Edit configs" })
+
+-- Generated ~/.config files are not the source of the packaged Lua runtime.
+vim.api.nvim_create_user_command("DotfilesConfig", function()
+  local source = vim.g.dotfiles_source_dir or vim.env.DOTFILES_NVIM_SOURCE
+  if not source or source == "" or vim.fn.isdirectory(source) ~= 1 then
+    vim.notify(
+      "Neovim source checkout is unavailable; set dotfiles.deployment.checkout and rebuild.",
+      vim.log.levels.ERROR
+    )
+    return
+  end
+  local live = vim.g.dotfiles_live_runtime
+  if live == nil then
+    -- Existing live installations can load this Lua before their wrapper rebuilds.
+    local runtime = vim.g.dotfiles_config_dir
+    live = runtime and vim.uv.fs_realpath(runtime) == vim.uv.fs_realpath(source) or false
+  end
+  local mode = live and "live; restart Neovim to reload" or "immutable; rebuild to apply edits"
+  vim.notify("Editing " .. source .. " (" .. mode .. ")")
+  require("fzf-lua").files({ cwd = source, prompt = "Neovim source (" .. mode .. ")> " })
+end, { desc = "Edit canonical Neovim source configuration" })
+vim.keymap.set("n", "<leader>sN", "<cmd>DotfilesConfig<CR>", { desc = "Edit Neovim source" })
 vim.keymap.set("n", "<leader>sD", function()
   require("fzf-lua").diagnostics_workspace()
 end, { desc = "Workspace diagnostics" })
