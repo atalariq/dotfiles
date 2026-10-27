@@ -9,7 +9,6 @@ follows_mouse = true
 [input.keyboard]
 layout = "us"
 numlock_toggle = false
-options = "ctrl:swap_rwin_rctl"
 repeat_delay = 350
 repeat_rate = 30
 

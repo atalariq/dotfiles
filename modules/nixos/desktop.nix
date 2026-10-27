@@ -68,7 +68,6 @@ in
         settings = {
           cursor.size = style.cursor.size;
           keyboard.layout = "us";
-          keyboard.options = "ctrl:swap_rwin_rctl";
           # Empty submission starts the existing fingerprint PAM conversation.
           auth.allow_empty_password = true;
           appearance = {
