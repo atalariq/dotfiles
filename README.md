@@ -256,7 +256,7 @@ Enabling CodeGraph registers its native MCP command in fresh profiles of the
 enabled clients. Stable executable names survive package upgrades. Existing
 profiles retain their servers until selectively updated. Project indexing is a
 separate explicit action; use the CLI when a client has not loaded its MCP server.
-RTK is available for selected noisy output, and [Tokscale](modules/home-manager/programs/tokscale/README.md)
+RTK is available for selected noisy output, and [Tokscale](modules/home-manager/programs/agentic-helpers/tokscale/README.md)
 runs on demand; unpriced models can appear with zero cost and must be treated as
 unknown. Neither
 starts an automatic background collector or intercepts all shell commands.
