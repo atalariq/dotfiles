@@ -20,3 +20,4 @@ hosts.yml
 *.private.*
 
 /.direnv/
+/.codegraph/

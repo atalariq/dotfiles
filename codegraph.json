@@ -1,0 +1,20 @@
+{
+  "exclude": [
+    ".beads/**",
+    ".codegraph/**",
+    "secrets/**",
+    "**/.cache/**",
+    ".direnv/**",
+    "result/**",
+    "result-*/**",
+    "build/**",
+    "dist/**",
+    "generated/**",
+    "private-runtime/**",
+    "**/*.agekey",
+    "**/keys.txt",
+    "**/.env",
+    "**/.env.*",
+    "**/auth.json"
+  ]
+}
