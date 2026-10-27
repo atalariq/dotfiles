@@ -287,26 +287,6 @@
         "type": "github"
       }
     },
-    "lerd": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792694284,
-        "narHash": "sha256-/05mE8mUsFYH6qsZ1pOetf2ywPv6Aust8RyHxyUKV/k=",
-        "owner": "lerd-env",
-        "repo": "lerd-nixos",
-        "rev": "91d4dacf75274dd62eb04a3e21fd1872b6dd2d34",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lerd-env",
-        "repo": "lerd-nixos",
-        "type": "github"
-      }
-    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -592,7 +572,6 @@
       "inputs": {
         "home-manager": "home-manager",
         "kitehost-nvim": "kitehost-nvim",
-        "lerd": "lerd",
         "llm-agents": "llm-agents",
         "mangowm": "mangowm",
         "mdkite-nvim": "mdkite-nvim",
