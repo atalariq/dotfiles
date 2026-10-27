@@ -43,6 +43,9 @@
       ];
       nixpkgs.config.allowUnfree = true;
       programs.fish.enable = true;
+      # Translate system shell fragments at build time instead of spawning Bash
+      # through foreign-env on every Fish startup.
+      programs.fish.useBabelfish = lib.mkDefault true;
       programs.bash.enable = true;
       programs.nix-ld.enable = true;
       environment.systemPackages = [ pkgs.bubblewrap ];
