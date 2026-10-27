@@ -16,7 +16,7 @@ that install them.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
 - **Development:** Independent Bun, Go, and Rust flake templates; commands collected in a plain `Justfile`.
 - **Coding agents:** Native account authentication for Codex, Antigravity, and Copilot;
-  direct DeepSeek/OpenRouter connections for OpenCode and Hermes; optional local gateway.
+  direct DeepSeek/OpenRouter connections for OpenCode and Hermes.
 
 ## Hosts
 
@@ -78,7 +78,7 @@ by a separate installer, set `nix.enable = false` in the host configuration befo
 activation. Home Manager uses its built-in application integration; macOS may
 request App Management permission for the terminal.
 
-CLI tools, Kitty, and Pen come from Nix. The host also declares GUI applications
+CLI tools and Kitty come from Nix. The host also declares GUI applications
 through Homebrew. Activation leaves unlisted Homebrew packages installed and does
 not auto-update or upgrade them. Homebrew cask versions and application updaters
 are outside the Nix lockfile.
@@ -205,7 +205,7 @@ dotfiles.programs.hermes.enable = false;
 
 The bundle selects Codex, Claude Code, OpenCode, Hermes, Beads Rust, CodeGraph,
 RTK, and Tokscale. It does not start workers, index projects, install shell
-rewrite hooks, or purchase provider access. Antigravity, Copilot, Gemini, and
+rewrite hooks, or purchase provider access. Antigravity, Copilot, and
 other experiments remain independently opt-in with
 `dotfiles.programs.<name>.enable`. The desktop hosts explicitly select
 Antigravity and Copilot for optional use.
@@ -298,21 +298,10 @@ pkexec --disable-internal-agent /run/current-system/sw/bin/nixos-rebuild switch 
 Without that desktop agent, the owner runs the command in their terminal. Never
 pass passwords through chat, agent stdin, command arguments, or askpass helpers.
 
-#### Optional local gateway and experiments
+#### Optional experiments
 
-`dotfiles.programs.omniroute.enable` remains available on Linux, but the default
-host selection uses direct providers. Enabling it declares a pinned rootless
-Podman service with a loopback dashboard at <http://127.0.0.1:20128/dashboard>.
-Configure its provider accounts and client keys in the native dashboard, then
-select that endpoint explicitly in each client. It is not required by the bundle.
-
-Disabling the service preserves its private data under
-`~/.local/state/omniroute/data`. Back up the database and `server.env` together;
-provider keys and gateway client keys are separate credentials. Review stopping
-an existing gateway before activation when other clients still depend on it.
-
-Tools such as Tirith, Crit, agent-browser, git-ai, git-surgeon, Nono, Workmux,
-Herdr, and Orca remain optional. Installing a package alone does not prove agent
+Tools such as Tirith, Crit, agent-browser, git-ai, git-surgeon, and Workmux
+remain optional. Installing a package alone does not prove agent
 integration. Enable an integration after its intended workflow has been verified.
 For git-ai, configure a nonempty repository allowlist and review its private
 configuration before enabling hooks; retain the module's upload restrictions.

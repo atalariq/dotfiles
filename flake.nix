@@ -12,11 +12,6 @@
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # Only the newer Herdr module is imported; stable Home Manager owns the rest.
-    home-manager-unstable = {
-      url = "github:nix-community/home-manager/6750249c69969d09d952efaf3fab88a2bdac7ec6";
-      flake = false;
-    };
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -108,27 +103,6 @@
           config.allowUnfree = true;
           overlays = [ applicationOverlay ];
         };
-      homeBackports = [
-        (
-          {
-            config,
-            lib,
-            pkgs,
-            ...
-          }:
-          import (inputs.home-manager-unstable + "/modules/programs/herdr.nix") {
-            inherit config pkgs;
-            # Herdr's upstream module also needs its native mutable-config helpers.
-            lib = lib // {
-              hm = lib.hm // {
-                generators =
-                  lib.hm.generators
-                  // (import (inputs.home-manager-unstable + "/modules/lib/generators.nix") { inherit lib; });
-              };
-            };
-          }
-        )
-      ];
       perSystem = lib.genAttrs systems (
         system:
         let
@@ -140,7 +114,6 @@
             neovim = editor;
             default = editor;
             home-manager = inputs.home-manager.packages.${system}.home-manager;
-            pencil-dev = pkgs.callPackage ./modules/home-manager/programs/pen/package.nix { };
           }
           // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             mango = import ./modules/home-manager/desktop/mango/package.nix { inherit inputs pkgs; };
@@ -174,7 +147,7 @@
         inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs "x86_64-linux";
           extraSpecialArgs = { inherit inputs; };
-          modules = [ host ] ++ homeBackports;
+          modules = [ host ];
         };
     in
     {
@@ -201,7 +174,6 @@
           {
             nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
-              sharedModules = homeBackports;
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs; };
@@ -220,7 +192,6 @@
             nixpkgs.config.allowUnfree = true;
             nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
-              sharedModules = homeBackports;
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs; };

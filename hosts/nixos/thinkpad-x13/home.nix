@@ -64,7 +64,6 @@
       snes9x
       pcsx2
       (callPackage ../../../modules/home-manager/programs/concat/package.nix { })
-      (callPackage ../../../modules/home-manager/programs/pen/package.nix { })
     ];
   };
   programs = {
@@ -77,7 +76,6 @@
     television.enable = true;
     kitty.enable = true;
     fastfetch.enable = true;
-    herdr.enable = true;
     jujutsu.settings.user = {
       name = "Atalariq Barra Hadinugraha";
       email = "atalariq.dev@outlook.com";
@@ -151,7 +149,6 @@
       agy.enable = true;
       copilot.enable = true;
       espanso.enable = true;
-      plane.enable = true;
       btop.enable = true;
       mpd.enable = true;
       rmpc.enable = true;
@@ -159,8 +156,6 @@
       aria2.enable = true;
       yt-dlp.enable = true;
       obs-studio.enable = true;
-      # Direct providers are the default. Keep OmniRoute opt-in and its state
-      # untouched; applying this generation stops its previous user service.
     };
     services.secrets = {
       enable = true;

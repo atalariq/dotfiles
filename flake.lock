@@ -270,23 +270,6 @@
         "type": "github"
       }
     },
-    "home-manager-unstable": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792703141,
-        "narHash": "sha256-3X34FaSeMJXMx8CK/BN6sZ9knwNauuiJXQhLM+bQQuI=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "6750249c69969d09d952efaf3fab88a2bdac7ec6",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "6750249c69969d09d952efaf3fab88a2bdac7ec6",
-        "type": "github"
-      }
-    },
     "kitehost-nvim": {
       "flake": false,
       "locked": {
@@ -608,7 +591,6 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
-        "home-manager-unstable": "home-manager-unstable",
         "kitehost-nvim": "kitehost-nvim",
         "lerd": "lerd",
         "llm-agents": "llm-agents",

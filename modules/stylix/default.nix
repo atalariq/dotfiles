@@ -164,16 +164,6 @@ in
           };
         };
       })
-      (lib.mkIf config.programs.herdr.enable {
-        programs.herdr.settings.theme.custom = {
-          panel_bg = c.base01;
-          accent = c.base0B;
-          green = c.base0B;
-          blue = c.base0D;
-          red = c.base08;
-          yellow = c.base0A;
-        };
-      })
       (lib.mkIf config.dotfiles.desktop.noctalia.enable {
         programs.noctalia.customPalettes.stylix = {
           dark = noctaliaPalette;

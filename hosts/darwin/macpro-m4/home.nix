@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
   imports = [
     ../../../modules/home-manager/common
@@ -7,9 +7,6 @@
     sessionVariables.DOTFILES_HOST = "macpro-m4";
     homeDirectory = "/Users/atalariq";
     stateVersion = "26.05";
-    packages = with pkgs; [
-      (callPackage ../../../modules/home-manager/programs/pen/package.nix { })
-    ];
   };
   targets.darwin.copyApps.enable = true;
   programs = {

@@ -26,7 +26,6 @@ in
     files = {
       hermes = secretFile "Encrypted YAML with an environment scalar containing Hermes dotenv data.";
       opencode = secretFile "Encrypted YAML with a gateway_api_key scalar.";
-      omniroute = secretFile "Encrypted YAML with an environment scalar containing gateway dotenv data.";
       aiProviders = secretFile "Encrypted YAML with OpenRouter and DeepSeek provider API key scalars.";
     };
   };
@@ -49,13 +48,6 @@ in
           mode = "0600";
         };
       }
-      // lib.optionalAttrs (cfg.files.omniroute != null) {
-        omniroute-env = {
-          sopsFile = cfg.files.omniroute;
-          key = "environment";
-          mode = "0600";
-        };
-      }
       // lib.optionalAttrs (cfg.files.aiProviders != null) {
         "openrouter-api-key" = {
           sopsFile = cfg.files.aiProviders;
@@ -70,11 +62,7 @@ in
       };
     assertions = [
       {
-        assertion =
-          cfg.files.hermes != null
-          || cfg.files.opencode != null
-          || cfg.files.omniroute != null
-          || cfg.files.aiProviders != null;
+        assertion = cfg.files.hermes != null || cfg.files.opencode != null || cfg.files.aiProviders != null;
         message = "Enable secrets only after selecting actual encrypted per-application files.";
       }
     ];
