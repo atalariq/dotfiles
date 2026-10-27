@@ -33,6 +33,15 @@
       };
       networking.networkmanager.dns = "systemd-resolved";
       systemd.user.tmpfiles.rules = [ "L %h/.local/bin/lerd - - - - /run/current-system/sw/bin/lerd" ];
+      # Lerd's PHP 8.5 Quadlet hardcodes /bin/mkdir, absent on NixOS.
+      # Extend the generated unit; leave its container and runtime config intact.
+      systemd.user.services.lerd-php85-fpm = {
+        overrideStrategy = "asDropin";
+        serviceConfig.ExecStartPre = [
+          ""
+          "${pkgs.coreutils}/bin/mkdir -p -m 0700 %t/lerd/env"
+        ];
+      };
     })
   ];
 }
