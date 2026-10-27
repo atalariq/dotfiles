@@ -11,5 +11,6 @@ files = [
   "keybinds/windows.toml",
   "keybinds/apps-and-panels.toml",
   "keybinds/screenshots-and-media.toml",
+  "keybinds/hyper.toml",
   "rules.toml",
 ]
