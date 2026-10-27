@@ -5,7 +5,7 @@
 "Mod+Return" = { action = "spawn:kitty", repeat = false }
 "Mod+Shift+Return" = { action = "spawn:kitty", repeat = false }
 "Mod+W" = { action = "spawn:brave-origin", repeat = false }
-"Mod+Q" = { action = "window-close", repeat = false }
+"Mod+Shift+Q" = { action = "window-close", repeat = false }
 "Mod+Shift+Alt+Q" = { action = "session-quit", repeat = false }
 "Mod+Space" = { action = "spawn:noctalia msg panel-toggle launcher", repeat = false }
 "Mod+V" = { action = "spawn:noctalia msg panel-toggle clipboard", repeat = false }

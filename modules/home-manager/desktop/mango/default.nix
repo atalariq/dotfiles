@@ -62,7 +62,7 @@ in
         monitor_rule = cfg.monitorRules;
         # The native binds file ends in resize mode. Select default explicitly
         # before appending this host-selected binding.
-        key_mode.default.bindn = lib.optional config.dotfiles.desktop.shelf.enable "CTRL+SUPER+ALT,S,spawn,pluto toggle";
+        key_mode.default.bind = lib.optional config.dotfiles.desktop.shelf.enable "CTRL+SUPER+ALT,S,spawn,pluto toggle";
       };
     };
     home.extraDependencies = [ validated ];
