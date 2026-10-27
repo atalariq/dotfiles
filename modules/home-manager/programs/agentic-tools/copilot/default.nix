@@ -5,13 +5,6 @@
   inputs,
   ...
 }:
-let
-  rtkData =
-    if pkgs.stdenv.hostPlatform.isDarwin then
-      "${config.home.homeDirectory}/Library/Application Support/rtk"
-    else
-      "${config.xdg.dataHome}/rtk";
-in
 {
   options.dotfiles.programs.copilot.enable = lib.mkEnableOption "GitHub Copilot CLI";
 
@@ -26,27 +19,9 @@ in
       pkgs.iptables-nftables-compat
     ];
 
-    # config.json and permissions-config.json belong to Copilot. Seed settings.json
-    # manually so /settings can save preferences without modifying the Nix store.
-    xdg.configFile."dotfiles/templates/copilot.json".text = builtins.toJSON (
-      lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./settings.json)) {
-        sandbox.userPolicy.filesystem = {
-          readwritePaths = [
-            rtkData
-            "${config.xdg.cacheHome}/nix"
-          ]
-          ++ lib.optional config.dotfiles.programs.beads-rust.enable config.dotfiles.programs.beads-rust.directory;
-          readonlyPaths = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "${config.xdg.configHome}/rtk" ];
-          deniedPaths = [
-            "${config.home.homeDirectory}/.ssh"
-            "${config.home.homeDirectory}/.gnupg"
-            "${config.xdg.configHome}/age"
-            "${config.xdg.configHome}/sops"
-            "${config.xdg.configHome}/sops-nix/secrets"
-          ];
-        };
-      }
-    );
+    # Copilot owns config.json and permissions-config.json. Seed only the shared
+    # defaults into a writable profile when it does not exist yet.
+    xdg.configFile."dotfiles/templates/copilot.json".source = ./settings.json;
     # Native MCP state remains writable; provisioning creates this seed only when absent.
     xdg.configFile."dotfiles/templates/copilot-mcp.json" =
       lib.mkIf config.dotfiles.programs.codegraph.enable

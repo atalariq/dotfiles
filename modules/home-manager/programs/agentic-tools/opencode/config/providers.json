@@ -1,4 +1,5 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "model": "deepseek/deepseek-flash",
   "providers": {
     "deepseek": {
@@ -50,17 +51,6 @@
       "env": [
         "OPENROUTER_API_KEY"
       ]
-    }
-  },
-  "agents": {
-    "title": {
-      "model": "deepseek/deepseek-flash"
-    },
-    "summary": {
-      "model": "deepseek/deepseek-flash"
-    },
-    "compaction": {
-      "model": "deepseek/deepseek-flash"
     }
   }
 }

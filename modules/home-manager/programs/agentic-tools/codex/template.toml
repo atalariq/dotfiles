@@ -1,30 +1,5 @@
 #:schema https://developers.openai.com/codex/config-schema.json
-# Loaded with `codex --profile development`; login and base config stay local.
-# The module adds per-host private-path restrictions to this named profile.
+# Shared defaults only. Account state, models, approvals and MCP entries are
+# native and stay writable; this file is seeded once when no profile exists.
 approval_policy = "on-request"
-default_permissions = "development"
-allow_login_shell = false
 web_search = "cached"
-
-[shell_environment_policy]
-inherit = "core"
-
-[permissions.development]
-extends = ":workspace"
-
-[permissions.development.filesystem]
-":workspace_roots" = "write"
-
-# Linux's network-disabled sandbox also blocks the Nix daemon's Unix socket.
-# Networking is enabled in this workspace profile; filesystem restrictions remain.
-[permissions.development.network]
-enabled = true
-
-[agents]
-enabled = true
-max_concurrent_threads_per_session = 3
-max_depth = 1
-
-[tui]
-status_line = ["model-with-reasoning", "current-dir", "git-branch", "context-used", "five-hour-limit", "run-state"]
-status_line_use_colors = true
