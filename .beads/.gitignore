@@ -25,6 +25,9 @@ last-touched
 # Local history backups
 .br_history/
 
+# Per-issue local verification receipts; handoff summaries belong in issue comments.
+artifacts/
+
 # DB-family recovery artifacts (truncated WAL/SHM, quarantined sidecars)
 # — same lifecycle as .br_history/, written by recovery paths and
 # `br doctor --repair`. Recovery artifacts live under their own directory
