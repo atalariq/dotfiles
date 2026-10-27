@@ -150,8 +150,8 @@
       copilot.enable = true;
       espanso.enable = true;
       btop.enable = true;
+      # mpd owns the daemon, rmpc client, MPRIS bridge and Last.fm scrobbler.
       mpd.enable = true;
-      rmpc.enable = true;
       mpv.enable = true;
       aria2.enable = true;
       yt-dlp.enable = true;
