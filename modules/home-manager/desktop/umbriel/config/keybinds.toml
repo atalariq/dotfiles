@@ -1,0 +1,78 @@
+# Umbriel bindings. Preserve native string actions and explicit repeat=false.
+# Package/session-selected bindings are added by the generated host wrapper.
+
+[keybinds]
+# Workspace selection and moving windows.
+"Mod+1" = "workspace-switch:1"
+"Mod+Shift+1" = "window-move-to-workspace:1"
+"Mod+2" = "workspace-switch:2"
+"Mod+Shift+2" = "window-move-to-workspace:2"
+"Mod+3" = "workspace-switch:3"
+"Mod+Shift+3" = "window-move-to-workspace:3"
+"Mod+4" = "workspace-switch:4"
+"Mod+Shift+4" = "window-move-to-workspace:4"
+"Mod+5" = "workspace-switch:5"
+"Mod+Shift+5" = "window-move-to-workspace:5"
+"Mod+6" = "workspace-switch:6"
+"Mod+Shift+6" = "window-move-to-workspace:6"
+"Mod+7" = "workspace-switch:7"
+"Mod+Shift+7" = "window-move-to-workspace:7"
+"Mod+8" = "workspace-switch:8"
+"Mod+Shift+8" = "window-move-to-workspace:8"
+"Mod+9" = "workspace-switch:9"
+"Mod+Shift+9" = "window-move-to-workspace:9"
+
+# Launching and desktop panels.
+"Mod+Return" = { action = "spawn:kitty", repeat = false }
+"Mod+Shift+Return" = { action = "spawn:kitty", repeat = false }
+"Mod+W" = { action = "spawn:brave-origin", repeat = false }
+"Mod+Shift+Alt+Q" = { action = "session-quit", repeat = false }
+"Mod+Space" = { action = "spawn:lookapp --toggle", repeat = false }
+"Mod+A" = { action = "spawn:lookapp --toggle", repeat = false }
+"Mod+V" = { action = "spawn:lookapp clipboard", repeat = false }
+"Mod+E" = { action = "spawn:lookapp --toggle", repeat = false }
+"Mod+C" = { action = "spawn:noctalia msg panel-toggle control-center", repeat = false }
+"Mod+N" = { action = "spawn:noctalia msg panel-toggle notifications", repeat = false }
+"Mod+Y" = { action = "spawn:noctalia msg panel-toggle wallpaper", repeat = false }
+"Mod+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
+"Mod+Escape" = { action = "spawn:noctalia msg panel-toggle session", repeat = false }
+
+# Window/column navigation.
+"Mod+H" = "window-focus-left"
+"Mod+J" = "window-focus-down"
+"Mod+K" = "window-focus-up"
+"Mod+L" = "window-focus-right"
+"Mod+Left" = "window-focus-left"
+"Mod+Down" = "window-focus-down"
+"Mod+Up" = "window-focus-up"
+"Mod+Right" = "window-focus-right"
+"Mod+Shift+H" = "column-move-left"
+"Mod+Shift+J" = "window-move-down"
+"Mod+Shift+K" = "window-move-up"
+"Mod+Shift+L" = "column-move-right"
+
+# Layout and scratchpad controls.
+"Mod+Shift+Space" = { action = "window-toggle-floating", repeat = false }
+"Mod+Shift+F" = { action = "window-toggle-fullscreen", repeat = false }
+"Mod+M" = { action = "window-toggle-maximize-to-edges", repeat = false }
+"Mod+O" = { action = "overview-toggle", repeat = false }
+"Mod+X" = "window-cycle-primary-extent"
+"Mod+Minus" = { action = "scratchpad-toggle:terminal", repeat = false }
+"Mod+Grave" = { action = "scratchpad-toggle:terminal", repeat = false }
+"Mod+Shift+Minus" = { action = "window-move-to-scratchpad:terminal", repeat = false }
+
+# Previous/next workspace.
+"Mod+BracketLeft" = "workspace-previous"
+"Mod+BracketRight" = "workspace-next"
+
+# Media, volume, display and keyboard brightness.
+"XF86AudioRaiseVolume" = "spawn:noctalia msg volume-up"
+"XF86AudioLowerVolume" = "spawn:noctalia msg volume-down"
+"XF86AudioMute" = { action = "spawn:noctalia msg volume-mute", repeat = false }
+"XF86AudioPlay" = { action = "spawn:noctalia msg media toggle", repeat = false }
+"XF86AudioNext" = { action = "spawn:noctalia msg media next", repeat = false }
+"XF86AudioPrev" = { action = "spawn:noctalia msg media prev", repeat = false }
+"XF86MonBrightnessUp" = "spawn:noctalia msg brightness-up"
+"XF86MonBrightnessDown" = "spawn:noctalia msg brightness-down"
+"XF86KbdBrightnessUp" = "spawn:brightnessctl --device=*kbd_backlight set 1+"
+"XF86KbdBrightnessDown" = "spawn:brightnessctl --device=*kbd_backlight set 1-"

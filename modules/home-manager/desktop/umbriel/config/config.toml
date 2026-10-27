@@ -1,0 +1,11 @@
+# Umbriel native configuration. Later includes override earlier scalar values;
+# the including file itself wins last. Rule lists preserve their source order.
+[include]
+files = [
+  "general.toml",
+  "input.toml",
+  "layout.toml",
+  "appearance.toml",
+  "keybinds.toml",
+  "rules.toml",
+]

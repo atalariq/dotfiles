@@ -1,0 +1,12 @@
+# Umbriel appearance. Native configuration; included in the root file.
+# Host output, theme, and conditional integrations are generated separately.
+
+[appearance]
+border_width = 1
+corner_radius = 16
+
+[appearance.blur]
+enabled = false
+
+[appearance.shadow]
+enabled = false

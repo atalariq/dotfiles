@@ -1,0 +1,10 @@
+# Noctalia native entrypoint. Use only this explicit include order instead of
+# alphabetically loading every TOML file from the config root.
+# Writable settings.toml remains application-owned and overlays these defaults.
+[include]
+autoload = false
+files = [
+  "bar.toml",
+  "lockscreen.toml",
+  "shell.toml",
+]

@@ -11,8 +11,9 @@
   config = lib.mkIf config.dotfiles.programs.espanso.enable {
 
     # NixOS owns the sole Wayland daemon and its capability wrapper.
-    # Link individual matches: an out-of-store directory is opaque to HM's
-    # recursive expansion and would replace Espanso's writable match directory.
+    # match/ can also contain owner matches and installed Espanso packages.
+    # Preserve that mixed-ownership directory instead of replacing it with a
+    # directory symlink; own only the declared native matches.
     xdg.configFile = {
       "espanso/config/default.yml".source = dotfilesLib.sourceFor "espanso" ./config/default.yml;
     }

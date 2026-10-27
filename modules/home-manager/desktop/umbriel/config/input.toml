@@ -1,0 +1,20 @@
+# Umbriel input. Native configuration; included in the root file.
+# Host output, theme, and conditional integrations are generated separately.
+
+[input]
+
+[input.focus]
+follows_mouse = true
+
+[input.keyboard]
+layout = "us"
+numlock_toggle = false
+options = "ctrl:swap_rwin_rctl"
+repeat_delay = 350
+repeat_rate = 30
+
+[input.touchpad]
+click_method = "clickfinger"
+disable_while_typing = true
+natural_scroll = true
+tap = true

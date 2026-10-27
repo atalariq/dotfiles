@@ -29,6 +29,10 @@
           "neovim"
           "hermes"
           "opencode"
+          "fish"
+          "mango"
+          "umbriel"
+          "noctalia"
         ]
       );
       default = [ ];

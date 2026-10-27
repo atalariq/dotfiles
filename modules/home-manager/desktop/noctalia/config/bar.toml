@@ -1,0 +1,10 @@
+# Noctalia bar layout. Array order controls the actual widget order.
+# Theme/font and desktop ownership are generated separately.
+
+[bar.main]
+start = ["wallpaper", "workspaces"]
+center = ["clock"]
+end = ["media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+
+[bar.main.dead_zone.actions]
+left = "none"

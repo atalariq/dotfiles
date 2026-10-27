@@ -1,0 +1,7 @@
+# Noctalia lockscreen. Native settings; the shell watches included files.
+# Theme/font and desktop ownership are generated separately.
+
+[lockscreen]
+enabled = true
+fingerprint = true
+lock_before_suspend = true

@@ -110,8 +110,10 @@
       "espanso"
       "vim"
       "neovim"
-      "hermes"
-      "opencode"
+      "fish"
+      "mango"
+      "umbriel"
+      "noctalia"
     ];
     appearance = {
       enable = true;

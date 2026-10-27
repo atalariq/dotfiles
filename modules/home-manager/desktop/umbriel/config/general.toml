@@ -1,0 +1,5 @@
+# Umbriel general. Native configuration; included in the root file.
+# Host output, theme, and conditional integrations are generated separately.
+
+[general]
+mod_key = "Super"

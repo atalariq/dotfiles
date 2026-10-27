@@ -1,0 +1,6 @@
+# Noctalia shell. Native settings; the shell watches included files.
+# Theme/font and desktop ownership are generated separately.
+
+[shell]
+time_format = "{:%H:%M}"
+telemetry_enabled = false
