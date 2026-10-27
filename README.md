@@ -221,6 +221,18 @@ authentication, sessions, models, and UI settings. Updated seeds are available
 under `~/.config/dotfiles/templates`; an existing profile needs a selective
 reviewed migration to adopt changed settings. No credential enters the Nix store.
 
+Seeds stay deliberately small: shared defaults only (direct DeepSeek for
+OpenCode and Hermes, schema references, update checks off, co-author opt-outs,
+CodeGraph as the single MCP server). Permissions, sandbox paths, approval
+lists, extra MCP servers and UI preferences are owned by each tool, which
+rewrites its own profile on normal use. Add capability through the native
+commands (`codex mcp add`, `claude mcp add`, `agy mcp add`, `copilot mcp add`,
+`opencode mcp add --global`) instead of growing the Nix seed.
+
+Agent CLIs live under `modules/home-manager/programs/agentic-tools/` and the
+supporting binaries under `agentic-helpers/`. Both trees declare their imports
+explicitly; the top-level program index only sees the two parents.
+
 | Command | First-use authentication and role |
 | --- | --- |
 | `codex` | Native account/API setup; trusted project implementation and review |
@@ -243,12 +255,12 @@ execution are not OS filesystem sandboxes. Existing running servers and sessions
 retain their settings until reloaded; `opencode2 --standalone` creates an isolated
 server without restarting the shared one.
 
-Codex's fresh profile includes the status line and development permissions; its
-base config remains writable. This repository also supplies project defaults.
-Claude's Linux sandbox keeps local socket access restricted, so Nix daemon
-access can require a separate native approval. Copilot uses native saved project
-approvals. Hermes retains hard-denied protected commands because its pinned
-version does not provide an arbitrary interactive ask list.
+Every client keeps its own approval, sandbox and permission model. The
+repository no longer ships permission lists, path allowlists or execpolicy
+rules, so the first run behaves like the tool's documented default. Claude's
+Linux sandbox can still need a native approval for the Nix daemon socket;
+Copilot keeps its saved project approvals; Hermes applies its own defaults
+because its pinned version has no arbitrary interactive ask list.
 
 #### Integration and coordination
 
