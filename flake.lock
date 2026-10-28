@@ -229,6 +229,23 @@
         "type": "github"
       }
     },
+    "kitehost-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790890752,
+        "narHash": "sha256-XHbCbooxN+29qCQT9XasihZFdYonDaWufFUSNowNdnk=",
+        "owner": "selimacerbas",
+        "repo": "kitehost.nvim",
+        "rev": "4cb5c94a84cc653e0b32e0c9aed95465a36fc94d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "selimacerbas",
+        "repo": "kitehost.nvim",
+        "rev": "4cb5c94a84cc653e0b32e0c9aed95465a36fc94d",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -248,6 +265,23 @@
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
+        "type": "github"
+      }
+    },
+    "mdkite-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790933440,
+        "narHash": "sha256-V3NRsP7ZGR+6p5wC/lS1nebnPsLevLgT4HWcDO1TKyo=",
+        "owner": "selimacerbas",
+        "repo": "mdkite.nvim",
+        "rev": "dded03dc6cce87364b48260b2ffbace575a6add7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "selimacerbas",
+        "repo": "mdkite.nvim",
+        "rev": "dded03dc6cce87364b48260b2ffbace575a6add7",
         "type": "github"
       }
     },
@@ -450,7 +484,9 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
+        "kitehost-nvim": "kitehost-nvim",
         "llm-agents": "llm-agents",
+        "mdkite-nvim": "mdkite-nvim",
         "nix-darwin": "nix-darwin",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs_2",

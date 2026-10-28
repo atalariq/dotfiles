@@ -198,14 +198,16 @@ snapshot; live mode uses Home Manager's `mkOutOfStoreSymlink`. Writable Noctalia
 settings remain application-owned. Native validators check a complete immutable
 copy of the include tree during builds, even when the deployed links are live.
 
-Neovim's Lua runtime lives in
-`modules/home-manager/programs/neovim/config/`, rather than `~/.config/nvim`.
-With Neovim selected in `liveApps`, edit that checkout directly and restart Neovim
-for a reliable full reload; Lua `require` caches modules within a running process.
-`:DotfilesConfig` or `<leader>sN` opens the canonical source picker and explains
-whether edits are live or require rebuilding. The native Fish `nvimc` helper opens
-the same picker after the updated configuration has been installed.
-Packages, plugins, parsers, and external language tools still rebuild through nvf.
+Neovim is assembled from nvf and split by how often things change. Build-time
+configuration - plugins, LSP servers, formatters, parsers - lives in
+`modules/home-manager/programs/neovim/nvf.nix` and is shared by the Home Manager
+module and the standalone `nix run .#neovim` package. The Lua runtime that stays
+live is `modules/home-manager/programs/neovim/runtime/`: with Neovim selected in
+`liveApps`, edit that checkout directly and restart Neovim for a reliable full
+reload, since Lua `require` caches modules within a running process. Markdown is
+read raw by default; `<leader>mr` toggles rendering and `<leader>mR` opens a
+rendered split. Plugins, parsers and external language tools still rebuild
+through a generation.
 
 Freesm Launcher ships inside the NixOS gaming module
 (`dotfiles.gaming.enable`) on x86_64 Linux. Its official AppImage is

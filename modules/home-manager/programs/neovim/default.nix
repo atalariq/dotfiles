@@ -7,35 +7,32 @@
   ...
 }:
 let
-  liveRuntime =
-    config.dotfiles.deployment.mode == "live"
-    || builtins.elem "neovim" config.dotfiles.deployment.liveApps;
-  configSource = "${config.dotfiles.deployment.checkout}/modules/home-manager/programs/neovim/config";
-  # Only native files can use live mode. Plugin/tool changes always rebuild.
-  editor = import ./package.nix (
-    {
-      inherit
-        inputs
-        pkgs
-        configSource
-        liveRuntime
-        ;
-    }
-    // lib.optionalAttrs liveRuntime {
-      runtime = dotfilesLib.sourceFor "neovim" ./config;
-    }
-  );
+  # "neovim" is a live app: the runtime tree links back to the checkout, so
+  # keymaps and options can be edited without a rebuild while everything build
+  # time still comes from a generation.
+  runtime = dotfilesLib.sourceFor "neovim" ./runtime;
 in
 {
+  imports = [ inputs.nvf.homeManagerModules.nvf ];
+
   options.dotfiles.programs.neovim.enable = lib.mkEnableOption "nvf workstation editor";
+
   config = lib.mkIf config.dotfiles.programs.neovim.enable {
-    home.packages = [ editor ];
+    programs.nvf = {
+      enable = true;
+      # EDITOR, so `git commit` and every agent that edits $EDITOR land here.
+      defaultEditor = true;
+      # One nvf configuration, two consumers: package.nix imports the same files
+      # for `nix run .#neovim`.
+      settings.imports = [
+        ./nvf.nix
+        (import ./plugins.nix { inherit pkgs inputs; })
+        (import ./runtime-layer.nix { inherit runtime; })
+      ];
+    };
     home.sessionVariables = {
-      DOTFILES_NVIM_SOURCE = configSource;
-      EDITOR = "nvim";
       VISUAL = "nvim";
       GIT_EDITOR = "nvim";
     };
-    xdg.configFile."vale/.vale.ini".source = dotfilesLib.source ./vale.ini;
   };
 }

@@ -38,6 +38,17 @@
       inputs.flake-parts.follows = "flake-parts";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # Not packaged in nixpkgs; built as vim plugins in the nvf module. mdkite
+    # 2.x requires kitehost >= 2.0, so both are pinned together.
+    kitehost-nvim = {
+      url = "github:selimacerbas/kitehost.nvim/4cb5c94a84cc653e0b32e0c9aed95465a36fc94d";
+      flake = false;
+    };
+    mdkite-nvim = {
+      url = "github:selimacerbas/mdkite.nvim/dded03dc6cce87364b48260b2ffbace575a6add7";
+      flake = false;
+    };
   };
 
   outputs =

@@ -17,9 +17,6 @@ end
 command -q nvim; and set -gx MANPAGER 'nvim +Man!'
 set -l config_home "$HOME/.config"
 set -q XDG_CONFIG_HOME; and set config_home "$XDG_CONFIG_HOME"
-if test -r "$config_home/vale/.vale.ini"
-    set -gx VALE_CONFIG_PATH "$config_home/vale/.vale.ini"
-end
 if command -q rg; and test -r "$config_home/ripgrep/ripgreprc"
     set -gx RIPGREP_CONFIG_PATH "$config_home/ripgrep/ripgreprc"
 else if set -q RIPGREP_CONFIG_PATH; and not test -r "$RIPGREP_CONFIG_PATH"
