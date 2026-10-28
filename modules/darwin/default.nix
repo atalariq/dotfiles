@@ -1,10 +1,18 @@
 { lib, ... }:
 {
+  imports = [ ../nix-cache.nix ];
   nix.enable = lib.mkDefault true;
-  nix.settings.experimental-features = lib.mkDefault [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = lib.mkDefault [
+      "nix-command"
+      "flakes"
+    ];
+    # macOS has no wheel group; name the administrative user explicitly.
+    trusted-users = [
+      "root"
+      "atalariq"
+    ];
+  };
   programs.fish.enable = lib.mkDefault true;
   security.pam.services.sudo_local = {
     touchIdAuth = lib.mkDefault true;

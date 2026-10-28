@@ -8,6 +8,7 @@
 {
   # Importing a catalogue declares options; the host owns activation.
   imports = [
+    ../nix-cache.nix
     inputs.mangowm.nixosModules.mango
     inputs.noctalia.nixosModules.default
     inputs.sops-nix.nixosModules.sops
@@ -40,10 +41,18 @@
   };
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.system.base.enable {
-      nix.settings.experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
+      nix.settings = {
+        experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+        # Let the desktop user and the wheel group pass substituters and other
+        # restricted settings through, so the flake fallback and `nh` work.
+        trusted-users = [
+          "root"
+          "@wheel"
+        ];
+      };
       nixpkgs.config.allowUnfree = true;
       programs.fish.enable = true;
       # Translate system shell fragments at build time instead of spawning Bash
