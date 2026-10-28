@@ -5,12 +5,12 @@
 # This module owns plugin *availability* only: everything below ends up on the
 # wrapped `nvim`'s packpath at build time. Treesitter parsers live in
 # 40-languages.nix because their parser set is a language concern.
-{ custom }:
 { pkgs, ... }:
 {
   vim = {
-    startPlugins =
-      (with pkgs.vimPlugins; [
+    startPlugins = (
+      with pkgs.vimPlugins;
+      [
         blink-cmp
         blink-indent
         blink-lib
@@ -57,14 +57,7 @@
         mini-statusline
         mini-surround
         mini-tabline
-      ])
-      # Pinned flake inputs that are not in nixpkgs; package.nix builds them
-      # with `custom`. Order is preserved from the previous single module.
-      ++ map custom [
-        "nvim-emmet"
-        "pathfinder-nvim"
-        "kitehost-nvim"
-        "mdkite-nvim"
-      ];
+      ]
+    );
   };
 }
