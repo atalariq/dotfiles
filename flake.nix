@@ -36,21 +36,10 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
-  # Portable fallback for standalone Home Manager hosts, where no system module
-  # owns nix.conf. NixOS and nix-darwin declare the authoritative settings in
-  # modules/nix-cache.nix; nixConfig cannot import, so keep both lists in sync.
-  nixConfig = {
-    extra-substituters = [
-      "https://noctalia.cachix.org"
-      "https://umbriel.cachix.org"
-      "https://cache.numtide.com"
-    ];
-    extra-trusted-public-keys = [
-      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
-      "umbriel.cachix.org-1:JfNq/2ygS6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
-      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-    ];
-  };
+  # No nixConfig here on purpose: it must be a literal attrset, so repeating the
+  # cache list would only duplicate modules/nix-cache.nix. Nix ignores extra-*
+  # settings for untrusted users anyway; standalone Home Manager hosts pick the
+  # caches up from /etc/nix/nix.conf once trusted-users includes them (README).
 
   outputs =
     inputs:

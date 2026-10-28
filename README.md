@@ -76,10 +76,19 @@ The Noctalia, Umbriel and numtide caches are declared once in
 nix-darwin modules, so `/etc/nix/nix.conf` is regenerated from the same list.
 `trusted-users` is platform-specific and stays in each platform module.
 
-Standalone Home Manager hosts (`linux-lab`, `wsl-lab`) have no system module and
-rely on the `extra-substituters`/`extra-trusted-public-keys` fallback in
-[flake.nix](flake.nix). Nix ignores those entries unless the user is trusted, so
-add `trusted-users = [ "atalariq" ]` to that machine's `/etc/nix/nix.conf` once.
+Standalone Home Manager hosts (`linux-lab`, `wsl-lab`) have no system module, so
+nothing in this repository writes their `/etc/nix/nix.conf`. Add the cache once by
+hand on those machines, otherwise the first build compiles everything:
+
+```nix
+# /etc/nix/nix.conf
+trusted-users = atalariq
+extra-substituters = https://cache.numtide.com
+extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+```
+
+The flake deliberately has no `nixConfig`: Nix refuses to import into it (it must
+be a literal attrset) and ignores the settings for untrusted users anyway.
 
 ### macOS bootstrap
 
