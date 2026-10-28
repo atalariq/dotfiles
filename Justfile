@@ -1,6 +1,7 @@
 # Builds, diffs, activation and store hygiene go through `nh`; it renders the
 # build plan with nix-output-monitor and prints the closure diff itself.
 # Each recipe keeps the native command it wraps as a comment for reference.
+
 default:
     @just --list
 
@@ -25,6 +26,7 @@ build-thinkpad-x13:
     nh os build . -H thinkpad-x13
     # native: nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link
 
+# Build and show the closure diff without activating.
 diff-thinkpad-x13:
     nh os switch --dry . -H thinkpad-x13
     # native: nix store diff-closures /run/current-system "$(nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link --print-out-paths)"
@@ -33,6 +35,7 @@ build-macpro-m4:
     nh darwin build . -H macpro-m4
     # native: nix build .#darwinConfigurations.macpro-m4.system --no-link
 
+# Build and show the closure diff without activating.
 diff-macpro-m4:
     nh darwin switch --dry . -H macpro-m4
     # native: nix store diff-closures /nix/var/nix/profiles/system "$(nix build .#darwinConfigurations.macpro-m4.system --no-link --print-out-paths)"
