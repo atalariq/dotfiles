@@ -14,8 +14,9 @@ let
   );
 in
 {
-  # Session packages are independent of the one login greeter. The host chooses
-  # its default; keeping Mango enabled does not replace the Umbriel default.
+  # The session package and the login greeter are independent selections:
+  # enabling Umbriel does not make it the greeter's default session, so the
+  # host sets both explicitly.
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.desktop.umbriel.enable {
       programs.umbriel.enable = true;

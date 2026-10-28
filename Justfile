@@ -58,19 +58,19 @@ build-wsl-lab:
 boot-thinkpad-x13:
     test -e /etc/NIXOS
     test "$(hostname)" = thinkpad-x13
-    sudo nh os boot . -H thinkpad-x13
+    nh os boot . -H thinkpad-x13
     # native: sudo nixos-rebuild boot --flake .#thinkpad-x13
 
 apply-thinkpad-x13:
     test -e /etc/NIXOS
     test "$(hostname)" = thinkpad-x13
-    sudo nh os switch . -H thinkpad-x13
+    nh os switch . -H thinkpad-x13
     # native: sudo nixos-rebuild switch --flake .#thinkpad-x13
 
 apply-macpro-m4:
     test "$(uname -s)" = Darwin
     test "$(id -un)" = atalariq
-    sudo nh darwin switch . -H macpro-m4
+    nh darwin switch . -H macpro-m4
     # native: sudo darwin-rebuild switch --flake .#macpro-m4
 
 apply-linux-lab:
@@ -89,12 +89,12 @@ apply-wsl-lab:
 
 # Keep 14 days and the 5 newest generations; everything older is collectable.
 gc:
-    sudo nh clean all --keep-since 14d --keep 5
+    nh clean all --keep-since 14d --keep 5
     # native: sudo nix-collect-garbage --delete-older-than 14d
 
 # Nuclear: drop every old generation (rollback history is gone).
 gc-all:
-    sudo nh clean all
+    nh clean all
     # native: sudo nix-collect-garbage -d
 
 # nh has no optimise equivalent; keep native.

@@ -380,12 +380,12 @@ Use `just fmt` to format Nix sources and `just check` to validate the flake and 
 its checks for the current platform. Update dependencies deliberately with
 `just update` or `just update nixpkgs`.
 
-Nixpkgs, Home Manager, nix-darwin, and Stylix use the 26.05 release branches.
-The lockfile pins exact revisions; a small explicit unstable application selection
-preserves newer desktop, editor, and agent support. Release branches alone do not
-replace the lockfile, and updates never select a fallback automatically.
+Nixpkgs follows `nixos-unstable`; Home Manager, nix-darwin, and Stylix follow
+their master branches because no 26.11 release branch exists yet - switch them
+back to `release-26.11` and `nix-darwin-26.11` when those appear. The lockfile
+pins exact revisions, and updates never select a fallback automatically.
 
-The development shell includes `nom`, `nix-tree`, `deadnix`, and `statix`.
+The development shell includes `nh`, `nix-tree`, `deadnix`, and `statix`.
 `just lint` reports source findings without rewriting files. Television-enabled
 hosts include Nix search through `tv nix`; its indexes update independently of
 the flake and are discovery aids rather than the installed package inventory.
