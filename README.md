@@ -54,14 +54,32 @@ just build-linux-lab
 just build-wsl-lab
 ```
 
-Each command builds one host. Builds use `--no-link` and do not activate a
+Each command builds one host through `nh`. Builds do not activate a
 configuration. On an existing managed system, inspect the system closure changes
 with `just diff-thinkpad-x13` or `just diff-macpro-m4`.
 
 After reviewing the configuration and backing up conflicting files, run the
-matching `just apply-<host>` recipe on its target machine. Inspect [Justfile](Justfile)
-for the underlying commands. Home Manager activation can replace managed files
+matching `just apply-<host>` recipe on its target machine, or
+`just boot-thinkpad-x13` to make the new generation the boot default and leave
+the running system untouched. Inspect [Justfile](Justfile) for the native
+command behind each recipe. Home Manager activation can replace managed files
 and restart user services.
+
+Generation cleanup and store maintenance are grouped at the end of the Justfile:
+`just gc` keeps 14 days and the newest five generations, `just gc-all` removes
+every old generation, and `just optimise` hard-links duplicate store paths.
+
+### Binary caches
+
+The Noctalia, Umbriel and numtide caches are declared once in
+[modules/nix-cache.nix](modules/nix-cache.nix) and imported by both the NixOS and
+nix-darwin modules, so `/etc/nix/nix.conf` is regenerated from the same list.
+`trusted-users` is platform-specific and stays in each platform module.
+
+Standalone Home Manager hosts (`linux-lab`, `wsl-lab`) have no system module and
+rely on the `extra-substituters`/`extra-trusted-public-keys` fallback in
+[flake.nix](flake.nix). Nix ignores those entries unless the user is trusted, so
+add `trusted-users = [ "atalariq" ]` to that machine's `/etc/nix/nix.conf` once.
 
 ### macOS bootstrap
 
