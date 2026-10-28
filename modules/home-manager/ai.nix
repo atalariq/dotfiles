@@ -52,6 +52,7 @@ in
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.ai.enable {
       dotfiles.programs = {
+        agy.enable = lib.mkDefault true;
         codex.enable = lib.mkDefault true;
         claude.enable = lib.mkDefault true;
         opencode.enable = lib.mkDefault true;

@@ -5,11 +5,10 @@
   ...
 }:
 {
-  options.dotfiles.bundles.terminal-tools.enable =
-    lib.mkEnableOption "the terminal-tools package bundle";
+  options.dotfiles.programs.terminal.enable = lib.mkEnableOption "the terminal-tools package bundle";
 
   # Optional CLI/TUI tools that are useful but not part of the every-host core.
-  config = lib.mkIf config.dotfiles.bundles.terminal-tools.enable {
+  config = lib.mkIf config.dotfiles.programs.terminal.enable {
     programs.btop = {
       enable = true;
       settings = {
@@ -21,12 +20,32 @@
       };
     };
 
+    programs.fastfetch = {
+      enable = true;
+      settings = {
+        "logo" = {
+          "type" = "small";
+        };
+        "display" = { };
+        "modules" = [
+          "os"
+          "kernel"
+          "uptime"
+          "terminal"
+          "cpu"
+          "gpu"
+          "memory"
+          "disk"
+          "battery"
+        ];
+      };
+    };
+
     home.packages = with pkgs; [
       dust
       duf
       hyperfine
       tealdeer
-      usage
       typos
       lazysql
     ];

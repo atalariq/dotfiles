@@ -5,13 +5,13 @@
   ...
 }:
 {
-  options.dotfiles.bundles.gui.enable = lib.mkEnableOption "the gui package bundle";
+  options.dotfiles.programs.gui.enable = lib.mkEnableOption "the gui package bundle";
 
   # Graphical applications and desktop utilities that have no dedicated Home
-  # Manager module: browsers, file manager, viewers, chat clients, media
-  # creation/playback and the local concat editor. kitty and obs-studio keep
-  # their own modules because they carry granular native config.
-  config = lib.mkIf config.dotfiles.bundles.gui.enable {
+  # Manager module: browsers, file manager, viewers, chat clients and media
+  # creation/playback. kitty and obs-studio keep their own modules because they
+  # carry granular native config.
+  config = lib.mkIf config.dotfiles.programs.gui.enable {
     home.packages = with pkgs; [
       brave-origin
       google-chrome
@@ -32,9 +32,7 @@
       kdePackages.kdenlive
       nicotine-plus
       anki
-      ncmpcpp
       libva-utils
-      (pkgs.callPackage ./concat.nix { })
     ];
   };
 }

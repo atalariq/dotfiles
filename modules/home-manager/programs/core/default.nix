@@ -5,7 +5,9 @@
   ...
 }:
 {
-  options.dotfiles.bundles.core.enable = lib.mkOption {
+  imports = [ ./git.nix ];
+
+  options.dotfiles.programs.core.enable = lib.mkOption {
     type = lib.types.bool;
     default = true;
     description = "the core package bundle: standard POSIX tools, modern replacements and base ops";
@@ -14,7 +16,7 @@
   # Standard POSIX/system tools plus their modern replacements (eza=ls, fd=find,
   # ripgrep=grep, bat=cat, trash-cli=rm, fzf, zoxide) and the base ops tools.
   # This is the "sunnah muakkad" set: enabled by default on every host.
-  config = lib.mkIf config.dotfiles.bundles.core.enable {
+  config = lib.mkIf config.dotfiles.programs.core.enable {
     programs.fd = {
       enable = true;
       ignores = [
@@ -89,6 +91,10 @@
         xdg-utils
         libsecret
         adwaita-icon-theme
+        wl-clipboard
+      ]
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+        pngpaste
       ];
   };
 }

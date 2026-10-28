@@ -212,22 +212,6 @@ in
           };
         };
       })
-      (lib.mkIf config.dotfiles.desktop.shelf.enable {
-        dotfiles.desktop.shelf.settings = {
-          font = config.stylix.fonts.sansSerif.name;
-          font_size = config.stylix.fonts.sizes.popups;
-          palette = {
-            bg = c.base00;
-            surface = c.base01;
-            fg = c.base05;
-            muted = c.base04;
-            dim = c.base03;
-            accent = c.base0B;
-            danger = c.base08;
-            border = c.base02;
-          };
-        };
-      })
       (lib.mkIf config.dotfiles.desktop.mango.enable {
         wayland.windowManager.mango.settings = {
           root_color = "0x${colors.base00}ff";

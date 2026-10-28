@@ -51,7 +51,6 @@ in
   config = lib.mkIf cfg.enable {
     wayland.windowManager.mango = {
       enable = true;
-      package = import ./package.nix { inherit inputs pkgs; };
       systemd.enable = true;
       autostart_sh = ''
         systemctl --user start noctalia.service
@@ -60,9 +59,6 @@ in
       '';
       settings = {
         monitor_rule = cfg.monitorRules;
-        # The native binds file ends in resize mode. Select default explicitly
-        # before appending this host-selected binding.
-        key_mode.default.bind = lib.optional config.dotfiles.desktop.shelf.enable "CTRL+SUPER+ALT,S,spawn,pluto toggle";
       };
     };
     home.extraDependencies = [ validated ];
