@@ -38,7 +38,7 @@
 
   # Portable fallback for standalone Home Manager hosts, where no system module
   # owns nix.conf. NixOS and nix-darwin declare the authoritative settings in
-  # modules/nix-cache.nix.
+  # modules/nix-cache.nix; nixConfig cannot import, so keep both lists in sync.
   nixConfig = {
     extra-substituters = [
       "https://noctalia.cachix.org"
@@ -47,7 +47,7 @@
     ];
     extra-trusted-public-keys = [
       "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
-      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
+      "umbriel.cachix.org-1:JfNq/2ygS6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     ];
   };
@@ -157,7 +157,7 @@
       };
       nixosModules.default = import ./modules/nixos;
       darwinModules.default = import ./modules/darwin;
-      homeManagerModules.default = import ./modules/home-manager;
+      homeModules.default = import ./modules/home-manager;
       templates = import ./devshell;
     };
 }

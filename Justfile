@@ -8,10 +8,14 @@ default:
 check:
     nix flake check --no-update-lock-file --no-write-lock-file
 
+# List what a build would compile locally instead of substituting.
+audit-build:
+    @nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link --dry-run --accept-flake-config 2>&1 | sed -n -e 's/^these \([0-9]*\) derivations will be built:/\1 derivations will be built locally:/p' -e 's|^  /nix/store/[a-z0-9]*-\(.*\)\.drv$|  \1|p'
+
 # Advisory checks; neither command rewrites source.
 lint:
     deadnix --fail flake.nix hosts modules
-    statix check .
+    statix check . --ignore '.beads/**'
 
 fmt:
     find flake.nix hosts modules devshell -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +

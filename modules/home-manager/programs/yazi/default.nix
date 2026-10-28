@@ -218,15 +218,12 @@
       };
 
     };
-    home.packages = (
-      with pkgs;
-      [
-        ouch
-        mediainfo
-        ffmpeg
-        imagemagick
-      ]
-    );
+    home.packages = with pkgs; [
+      ouch
+      mediainfo
+      ffmpeg
+      imagemagick
+    ];
     xdg.configFile."yazi/plugins" = {
       source = ./config/plugins;
     };
