@@ -1,0 +1,33 @@
+[osd]
+position = "bottom_center"  # top_right | top_left | top_center | bottom_right | bottom_left | bottom_center | center_right | center_left
+position_vertical = "top_left"  # same options; used when orientation = "vertical"
+orientation = "horizontal" # horizontal | vertical (volume/brightness sliders only)
+hide_delay_ms = 1500     # time before a popup starts hiding; range 250 to 10000 ms
+scale = 1              # OSD size multiplier on top of shell.ui_scale
+background_opacity = 0.98 # background opacity of OSD popups
+border = false            # outline around OSD popup cards; set false for a borderless look
+border_color = "outline_variant" # outline color: theme color role (e.g. "primary") or hex (e.g. "#a8b185")
+border_width = 1         # outline stroke width in px; raise for a thicker outline
+follow_focused_output = true # show a new OSD on the focused output; keep it pinned until it disappears
+offset_x = 20            # absolute horizontal margin from the screen edge
+offset_y = 16             # absolute vertical margin from the screen edge
+# monitors = ["DP-1"]    # connector names; omit or leave empty for all monitors
+
+[osd.kinds]
+volume = true            # master volume OSD toggle
+volume_output = true     # output (speaker) volume; requires volume = true
+volume_input = true      # input (microphone) volume; requires volume = true
+brightness = true        # display brightness
+wifi = true              # Wi-Fi toggle
+bluetooth = true         # Bluetooth toggle
+power_profile = true     # power profile changes
+caffeine = true          # idle inhibitor toggle
+nightlight = true        # night light toggle
+dnd = true               # Do Not Disturb toggle
+lock_keys = true         # Caps/Num/Scroll Lock popups
+keyboard_layout = true   # input keyboard layout changes
+media = true             # MPRIS track changes
+media_volume = true      # MPRIS per-player volume changes; requires media = true
+privacy = true           # microphone/camera/screen share capture changes
+keyboard_backlight = true # keyboard backlight level
+custom = true            # custom popups sent by plugins or scripts

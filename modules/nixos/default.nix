@@ -11,6 +11,7 @@
     ../nix-cache.nix
     inputs.mangowm.nixosModules.mango
     inputs.noctalia.nixosModules.default
+    inputs.umbriel.nixosModules.default
     inputs.sops-nix.nixosModules.sops
     ./desktop.nix
     ./security.nix

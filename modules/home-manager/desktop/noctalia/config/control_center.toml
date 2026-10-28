@@ -1,0 +1,15 @@
+[control_center]
+hidden_tabs = ["power", "network", "bluetooth", "calendar", "notifications"]
+width = 600
+
+[[control_center.shortcuts]]
+type = "caffeine"
+
+[[control_center.shortcuts]]
+type = "nightlight"
+
+[[control_center.shortcuts]]
+type = "dark_mode"
+
+[[control_center.shortcuts]]
+type = "wallpaper"

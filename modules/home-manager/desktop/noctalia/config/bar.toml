@@ -1,10 +1,54 @@
 # Noctalia bar layout. Array order controls the actual widget order.
 # Theme/font and desktop ownership are generated separately.
 
+[bar]
+order = ["main"]
+
 [bar.main]
-start = ["wallpaper", "workspaces"]
-center = ["clock"]
-end = ["media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+font_family = "Fira Code"
+margin_ends = 0
+radius = 0
+widget_spacing = 12
+start = ["workspaces", "umbriel-companion", "media"]
+center = []
+end = [
+  "tray",
+  "bluetooth",
+  "battery",
+  "network",
+  "control-center",
+  "shelf",
+  "clock",
+  "notifications"
+]
 
 [bar.main.dead_zone.actions]
 left = "none"
+
+[widget.clock]
+format = "%a %d %b %R"
+
+[widget.control-center]
+glyph = "toggle-right-filled"
+
+[widget.media]
+album_art_only = true
+art_size = 18
+hide_when_no_media = true
+max_length = 120
+rotate_album_art = true
+title_scroll = "on_hover"
+
+[widget.network]
+show_label = false
+
+[widget.tray]
+drawer_columns = 1
+match_adjacent_spacing = true
+scale = 0.8
+
+[widget.shelf]
+type = "alok-debnath/shelf:shelf"
+
+[widget.umbriel-companion]
+type = "noctalia/umbriel-companion:bar"

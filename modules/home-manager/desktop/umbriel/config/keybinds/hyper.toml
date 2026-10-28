@@ -1,7 +1,7 @@
 # Hyper layer: Ctrl+Mod+Alt, mirroring the macOS Vorssaint system keys.
 # Screen capture follows Cmd+Shift+3/4/5, with Shift kept optional.
-# Shelf stays in the module-generated binding because it depends on the
-# desktop.shelf option; everything else lives here.
+# The shelf toggle lives here because the Noctalia shelf plugin now owns it;
+# everything else also lives here.
 
 [keybinds]
 
@@ -20,3 +20,6 @@
 "Ctrl+Mod+Alt+E" = { action = "spawn:kitty -e espanso edit", repeat = false }
 "Ctrl+Mod+Alt+Space" = { action = "spawn:noctalia msg panel-toggle launcher", repeat = false }
 "Ctrl+Mod+Alt+Q" = { action = "window-close", repeat = false }
+
+# Noctalia Plugins - Shelf
+"Ctrl+Mod+Alt+D" = { action = "spawn:noctalia msg plugin alok-debnath/shelf:service all toggle", repeat = false }

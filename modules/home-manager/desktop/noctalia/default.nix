@@ -50,7 +50,7 @@ in
       settings.shell = {
         polkit_agent = true;
         clipboard_enabled = true;
-        font = config.stylix.fonts.sansSerif.name;
+        font_family = config.stylix.fonts.sansSerif.name;
       };
     };
     home.extraDependencies = [ validated ];
@@ -63,5 +63,15 @@ in
     # Preserve restarts when generated settings change, as well as the upstream
     # palette/root triggers. Native live edits use Noctalia's own file watcher.
     systemd.user.services.noctalia.Unit.X-Restart-Triggers = [ "${generated}" ];
+
+    # Packages dependencies for core function and plugins
+    home.packages = with pkgs; [
+      python3
+      python3Packages.pygobject3
+      gtk4
+      xdg-utils
+      wl-clipboard
+      gtk4-layer-shell # optional
+    ];
   };
 }

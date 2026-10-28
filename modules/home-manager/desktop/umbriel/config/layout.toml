@@ -2,7 +2,7 @@
 # Host output, theme, and conditional integrations are generated separately.
 
 [layout]
-extent_presets = [0.5, 0.8, 1.0]
+extent_presets = [0.5, 0.8, 0.95, 1.0]
 gap = 4
 mode = "scrolling"
 

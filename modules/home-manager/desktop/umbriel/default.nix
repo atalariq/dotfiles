@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   dotfilesLib,
   ...
 }:
@@ -28,10 +29,14 @@ let
     mkdir -p "$HOME" "$out/native"
     cp -R ${./config}/. "$out/native/"
     cp ${format.generate "umbriel-validation.toml" (root "native/config.toml")} "$out/config.toml"
-    ${pkgs.umbriel}/bin/umbriel config validate -c "$out/config.toml"
+    ${config.programs.umbriel.package}/bin/umbriel config validate -c "$out/config.toml"
   '';
 in
 {
+  # The flake module supplies programs.umbriel and its package; the NixOS
+  # module of the same flake installs the session and the portal.
+  imports = [ inputs.umbriel.homeModules.default ];
+
   options.dotfiles.desktop.umbriel = {
     enable = lib.mkEnableOption "Umbriel scrolling desktop";
     workspaceAxis = lib.mkOption {
@@ -55,10 +60,10 @@ in
         message = "Umbriel requires Linux and Noctalia.";
       }
     ];
-    home.packages = [
-      pkgs.umbriel
-      pkgs.xwayland
-    ];
+    programs.umbriel.enable = true;
+    # The packaged session expects Xwayland on PATH; the flake module owns the
+    # compositor and portal packages.
+    home.packages = [ pkgs.xwayland ];
     home.extraDependencies = [ validated ];
     xdg.configFile = {
       "umbriel/config.toml".source = generated;
@@ -73,20 +78,14 @@ in
         org.freedesktop.impl.portal.FileChooser=gtk
       '';
     };
-    # The pinned HM has no Umbriel module. Retain the packaged session launcher,
-    # Noctalia startup, selected Shelf binding, and host-owned outputs.
+    # The flake module leaves settings null so the packaged config is used; the
+    # generated body above still owns autostart and host outputs.
     dotfiles.desktop.umbriel.settings = {
       general.autostart = [
         "systemctl --user start noctalia.service"
         # OBS stays resident in the tray so obs-cmd can toggle recording.
         "obs --minimize-to-tray"
       ];
-      keybinds = lib.optionalAttrs config.dotfiles.desktop.shelf.enable {
-        "Ctrl+Mod+Alt+S" = {
-          action = "spawn:pluto toggle";
-          repeat = false;
-        };
-      };
     };
   };
 }

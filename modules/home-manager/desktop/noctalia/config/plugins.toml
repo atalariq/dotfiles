@@ -1,0 +1,14 @@
+[plugins]
+enabled = [
+  "alok-debnath/shelf",
+  "noctalia/bitwarden",
+  "noctalia/translator",
+  "noctalia/umbriel-companion",
+]
+
+auto_update = "none"
+
+[plugin_settings."alok-debnath/shelf"]
+close_after_drag = true
+remove_after_drag = true
+shortcut = ""
