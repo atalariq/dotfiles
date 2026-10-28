@@ -51,6 +51,7 @@
       "wheel"
       "kvm"
       "gamemode"
+      "tss"
     ];
     linger = true;
   };
@@ -60,6 +61,7 @@
     desktop.audio.enable = true;
     desktop.bluetooth.enable = true;
     desktop.files.enable = true;
+    desktop.printing.enable = true;
     desktop.fonts.enable = true;
     desktop.espanso.enable = true;
     desktop.mango.enable = true;
@@ -67,11 +69,12 @@
     desktop.greeter.enable = true;
     desktop.noctalia.enable = true;
     security.authentication.enable = true;
-    security.ssh.enable = false;
+    security.ssh-server.enable = false;
     security.secrets.enable = true;
+    security.tpm.enable = true;
     development.podman.enable = true;
     hardware.thinkpad.enable = true;
-    gaming.steam.enable = true;
+    gaming.enable = true;
   };
   services.displayManager.defaultSession = "umbriel";
   services.displayManager.noctalia-greeter.settings.session.default = "Umbriel";
