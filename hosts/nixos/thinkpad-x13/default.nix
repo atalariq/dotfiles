@@ -64,7 +64,6 @@
     desktop.printing.enable = true;
     desktop.fonts.enable = true;
     desktop.espanso.enable = true;
-    desktop.mango.enable = true;
     desktop.umbriel.enable = true;
     desktop.greeter.enable = true;
     desktop.noctalia.enable = true;

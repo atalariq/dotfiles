@@ -9,7 +9,6 @@
   # Importing a catalogue declares options; the host owns activation.
   imports = [
     ../nix-cache.nix
-    inputs.mangowm.nixosModules.mango
     inputs.noctalia.nixosModules.default
     inputs.umbriel.nixosModules.default
     inputs.sops-nix.nixosModules.sops
@@ -30,7 +29,6 @@
     desktop.espanso.enable = lib.mkEnableOption "Espanso Wayland service";
     desktop.umbriel.enable = lib.mkEnableOption "the Umbriel session";
     desktop.greeter.enable = lib.mkEnableOption "the Noctalia login greeter";
-    desktop.mango.enable = lib.mkEnableOption "the Mango session";
     desktop.noctalia.enable = lib.mkEnableOption "Noctalia desktop services";
     security.authentication.enable = lib.mkEnableOption "desktop authentication";
     security.ssh-server.enable = lib.mkEnableOption "the OpenSSH server";

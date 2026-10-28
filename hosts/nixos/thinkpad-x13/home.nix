@@ -15,7 +15,6 @@
       "vim"
       "neovim"
       "fish"
-      "mango"
       "umbriel"
       "noctalia"
     ];
@@ -35,10 +34,6 @@
           scale = 1.25;
           workspaces = 5;
         };
-      };
-      mango = {
-        enable = true;
-        monitorRules = [ "name:eDP-1,width:1920,height:1200,refresh:60,x:0,y:0,scale:1.25,vrr:0,rr:0" ];
       };
       noctalia.enable = true;
     };

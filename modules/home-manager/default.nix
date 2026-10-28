@@ -32,7 +32,6 @@
           "hermes"
           "opencode"
           "fish"
-          "mango"
           "umbriel"
           "noctalia"
         ]

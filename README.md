@@ -8,8 +8,8 @@ that install them.
 
 ## Features
 
-- **Desktop:** Umbriel, a Mango fallback session, and Noctalia for the launcher,
-  clipboard, screenshots, and bar.
+- **Desktop:** Umbriel with Noctalia for the launcher, clipboard,
+  screenshots, and bar.
 - **Appearance:** Stylix themes, fonts, and application palettes.
 - **Terminal:** Fish, Starship, Git, Tmux, Yazi, Vim, and Neovim configured through nvf.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
@@ -151,7 +151,7 @@ limitation when live mode and appearance are enabled together.
 Select individual applications instead when only some files need live editing:
 
 ```nix
-dotfiles.deployment.liveApps = [ "espanso" "vim" "neovim" "fish" "mango" "umbriel" "noctalia" ];
+dotfiles.deployment.liveApps = [ "espanso" "vim" "neovim" "fish" "umbriel" "noctalia" ];
 ```
 
 This links Espanso's native files, Vim's vimrc, Neovim's Lua runtime, Fish
@@ -181,7 +181,7 @@ Reload Vim edits with `:source ~/.vimrc` or start a new Vim process. A failed
 in a separate Vim process before reloading your working session. Switching back
 to immutable mode requires a Home Manager rebuild; it leaves undo files intact.
 
-Mango, Umbriel, and Noctalia use native include files with explicit load order.
+Umbriel and Noctalia use native include files with explicit load order.
 Edit behavior and bindings in their colocated `config/` directories under
 `modules/home-manager/desktop/`. Nix still generates host displays, conditional
 integrations, and Stylix colors. Immutable mode uses the same native source

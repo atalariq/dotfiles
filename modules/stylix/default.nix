@@ -212,13 +212,6 @@ in
           };
         };
       })
-      (lib.mkIf config.dotfiles.desktop.mango.enable {
-        wayland.windowManager.mango.settings = {
-          root_color = "0x${colors.base00}ff";
-          border_color = "0x${colors.base03}ff";
-          focus_color = "0x${colors.base0B}ff";
-        };
-      })
     ]
   );
 }

@@ -17,22 +17,14 @@ in
   # Session packages are independent of the one login greeter. The host chooses
   # its default; keeping Mango enabled does not replace the Umbriel default.
   config = lib.mkMerge [
-    (lib.mkIf config.dotfiles.desktop.mango.enable {
-      programs.mango.enable = true;
-      # Upstream marks graphical-desktop enabled, which would otherwise default
-      # PipeWire on. Preserve our explicit audio selection at normal priority.
-      services.pipewire.enable = config.dotfiles.desktop.audio.enable;
-      security.polkit.enable = true;
-      services.libinput.enable = true;
-    })
     (lib.mkIf config.dotfiles.desktop.umbriel.enable {
       programs.umbriel.enable = true;
       # The pinned wrapper expects Xwayland on PATH; supply it explicitly.
       environment.systemPackages = [ pkgs.xwayland ];
       services.pipewire.enable = config.dotfiles.desktop.audio.enable;
       services.libinput.enable = true;
-    })
-    (lib.mkIf (config.dotfiles.desktop.mango.enable || config.dotfiles.desktop.umbriel.enable) {
+      # Noctalia's polkit agent needs the daemon running system-wide.
+      security.polkit.enable = true;
       xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     })
     (lib.mkIf config.dotfiles.desktop.greeter.enable {

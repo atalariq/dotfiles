@@ -21,10 +21,6 @@
     # closures.
     noctalia.url = "github:noctalia-dev/noctalia/cachix";
     umbriel.url = "github:noctalia-dev/umbriel/cachix";
-    mangowm = {
-      url = "github:mangowm/mango";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nvf = {
       url = "github:NotAShelf/nvf";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -1,7 +1,6 @@
 { ... }: {
   imports = [
     ./umbriel
-    ./mango
     ./noctalia
   ];
 }
