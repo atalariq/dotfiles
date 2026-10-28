@@ -1,4 +1,6 @@
-# Native commands; run `nix develop` for the pinned tools.
+# Builds, diffs, activation and store hygiene go through `nh`; it renders the
+# build plan with nix-output-monitor and prints the closure diff itself.
+# Each recipe keeps the native command it wraps as a comment for reference.
 default:
     @just --list
 
@@ -13,44 +15,81 @@ lint:
 fmt:
     find flake.nix hosts modules devshell -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +
 
+# nh has no update subcommand; keep native.
 update *inputs:
     nix flake update {{ inputs }}
 
+# ── Build and diff (no activation) ──────────────────────────────────────────
+
 build-thinkpad-x13:
-    nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link
+    nh os build . -H thinkpad-x13
+    # native: nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link
 
 diff-thinkpad-x13:
-    nix store diff-closures /run/current-system "$(nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link --print-out-paths)"
+    nh os switch --dry . -H thinkpad-x13
+    # native: nix store diff-closures /run/current-system "$(nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link --print-out-paths)"
 
-# Owner-reviewed activation only; this recipe is never run by an agent.
+build-macpro-m4:
+    nh darwin build . -H macpro-m4
+    # native: nix build .#darwinConfigurations.macpro-m4.system --no-link
+
+diff-macpro-m4:
+    nh darwin switch --dry . -H macpro-m4
+    # native: nix store diff-closures /nix/var/nix/profiles/system "$(nix build .#darwinConfigurations.macpro-m4.system --no-link --print-out-paths)"
+
+build-linux-lab:
+    nh home build . -c linux-lab
+    # native: nix build .#homeConfigurations.linux-lab.activationPackage --no-link
+
+build-wsl-lab:
+    nh home build . -c wsl-lab
+    # native: nix build .#homeConfigurations.wsl-lab.activationPackage --no-link
+
+# ── Activation (owner-only; agents never run these) ─────────────────────────
+
+# Activate on the next boot, leaving the running system untouched.
+boot-thinkpad-x13:
+    test -e /etc/NIXOS
+    test "$(hostname)" = thinkpad-x13
+    sudo nh os boot . -H thinkpad-x13
+    # native: sudo nixos-rebuild boot --flake .#thinkpad-x13
+
 apply-thinkpad-x13:
     test -e /etc/NIXOS
     test "$(hostname)" = thinkpad-x13
-    sudo nixos-rebuild switch --flake .#thinkpad-x13
-
-build-macpro-m4:
-    nix build .#darwinConfigurations.macpro-m4.system --no-link
-
-diff-macpro-m4:
-    nix store diff-closures /nix/var/nix/profiles/system "$(nix build .#darwinConfigurations.macpro-m4.system --no-link --print-out-paths)"
+    sudo nh os switch . -H thinkpad-x13
+    # native: sudo nixos-rebuild switch --flake .#thinkpad-x13
 
 apply-macpro-m4:
     test "$(uname -s)" = Darwin
     test "$(id -un)" = atalariq
-    sudo darwin-rebuild switch --flake .#macpro-m4
-
-build-linux-lab:
-    nix build .#homeConfigurations.linux-lab.activationPackage --no-link
+    sudo nh darwin switch . -H macpro-m4
+    # native: sudo darwin-rebuild switch --flake .#macpro-m4
 
 apply-linux-lab:
     test "$(uname -s)" = Linux
     test "$(id -un)" = atalariq
-    nix run .#home-manager -- switch --flake .#linux-lab
-
-build-wsl-lab:
-    nix build .#homeConfigurations.wsl-lab.activationPackage --no-link
+    nh home switch . -c linux-lab
+    # native: nix run .#home-manager -- switch --flake .#linux-lab
 
 apply-wsl-lab:
     test "$(uname -s)" = Linux
     test "$(id -un)" = atalariq
-    nix run .#home-manager -- switch --flake .#wsl-lab
+    nh home switch . -c wsl-lab
+    # native: nix run .#home-manager -- switch --flake .#wsl-lab
+
+# ── Store hygiene ───────────────────────────────────────────────────────────
+
+# Keep 14 days and the 5 newest generations; everything older is collectable.
+gc:
+    sudo nh clean all --keep-since 14d --keep 5
+    # native: sudo nix-collect-garbage --delete-older-than 14d
+
+# Nuclear: drop every old generation (rollback history is gone).
+gc-all:
+    sudo nh clean all
+    # native: sudo nix-collect-garbage -d
+
+# nh has no optimise equivalent; keep native.
+optimise:
+    sudo nix-store --optimise

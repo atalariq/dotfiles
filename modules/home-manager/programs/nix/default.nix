@@ -23,9 +23,14 @@
     # `comma` is owned by nix-index-database, not by programs.nix-index.
     programs.nix-index-database.comma.enable = true;
 
+    # nh renders the build plan with nix-output-monitor and prints the closure
+    # diff itself, replacing the separate nom and dix packages.
+    programs.nh = {
+      enable = true;
+      flake = config.dotfiles.deployment.checkout;
+    };
+
     home.packages = with pkgs; [
-      nix-output-monitor # nom
-      dix # nix-diff
       devenv
     ];
   };
