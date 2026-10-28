@@ -15,12 +15,14 @@
     ./security.nix
     ./development.nix
     ./hardware.nix
+    ./gaming
   ];
   options.dotfiles = {
     system.base.enable = lib.mkEnableOption "the shared NixOS baseline";
     system.appimage.enable = lib.mkEnableOption "AppImage binfmt support";
     desktop.audio.enable = lib.mkEnableOption "PipeWire audio";
     desktop.bluetooth.enable = lib.mkEnableOption "Bluetooth integration";
+    desktop.printing.enable = lib.mkEnableOption "Printing support";
     desktop.files.enable = lib.mkEnableOption "desktop removable-media services";
     desktop.fonts.enable = lib.mkEnableOption "desktop fonts";
     desktop.espanso.enable = lib.mkEnableOption "Espanso Wayland service";
@@ -29,11 +31,12 @@
     desktop.mango.enable = lib.mkEnableOption "the Mango session";
     desktop.noctalia.enable = lib.mkEnableOption "Noctalia desktop services";
     security.authentication.enable = lib.mkEnableOption "desktop authentication";
-    security.ssh.enable = lib.mkEnableOption "the OpenSSH server";
+    security.ssh-server.enable = lib.mkEnableOption "the OpenSSH server";
     security.secrets.enable = lib.mkEnableOption "sops-nix runtime secrets";
+    security.tpm.enable = lib.mkEnableOption "TPM (Trusted Platform Module) support";
     development.podman.enable = lib.mkEnableOption "rootless Podman";
     hardware.thinkpad.enable = lib.mkEnableOption "balanced X13 AMD defaults";
-    gaming.steam.enable = lib.mkEnableOption "Steam system integration";
+    gaming.enable = lib.mkEnableOption "Gaming optimization and support for NixOS";
   };
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.system.base.enable {
@@ -56,11 +59,6 @@
         enable = true;
         binfmt = true;
       };
-    })
-    (lib.mkIf config.dotfiles.security.ssh.enable { services.openssh.enable = true; })
-    (lib.mkIf config.dotfiles.gaming.steam.enable {
-      programs.steam.enable = true;
-      hardware.graphics.enable32Bit = true;
     })
   ];
 }

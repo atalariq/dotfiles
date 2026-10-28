@@ -2,58 +2,58 @@
   description = "Atalariq's NixOS and Home Manager configuration";
 
   inputs = {
+    # One nixpkgs for every host. Unstable is the default so desktop packages and
+    # the system closure share a single evaluation graph.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Keep the cache-provided pins: following nixpkgs would miss their Cachix
+    # closures.
+    noctalia.url = "github:noctalia-dev/noctalia/cachix";
+    umbriel.url = "github:noctalia-dev/umbriel/cachix";
     mangowm = {
       url = "github:mangowm/mango";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nvf = {
       url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
-      url = "github:nix-community/stylix/release-26.05";
+      url = "github:nix-community/stylix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    nvim-emmet = {
-      url = "github:olrtg/nvim-emmet/cde4fb2968704aae5c18b7f8a9bc2508767bb78d";
-      flake = false;
-    };
-    pathfinder-nvim = {
-      url = "github:HawkinsT/pathfinder.nvim/9c79815dfd31726119b44a71c0654377be01d3c2";
-      flake = false;
-    };
-    kitehost-nvim = {
-      url = "github:selimacerbas/kitehost.nvim/4cb5c94a84cc653e0b32e0c9aed95465a36fc94d";
-      flake = false;
-    };
-    mdkite-nvim = {
-      url = "github:selimacerbas/mdkite.nvim/dded03dc6cce87364b48260b2ffbace575a6add7";
-      flake = false;
-    };
+  };
 
+  # Portable fallback for standalone Home Manager hosts, where no system module
+  # owns nix.conf. NixOS and nix-darwin declare the authoritative settings in
+  # modules/nix-cache.nix.
+  nixConfig = {
+    extra-substituters = [
+      "https://noctalia.cachix.org"
+      "https://umbriel.cachix.org"
+      "https://cache.numtide.com"
+    ];
+    extra-trusted-public-keys = [
+      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    ];
   };
 
   outputs =
@@ -65,39 +65,11 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
-      # New desktop/editor applications stay on their tested unstable build graph.
-      # This is deliberately an application allowlist, not an unstable system overlay.
-      applicationOverlay =
-        _final: prev:
-        let
-          unstable = import inputs.nixpkgs-unstable {
-            system = prev.stdenv.hostPlatform.system;
-            config.allowUnfree = true;
-          };
-        in
-        {
-          inherit (unstable)
-            umbriel
-            xdg-desktop-portal-umbriel
-            noctalia-greeter
-            brave-origin
-            ;
-          # Avoid downgrading existing vault/collection formats and the tested
-          # OBS/plugin combination during the system release migration.
-          inherit (unstable)
-            anki
-            bitwarden-desktop
-            obs-studio
-            obs-studio-plugins
-            ;
-          inherit (unstable) neovim-unwrapped vimPlugins;
-        };
       mkPkgs =
         system:
         import inputs.nixpkgs {
           inherit system;
           config.allowUnfree = true;
-          overlays = [ applicationOverlay ];
         };
       perSystem = lib.genAttrs systems (
         system:
@@ -110,11 +82,6 @@
             neovim = editor;
             default = editor;
             home-manager = inputs.home-manager.packages.${system}.home-manager;
-          }
-          // pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-            mango = import ./modules/home-manager/desktop/mango/package.nix { inherit inputs pkgs; };
-            pluto-shelf = pkgs.callPackage ./modules/home-manager/desktop/pluto/package.nix { };
-            concat = pkgs.callPackage ./modules/home-manager/programs/gui/concat.nix { };
           };
           formatter = pkgs.nixfmt;
           devShells.default = pkgs.mkShell {
@@ -123,21 +90,15 @@
               # escapes, history and programmable completion work inside the
               # devshell instead of falling back to stdenv's non-interactive one.
               bashInteractive
-              nixfmt
               git
               just
               sops
               age
-              nix-output-monitor
               nix-tree
               deadnix
               statix
-              alejandra
-              comma
-              angrr
-              dix
+              nixfmt
               nixd
-              devenv
             ];
           };
           checks.neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''
@@ -166,19 +127,8 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./hosts/nixos/thinkpad-x13
-          (inputs.nixpkgs-unstable + "/nixos/modules/programs/wayland/umbriel.nix")
-          (inputs.nixpkgs-unstable + "/nixos/modules/services/display-managers/noctalia-greeter.nix")
-          # Preserve current fingerprint sandbox and greeter/pkexec integration.
-          (inputs.nixpkgs-unstable + "/nixos/modules/security/polkit.nix")
-          {
-            disabledModules = [ "security/polkit.nix" ];
-            # Override the service only; changing pkgs.polkit rebuilds unrelated
-            # stable desktop libraries and their dependants.
-            security.polkit.package = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux.polkit;
-          }
           inputs.home-manager.nixosModules.home-manager
           {
-            nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
@@ -196,7 +146,6 @@
           inputs.home-manager.darwinModules.home-manager
           {
             nixpkgs.config.allowUnfree = true;
-            nixpkgs.overlays = [ applicationOverlay ];
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
