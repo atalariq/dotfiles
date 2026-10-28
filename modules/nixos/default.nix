@@ -52,6 +52,50 @@
           "@wheel"
         ];
       };
+      # angrr prunes GC roots first (generations, .direnv, result), nix-gc
+      # deletes the store afterwards; the module orders angrr before nix-gc.
+      nix.gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 14d";
+      };
+      services.angrr = {
+        enable = true;
+        timer.enable = true;
+        settings = {
+          profile-policies = {
+            system = {
+              profile-paths = [ "/nix/var/nix/profiles/system" ];
+              keep-since = "14d";
+              keep-latest-n = 5;
+              keep-current-system = true;
+              keep-booted-system = true;
+            };
+            home-manager = {
+              profile-paths = [ "/nix/var/nix/profiles/per-user/atalariq/home-manager" ];
+              keep-since = "14d";
+              keep-latest-n = 5;
+            };
+            user = {
+              profile-paths = [ "~/.local/state/nix/profiles/profile" ];
+              keep-since = "14d";
+              keep-latest-n = 3;
+            };
+          };
+          temporary-root-policies = {
+            # nix-direnv writes flake profiles under $XDG_CACHE_HOME/direnv and
+            # project roots under .direnv; both age out together.
+            direnv = {
+              path-regex = "/direnv/";
+              period = "14d";
+            };
+            result = {
+              path-regex = "/result[^/]*$";
+              period = "3d";
+            };
+          };
+        };
+      };
       nixpkgs.config.allowUnfree = true;
       programs.fish.enable = true;
       # Translate system shell fragments at build time instead of spawning Bash
