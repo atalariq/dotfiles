@@ -28,7 +28,7 @@ in
       hermes = secretFile "Encrypted YAML with an environment scalar containing Hermes dotenv data.";
       opencode = secretFile "Encrypted YAML with a gateway_api_key scalar.";
       aiProviders = secretFile "Encrypted YAML with OpenRouter and DeepSeek provider API key scalars.";
-      credentials = secretFile "Encrypted YAML with non-AI credentials (AUR, GitHub, Google Tasks) and the mpdscribble Last.fm configuration.";
+      credentials = secretFile "Encrypted YAML with non-AI credentials (AUR, GitHub) and the mpdscribble Last.fm configuration.";
     };
   };
   config = lib.mkIf cfg.enable {
