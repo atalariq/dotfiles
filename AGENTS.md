@@ -31,7 +31,7 @@
 
 | Entry point | Responsibility |
 | --- | --- |
-| `flake.nix`, `flake.lock` | Inputs, package outputs, checks, and host entry points |
+| `flake.nix`, `flake/hosts.nix`, `flake/packages.nix` | Inputs, host wiring, packages, devShell |
 | `Justfile` | Direct build, diff, apply, formatting, and update commands |
 | `hosts/nixos/thinkpad-x13` | NixOS system and desktop Home Manager selections |
 | `hosts/darwin/macpro-m4` | nix-darwin system and Home Manager selections |
@@ -41,7 +41,6 @@
 | `modules/home-manager/desktop` | Compositor and desktop-shell configuration |
 | `modules/home-manager/sources.nix` | Immutable/live source mapping and native theme adapters |
 | `modules/nixos`, `modules/darwin`, `modules/stylix` | System integration and appearance |
-| `devshell` | Independent project templates with their own flakes |
 
 The standalone outputs are `homeConfigurations.linux-lab` and
 `homeConfigurations.wsl-lab`. The system outputs are

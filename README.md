@@ -14,7 +14,7 @@ that install them.
 - **Terminal:** Fish, Starship, Git, Tmux, Yazi, Vim, and Neovim configured through nvf.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
-- **Development:** Independent Bun, Go, and Rust flake templates; commands collected in a plain `Justfile`.
+- **Development:** Commands collected in a plain `Justfile`; project environments come from devenv/flox rather than flake templates.
 - **Coding agents:** Native account authentication for Codex, Antigravity, and Copilot;
   direct DeepSeek/OpenRouter connections for OpenCode and Hermes.
 
@@ -373,7 +373,6 @@ configuration before enabling hooks; retain the module's upload restrictions.
 | [modules/nixos/](modules/nixos/) | NixOS system integration |
 | [modules/darwin/](modules/darwin/) | macOS system defaults |
 | [modules/stylix/](modules/stylix/) | Theme palettes and adapters |
-| [devshell/](devshell/) | Independent project templates |
 
 Use `just fmt` to format Nix sources and `just check` to validate the flake and run
 its checks for the current platform. Update dependencies deliberately with
@@ -394,11 +393,6 @@ first; use RTK for repetitive output and recover original diagnostics before
 debugging failures. No global rewrite hook, context proxy, or mandatory skill
 framework is enabled.
 
-The [Bun](devshell/bun-with-services/README.md), [Go](devshell/go/README.md),
-[Rust](devshell/rust/README.md), and [PHP](devshell/php/README.md) templates
-include their own usage instructions. The PHP template uses `devenv` rather than
-a standalone flake: copy its `devenv.yaml` and `devenv.nix` into a project, then
-use `just dev` and `just dev-up` from that directory.
 Application-specific behavior is documented in the relevant module and native config.
 
 ## AI Usage Disclosure

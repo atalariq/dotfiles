@@ -1,6 +1,0 @@
-# Reproducible PHP project environment. `devenv` writes devenv.lock next to this
-# file on first use; keep that lock with the project so copies resolve the same
-# nixpkgs revision.
-inputs:
-  nixpkgs:
-    url: github:NixOS/nixpkgs/nixos-26.05

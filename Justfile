@@ -18,7 +18,7 @@ lint:
     statix check . --ignore '.beads/**'
 
 fmt:
-    find flake.nix hosts modules devshell -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +
+    find flake.nix hosts modules flake -type f -name '*.nix' ! -name hardware-configuration.nix ! -name per-device.nix -exec nix fmt -- {} +
 
 # nh has no update subcommand; keep native.
 update *inputs:

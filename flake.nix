@@ -2,6 +2,8 @@
   description = "Atalariq's NixOS and Home Manager configuration";
 
   inputs = {
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     # One nixpkgs for every host. Unstable is the default so desktop packages and
     # the system closure share a single evaluation graph.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -32,121 +34,23 @@
     stylix = {
       url = "github:nix-community/stylix/master";
       inputs.nixpkgs.follows = "nixpkgs";
+      # Otherwise the lock keeps two copies of flake-parts.
+      inputs.flake-parts.follows = "flake-parts";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
-  # No nixConfig here on purpose: it must be a literal attrset, so repeating the
-  # cache list would only duplicate modules/nix-cache.nix. Nix ignores extra-*
-  # settings for untrusted users anyway; standalone Home Manager hosts pick the
-  # caches up from /etc/nix/nix.conf once trusted-users includes them (README).
-
   outputs =
-    inputs:
-    let
-      lib = inputs.nixpkgs.lib;
+    inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
       ];
-      mkPkgs =
-        system:
-        import inputs.nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-        };
-      perSystem = lib.genAttrs systems (
-        system:
-        let
-          pkgs = mkPkgs system;
-          editor = import ./modules/home-manager/programs/neovim/package.nix { inherit inputs pkgs; };
-        in
-        {
-          packages = {
-            neovim = editor;
-            default = editor;
-            home-manager = inputs.home-manager.packages.${system}.home-manager;
-          };
-          formatter = pkgs.nixfmt;
-          devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
-              # Interactive bash so a nested `bash` keeps readline: prompt
-              # escapes, history and programmable completion work inside the
-              # devshell instead of falling back to stdenv's non-interactive one.
-              bashInteractive
-              git
-              just
-              sops
-              age
-              nix-tree
-              deadnix
-              statix
-              nixfmt
-              nixd
-            ];
-          };
-          checks.neovim-startup = pkgs.runCommand "neovim-startup" { nativeBuildInputs = [ editor ]; } ''
-            export HOME="$TMPDIR/home"
-            mkdir -p "$HOME"
-            nvim --headless -i NONE -n '+lua local ok, err = pcall(require, "conform"); if not ok or vim.v.errmsg ~= "" then io.stderr:write(tostring(err) .. vim.v.errmsg); vim.cmd("cquit 1") end; assert(package.loaded["plugins.cmp"]); assert(package.loaded["plugins.debug"]); assert(vim.fn.exists(":PackInstall") == 0)' +qa
-            touch "$out"
-          '';
-        }
-      );
-      mkHome =
-        host:
-        inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = mkPkgs "x86_64-linux";
-          extraSpecialArgs = { inherit inputs; };
-          modules = [ host ];
-        };
-    in
-    {
-      packages = lib.mapAttrs (_: value: value.packages) perSystem;
-      formatter = lib.mapAttrs (_: value: value.formatter) perSystem;
-      devShells = lib.mapAttrs (_: value: value.devShells) perSystem;
-      checks = lib.mapAttrs (_: value: value.checks) perSystem;
-      nixosConfigurations.thinkpad-x13 = lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/nixos/thinkpad-x13
-          inputs.home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit inputs; };
-              users.atalariq = import ./hosts/nixos/thinkpad-x13/home.nix;
-            };
-          }
-        ];
-      };
-      darwinConfigurations.macpro-m4 = inputs.nix-darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/darwin/macpro-m4
-          inputs.home-manager.darwinModules.home-manager
-          {
-            nixpkgs.config.allowUnfree = true;
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit inputs; };
-              users.atalariq = import ./hosts/darwin/macpro-m4/home.nix;
-            };
-          }
-        ];
-      };
-      homeConfigurations = {
-        linux-lab = mkHome ./hosts/linux/lab;
-        wsl-lab = mkHome ./hosts/wsl/lab;
-      };
-      nixosModules.default = import ./modules/nixos;
-      darwinModules.default = import ./modules/darwin;
-      homeModules.default = import ./modules/home-manager;
-      templates = import ./devshell;
+      imports = [
+        ./flake/packages.nix
+        ./flake/hosts.nix
+      ];
     };
 }
