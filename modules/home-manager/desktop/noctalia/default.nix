@@ -30,6 +30,43 @@ let
     # native includes and validates the complete effective configuration.
     ${lib.getExe cfg.package} config validate "$out"
   '';
+  # Plugin helpers (Shelf's GTK4 drop window, future plugin subprocesses) run
+  # as children of noctalia, so the runtime lives on the service, not the
+  # profile: one aggregated lib set + one python env, extended here when a new
+  # plugin needs more. pango.out is explicit: the default output's
+  # girepository is empty, and PangoCairo lives in out.
+  pluginLibs = with pkgs; [
+    gtk4
+    gtk4-layer-shell
+    graphene
+    gobject-introspection
+    pango.out
+    harfbuzz
+    gdk-pixbuf
+    cairo
+  ];
+  giTypelibPath = lib.makeSearchPath "lib/girepository-1.0" pluginLibs;
+  giLibPath = lib.makeLibraryPath pluginLibs;
+  pythonPlugins = pkgs.python3.withPackages (ps: [
+    ps.pygobject3
+    ps.pycairo
+  ]);
+  noctaliaWrapped =
+    pkgs.runCommand "noctalia-plugin-env" { nativeBuildInputs = [ pkgs.makeWrapper ]; }
+      ''
+        mkdir -p $out/bin
+        makeWrapper ${cfg.package}/bin/noctalia $out/bin/noctalia \
+          --set-default GI_TYPELIB_PATH ${giTypelibPath} \
+          --set-default LD_LIBRARY_PATH ${giLibPath} \
+          --set-default LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so.0 \
+          --set-default SHELF_LAYER_SHELL_TRIED 1 \
+          --prefix PATH : ${
+            lib.makeBinPath [
+              pythonPlugins
+              pkgs.glib
+            ]
+          }
+      '';
 in
 {
   imports = [ inputs.noctalia.homeModules.default ];
@@ -64,14 +101,19 @@ in
     # palette/root triggers. Native live edits use Noctalia's own file watcher.
     systemd.user.services.noctalia.Unit.X-Restart-Triggers = [ "${generated}" ];
 
-    # Packages dependencies for core function and plugins
+    # ExecStart ships as a one-element list upstream; replace it wholesale so
+    # helpers inherit GI_TYPELIB_PATH/LD_LIBRARY_PATH/LD_PRELOAD plus a PATH
+    # python3 (pygobject3 + pycairo) and gdbus from the service environment.
+    systemd.user.services.noctalia.Service.ExecStart = lib.mkForce [
+      "${noctaliaWrapped}/bin/noctalia"
+    ];
+
+    # Packages dependencies for core function and plugins. GTK/python
+    # runtimes live on the service wrapper above; only PATH-level helpers
+    # that plugins shell out to stay here.
     home.packages = with pkgs; [
-      python3
-      python3Packages.pygobject3
-      gtk4
       xdg-utils
       wl-clipboard
-      gtk4-layer-shell # optional
     ];
   };
 }

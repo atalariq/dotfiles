@@ -12,6 +12,7 @@
     inputs.noctalia.nixosModules.default
     inputs.umbriel.nixosModules.default
     inputs.sops-nix.nixosModules.sops
+    inputs.lanzaboote.nixosModules.lanzaboote
     ./desktop.nix
     ./security.nix
     ./development.nix

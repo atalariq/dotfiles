@@ -31,6 +31,12 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Secure Boot (UKI signing) + measured boot (systemd-pcrlock). Pinned to a
+    # rev; update deliberately and re-verify the enroll flow afterwards.
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/4b98333073bdaf9b1b5dd7d87c2dab96883b234e";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stylix = {
       url = "github:nix-community/stylix/master";
       inputs.nixpkgs.follows = "nixpkgs";

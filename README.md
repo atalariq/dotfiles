@@ -313,6 +313,10 @@ tokscale clients           # where usage comes from; then `tokscale models`
 workmux add <name>         # worktree + tmux window per parallel task
 ```
 
+Per-agent crit setup is runtime state (not Nix-declared); the manual steps,
+install order, and known `crit check` noise are documented in
+[docs/agentic-setup.md](docs/agentic-setup.md).
+
 Project indexing is a separate explicit action; use the CLI when a client has
 not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-tools/tokscale/README.md)
 runs on demand and unpriced models can appear with zero cost, which must be
