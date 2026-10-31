@@ -41,13 +41,6 @@ alias root "sudo -i"
 alias su "sudo -i"
 
 # ── Modern replacements ────────────────────────────────
-if command -q eza
-    alias ll "eza --icons --group-directories-first -lgh"
-    alias lla "eza --icons --group-directories-first -algh"
-    alias ls "eza --icons --group-directories-first"
-    alias lsa "eza --icons --group-directories-first -a"
-    alias lt "eza --icons --group-directories-first -T"
-    alias tree "eza --icons --group-directories-first -T"
-end
+# ls/ll/… live in programs.fish.shellAliases (must beat /etc/fish/config.fish).
 
 command -q bat; and alias cat "bat --paging=never"

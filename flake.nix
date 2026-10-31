@@ -55,6 +55,12 @@
       url = "github:selimacerbas/mdkite.nvim/dded03dc6cce87364b48260b2ffbace575a6add7";
       flake = false;
     };
+    # Owner's colorscheme, plain vim plugin (no flake.nix): the non-stylix
+    # fallback for nvf. See T10 for the full integration design.
+    wana = {
+      url = "github:atalariq/wana.nvim";
+      flake = false;
+    };
   };
 
   outputs =

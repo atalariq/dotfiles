@@ -572,7 +572,8 @@
         "nvf": "nvf",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
-        "umbriel": "umbriel"
+        "umbriel": "umbriel",
+        "wana": "wana"
       }
     },
     "rust-overlay": {
@@ -785,6 +786,22 @@
         "owner": "noctalia-dev",
         "ref": "cachix",
         "repo": "umbriel",
+        "type": "github"
+      }
+    },
+    "wana": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783142735,
+        "narHash": "sha256-QI7AvJ8EkHLUB0U2xzMY6XnsA9WQPNDm3QCtyq9BAcc=",
+        "owner": "atalariq",
+        "repo": "wana.nvim",
+        "rev": "892151e35b234ed7d3bbb2fb94569f0082763a74",
+        "type": "github"
+      },
+      "original": {
+        "owner": "atalariq",
+        "repo": "wana.nvim",
         "type": "github"
       }
     },

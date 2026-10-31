@@ -30,3 +30,32 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     vim.highlight.on_yank({ timeout = 120 })
   end,
 })
+
+-- Legacy IDE-feel additions ported from the old config (2026-10). The yank
+-- highlight above already covers that behaviour, so it is not duplicated.
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  group = group,
+  callback = function()
+    vim.notify("File changed on disk; buffer reloaded", vim.log.levels.WARN)
+  end,
+})
+
+-- LSP buffer keys that the 0.11 natives do not cover.
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = group,
+  callback = function(ev)
+    local function b(lhs, fn, desc)
+      vim.keymap.set("n", lhs, fn, { buffer = ev.buf, desc = desc })
+    end
+    b("gd", vim.lsp.buf.definition, "Definition")
+    b("<leader>ca", vim.lsp.buf.code_action, "Code action")
+    b("<leader>cr", vim.lsp.buf.rename, "Rename")
+    b(
+      "<leader>th",
+      function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
+      end,
+      "Toggle inlay hints"
+    )
+  end,
+})

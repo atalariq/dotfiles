@@ -72,6 +72,7 @@
     security.secrets.enable = true;
     security.tpm.enable = true;
     development.podman.enable = true;
+    development.emulation.enable = true;
     hardware.thinkpad.enable = true;
     gaming.enable = true;
   };

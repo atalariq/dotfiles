@@ -13,5 +13,5 @@
 "Mod+C" = { action = "spawn:noctalia msg panel-toggle control-center", repeat = false }
 "Mod+N" = { action = "spawn:noctalia msg panel-toggle notifications", repeat = false }
 "Mod+Y" = { action = "spawn:noctalia msg panel-toggle wallpaper", repeat = false }
-"Mod+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
+"Mod+Shift+Comma" = { action = "spawn:noctalia msg settings-toggle", repeat = false }
 "Mod+Escape" = { action = "spawn:noctalia msg panel-toggle session", repeat = false }

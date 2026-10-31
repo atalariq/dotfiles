@@ -28,7 +28,22 @@ in
         ./nvf.nix
         (import ./plugins.nix { inherit pkgs inputs; })
         (import ./runtime-layer.nix { inherit runtime; })
+        (import ./stacks-langs.nix { stacks = config.dotfiles.dev.stacks; })
       ];
+      # Theme: Stylix owns nvf's colors through `stylix.targets.nvf`; only when
+      # stylix is off (lab/wsl-class hosts) does the owner's wana.nvim load,
+      # with habamax as the in-editor fallback. The `!stylix.enable` gates are
+      # what keep the two owners from colliding.
+      settings.vim.startPlugins = lib.optionals (!config.stylix.enable) [
+        (pkgs.vimUtils.buildVimPlugin {
+          pname = "wana";
+          version = "0-unstable-2026-10-31";
+          src = inputs.wana;
+        })
+      ];
+      settings.vim.luaConfigRC.dotfilesTheme = lib.mkIf (!config.stylix.enable) ''
+        vim.g.dotfiles_theme = "wana"
+      '';
     };
     home.sessionVariables = {
       VISUAL = "nvim";

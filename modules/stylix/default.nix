@@ -115,6 +115,10 @@ in
               qt.enable = pkgs.stdenv.hostPlatform.isLinux && config.dotfiles.appearance.gui;
               starship.enable = config.programs.starship.enable;
               kitty.enable = config.programs.kitty.enable;
+              # nvf never themes itself: stylix.autoEnable is off here, so the
+              # target must be named explicitly. When this is false the wana
+              # fallback in programs/neovim/default.nix takes over.
+              nvf.enable = config.dotfiles.appearance.gui && config.programs.nvf.enable;
               fish.enable = config.programs.fish.enable;
               fzf.enable = config.programs.fzf.enable;
               btop.enable = config.programs.btop.enable;

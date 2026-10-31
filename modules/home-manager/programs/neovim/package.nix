@@ -13,5 +13,16 @@
     ./nvf.nix
     (import ./plugins.nix { inherit pkgs inputs; })
     (import ./runtime-layer.nix { inherit runtime; })
+    # Standalone default = the x13 stack set, so `nix run .#neovim` matches the
+    # primary workstation. Hosts override this through their `dev.stacks`.
+    (import ./stacks-langs.nix {
+      stacks = [
+        "node"
+        "python"
+        "go"
+        "rust"
+        "cc"
+      ];
+    })
   ];
 }).neovim

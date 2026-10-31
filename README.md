@@ -119,10 +119,11 @@ using those services. The configuration does not provision Windows or a WSL dist
 ## Customization
 
 The shared environment lives under `modules/home-manager/programs/`. The `shell`,
-`core`, `nix`, `git`, `direnv`, `tmux` and `vim` modules are enabled by default
+`core`, `nix`, `git`, `tmux` and `vim` modules are enabled by default
 (the "sunnah muakkad" set, overridable); everything else — `terminal`, `gui`,
-`agentic-tools`, the `development.*` bundles (`android`, `godot`, `jetbrains`,
-`podman`) and individual applications — is opt-in. Gaming is a NixOS feature
+`agentic-tools`, the `development.*` bundles (`android`, `devenv`, `direnv`,
+`godot`, `jetbrains`, `mise`, `podman`) plus `dotfiles.dev.stacks` and
+individual applications — is opt-in. Gaming is a NixOS feature
 (`dotfiles.gaming.enable`), not a Home Manager package bundle. Each host adds
 its own applications, system services, and displays.
 Most application modules are opt-in; package definitions stay next to their consumers.
@@ -315,7 +316,7 @@ workmux add <name>         # worktree + tmux window per parallel task
 
 Per-agent crit setup is runtime state (not Nix-declared); the manual steps,
 install order, and known `crit check` noise are documented in
-[docs/agentic-setup.md](docs/agentic-setup.md).
+[docs/agent-setup.md](docs/agent-setup.md).
 
 Project indexing is a separate explicit action; use the CLI when a client has
 not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-tools/tokscale/README.md)

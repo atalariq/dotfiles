@@ -106,3 +106,72 @@ function! ServerGrep() abort
   endif
 endfunction
 nnoremap <leader>/ :call ServerGrep()<CR>
+
+" ── Neovim-feel floor (2026-10): built-ins only, guards for ancient vim ────
+if exists('+inccommand')
+  set inccommand=split
+endif
+if exists('+termsync')
+  set termsync
+endif
+set display+=lastline
+set scrolloff=4
+set sidescrolloff=4
+set virtualedit=block
+set shortmess+=I
+set lazyredraw
+set completeopt=menu,menuone,noselect
+if v:version >= 900
+  set completeopt+=fuzzy
+endif
+if exists('+breakindent')
+  set breakindentopt=shift:1
+  set showbreak=>
+endif
+" ripgrep is the nvim parity here; grep stays the fallback.
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --smart-case
+  set grepformat=%f:%l:%c:%m
+endif
+" Search/window/motion parity with the nvf runtime layer.
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+nnoremap <silent> # #zz
+nnoremap <C-u> <C-u>zz
+nnoremap <C-d> <C-d>zz
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+nnoremap J mzJ`z
+nnoremap <leader>uw :set wrap!<CR>
+inoremap jk <Esc>
+inoremap kj <Esc>
+" Smart split by window shape (like nvf <leader>sv intent).
+nnoremap <silent> <C-w>v :let s:w = winwidth(0) > 160 \| exe s:w ? 'vsplit' : 'split'<CR>
+" Yank flash via TextYankPost (Neovim has vim.hl.on_yank; Vim needs marks).
+if v:version >= 800
+  function! s:YankFlash() abort
+    if exists('w:yank_match')
+      call matchdelete(w:yank_match)
+    endif
+    let l:pos = getpos("'<")[1]
+    if l:pos > 0
+      let w:yank_match = matchaddpos('IncSearch', [[l:pos]], 99)
+      call timer_start(250, { _ -> exists('w:yank_match') ? matchdelete(w:yank_match) : 0 })
+    endif
+  endfunction
+  augroup dotfiles_yank
+    autocmd!
+    autocmd TextYankPost * call s:YankFlash()
+  augroup END
+endif
+" Terminal buffers: quit insert like nvim, drop the buffer like the shell floor.
+if has('terminal') && exists('##TermOpen') && exists('##TermClose')
+  augroup dotfiles_term
+    autocmd!
+    autocmd TermOpen * startinsert
+    autocmd TermClose * stopinsert | execute 'bdelete! ' . expand('<abuf>')
+  augroup END
+endif

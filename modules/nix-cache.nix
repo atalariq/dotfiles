@@ -4,13 +4,21 @@
   # keeps an extra-* fallback for standalone Home Manager hosts.
   #
   # `trusted-users` is platform-specific and stays in each platform module.
+  #
+  # cache.nixos.org (the nixpkgs channel cache) is already the Nix default; it
+  # is listed explicitly so hosts that ever replace `substituters` still pull
+  # it through these `extra-*` options.
   nix.settings = {
     extra-substituters = [
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
       "https://noctalia.cachix.org"
       "https://umbriel.cachix.org"
       "https://cache.numtide.com"
     ];
     extra-trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+rkXd32PYzeVMqw="
       "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
       "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="

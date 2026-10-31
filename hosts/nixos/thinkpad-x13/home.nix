@@ -10,6 +10,14 @@
   };
   dotfiles = {
     ai.enable = true;
+    dev.stacks = [
+      "node"
+      "bun"
+      "python"
+      "go"
+      "rust"
+      "cc"
+    ];
     deployment.liveApps = [
       "espanso"
       "vim"
@@ -57,7 +65,10 @@
       yt-dlp.enable = true;
       development = {
         android.enable = true;
+        devenv.enable = true;
+        direnv.enable = true;
         jetbrains.enable = true;
+        mise.enable = true;
         podman.enable = true;
       };
     };

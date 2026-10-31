@@ -56,6 +56,16 @@ in
   home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
   programs.fish.generateCompletions = lib.mkIf config.programs.fish.enable true;
+  # These render into ~/.config/fish/config.fish, which fish sources after
+  # /etc/fish/config.fish, so they beat NixOS's system `alias ls 'ls --color=tty'`.
+  programs.fish.shellAliases = lib.mkIf config.programs.fish.enable {
+    ls = "eza --icons --group-directories-first";
+    lla = "eza --icons --group-directories-first -algh";
+    ll = "eza --icons --group-directories-first -lgh";
+    lsa = "eza --icons --group-directories-first -a";
+    lt = "eza --icons --group-directories-first -T";
+    tree = "eza --icons --group-directories-first -T";
+  };
   # conf.d also contains generated integrations and owner/private snippets, so
   # it is a mixed-ownership directory. Link only our snippets; history and
   # universal variables remain in their writable native locations.
@@ -70,6 +80,15 @@ in
           builtins.readDir ./config
         )
       )
+    # functions/ is a pure native config tree, so it gets a whole-directory
+    # link (conf.d above stays selective because it is mixed-ownership). The
+    # repo does not use programs.fish.functions, so there is no collision.
+    // {
+      "fish/functions" = {
+        source = dotfilesLib.sourceFor "fish" ./config/functions;
+        recursive = true;
+      };
+    }
   );
 
   programs.starship.settings = lib.mkIf config.programs.starship.enable {

@@ -20,6 +20,11 @@
       "obsidian"
       "localsend"
       "linear"
+      "flutter"
+      "android-studio"
+    ];
+    brews = [
+      "dart"
     ];
   };
 }

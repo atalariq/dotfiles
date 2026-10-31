@@ -22,3 +22,84 @@
 "Mod+Minus" = { action = "scratchpad-toggle:terminal", repeat = false }
 "Mod+Grave" = { action = "scratchpad-toggle:terminal", repeat = false }
 "Mod+Shift+Minus" = { action = "window-move-to-scratchpad:terminal", repeat = false }
+
+# ── Resize / move / tiling (grilled 2026-10-31) ────────────────────────────
+# NOTE (2026-10-31, coordinator fix): Umbriel 0.1.0's action grammar is
+# `action:arg` with `/` between multi-args (see `umbriel msg --help`), NOT the
+# space-separated form on the current docs site. window-set-region/clear-region
+# do not exist in 0.1.0 — window-snap/unsnap are the native equivalents here.
+# Direct extent nudges; repeat while held (default repeat is on — leave it on).
+"Mod+Ctrl+H" = "window-modify-primary-extent:-0.05"
+"Mod+Ctrl+L" = "window-modify-primary-extent:0.05"
+"Mod+Ctrl+J" = "window-modify-secondary-extent:-0.05"
+"Mod+Ctrl+K" = "window-modify-secondary-extent:0.05"
+
+# Pin above everything / last-focused toggle.
+"Mod+P" = { action = "window-toggle-pinned", repeat = false }
+"Mod+Tab" = { action = "window-focus-last", repeat = false }
+
+# Column consume/expel (Umbriel example-config keys).
+"Mod+Comma" = { action = "window-consume-left", repeat = false }
+"Mod+Period" = { action = "window-consume-right", repeat = false }
+"Mod+Ctrl+Comma" = { action = "window-consume-from-left", repeat = false }
+"Mod+Ctrl+Period" = { action = "window-consume-from-right", repeat = false }
+
+# Discoverability and multi-output. (Mod+/ is a bad chord in 0.1.0 — Slash.)
+"Mod+Slash" = { action = "cheatsheet-toggle", repeat = false }
+"Mod+Alt+Left" = { action = "output-focus-left", repeat = false }
+"Mod+Alt+Right" = { action = "output-focus-right", repeat = false }
+"Mod+Alt+Up" = { action = "output-focus-up", repeat = false }
+"Mod+Alt+Down" = { action = "output-focus-down", repeat = false }
+"Mod+Shift+Alt+Left" = { action = "window-move-to-output-left", repeat = false }
+"Mod+Shift+Alt+Right" = { action = "window-move-to-output-right", repeat = false }
+"Mod+Shift+Alt+Up" = { action = "window-move-to-output-up", repeat = false }
+"Mod+Shift+Alt+Down" = { action = "window-move-to-output-down", repeat = false }
+
+# Hard-kill (SIGKILL) — deliberately awkward to reach.
+"Mod+Shift+Alt+Q" = { action = "window-kill", repeat = false }
+
+# Escape hatch for games/remote-desktops that grab all shortcuts.
+"Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
+
+# Submap: keyboard resize (fine/coarse), jump to move.
+"Mod+R" = { action = "submap:resize", repeat = false }
+"submap[resize],H" = "window-modify-primary-extent:-0.02"
+"submap[resize],L" = "window-modify-primary-extent:0.02"
+"submap[resize],J" = "window-modify-secondary-extent:-0.02"
+"submap[resize],K" = "window-modify-secondary-extent:0.02"
+"submap[resize],Shift+H" = "window-modify-primary-extent:-0.1"
+"submap[resize],Shift+L" = "window-modify-primary-extent:0.1"
+"submap[resize],Shift+J" = "window-modify-secondary-extent:-0.1"
+"submap[resize],Shift+K" = "window-modify-secondary-extent:0.1"
+"submap[resize],G" = { action = "submap:move", repeat = false }
+"submap[resize],Escape" = "submap:reset"
+"submap[resize],Return" = "submap:reset"
+
+# Submap: floating move by pixels / to edges / center.
+"submap[move],H" = "window-move-by:-40/0"
+"submap[move],L" = "window-move-by:40/0"
+"submap[move],J" = "window-move-by:0/40"
+"submap[move],K" = "window-move-by:0/-40"
+"submap[move],Left" = "window-move-to:left/20/0"
+"submap[move],Right" = "window-move-to:right/20/0"
+"submap[move],Up" = "window-move-to:top/0/20"
+"submap[move],Down" = "window-move-to:bottom/0/20"
+"submap[move],C" = { action = "window-center", repeat = false }
+"submap[move],Escape" = "submap:reset"
+"submap[move],Return" = "submap:reset"
+
+# Submap: snap halves/quarters (floating windows in 0.1.0; toggles via unsnap).
+"Mod+G" = { action = "submap:region", repeat = false }
+"submap[region],H" = { action = "window-snap:left", repeat = false }
+"submap[region],L" = { action = "window-snap:right", repeat = false }
+"submap[region],K" = { action = "window-snap:top", repeat = false }
+"submap[region],J" = { action = "window-snap:bottom", repeat = false }
+"submap[region],1" = { action = "window-snap:top_left", repeat = false }
+"submap[region],2" = { action = "window-snap:top_right", repeat = false }
+"submap[region],3" = { action = "window-snap:bottom_left", repeat = false }
+"submap[region],4" = { action = "window-snap:bottom_right", repeat = false }
+"submap[region],C" = { action = "window-center", repeat = false }
+"submap[region],X" = { action = "window-unsnap", repeat = false }
+"submap[region],F" = { action = "window-toggle-floating", repeat = false }
+"submap[region],Escape" = "submap:reset"
+"submap[region],Return" = "submap:reset"

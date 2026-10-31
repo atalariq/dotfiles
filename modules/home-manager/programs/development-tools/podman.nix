@@ -12,6 +12,11 @@
     home.packages = with pkgs; [
       podman
       podman-compose
+      devcontainer
+      dive
+      hadolint
+      lazydocker
+      yq
     ];
   };
 }

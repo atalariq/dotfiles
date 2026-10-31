@@ -7,5 +7,9 @@
     stateVersion = "26.05";
     packages = [ pkgs.wget ];
   };
+  dotfiles.dev.stacks = [
+    "node"
+    "python"
+  ];
   targets.genericLinux.enable = true;
 }
