@@ -18,6 +18,8 @@
     programs.nix-index = {
       enable = true;
       enableFishIntegration = config.programs.fish.enable;
+      enableBashIntegration = config.programs.bash.enable;
+      enableZshIntegration = config.programs.zsh.enable;
     };
 
     # `comma` is owned by nix-index-database, not by programs.nix-index.
@@ -29,9 +31,5 @@
       enable = true;
       flake = config.dotfiles.deployment.checkout;
     };
-
-    home.packages = with pkgs; [
-      devenv
-    ];
   };
 }

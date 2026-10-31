@@ -35,8 +35,12 @@ let
     # job (T8). The enum value exists only to gate nvf's rust-analyzer (T6).
     rust = [ ];
     cc = [
+      # gcc owns cc/c++/cpp: clang-wrapper and gcc-wrapper ship identical
+      # subpaths and buildEnv rejects equal-priority collisions (this broke
+      # thinkpad activation once — always build home.activationPackage after
+      # changing stacks). clang stays fully available as clang/clang++.
+      (lib.hiPrio pkgs.gcc14)
       pkgs.clang
-      pkgs.gcc14
       pkgs.cmake
       pkgs.ninja
       pkgs.pkg-config
