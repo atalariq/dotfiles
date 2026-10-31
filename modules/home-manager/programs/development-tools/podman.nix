@@ -15,8 +15,6 @@
       devcontainer
       dive
       hadolint
-      lazydocker
-      yq
     ];
   };
 }
