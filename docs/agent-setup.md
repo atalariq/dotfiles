@@ -71,3 +71,11 @@ Two findings are **expected noise, not breakage**:
 Do not delete `~/.agents/skills/crit/SKILL.md`: the OpenCode installer calls
 it "obsolete" for OpenCode (which moved to `commands/` + `crit-cli`), but
 Codex and Copilot still read that exact path.
+
+## In-editor review
+
+`review.nvim` is installed by the nvf kernel as the interactive diff review
+surface. `<leader>rr` reviews the working tree, `<leader>rc` picks commits,
+`<leader>rb` reviews a branch, and `<leader>rn` adds a note on any file. `C`
+exports the comments as AI-ready markdown; `q` archives the review. `crit`
+remains the CLI/agent integration and `tuicr` remains available as a TUI.

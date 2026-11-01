@@ -7,7 +7,7 @@
         inherit system;
         config.allowUnfree = true;
       };
-      editor = import ../modules/home-manager/programs/neovim/package.nix { inherit inputs pkgs; };
+      editor = import ../modules/nvf/package.nix { inherit inputs pkgs; };
     in
     {
       packages = {

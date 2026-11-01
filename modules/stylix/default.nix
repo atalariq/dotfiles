@@ -115,10 +115,11 @@ in
               qt.enable = pkgs.stdenv.hostPlatform.isLinux && config.dotfiles.appearance.gui;
               starship.enable = config.programs.starship.enable;
               kitty.enable = config.programs.kitty.enable;
-              # nvf never themes itself: stylix.autoEnable is off here, so the
-              # target must be named explicitly. When this is false the wana
-              # fallback in programs/neovim/default.nix takes over.
-              nvf.enable = config.dotfiles.appearance.gui && config.programs.nvf.enable;
+              # The Stylix nvf target still writes the deprecated
+              # `lualine.theme` option. nvf's theme is wired manually in
+              # programs/cli/neovim.nix instead; the wana fallback handles
+              # hosts without Stylix.
+              nvf.enable = false;
               fish.enable = config.programs.fish.enable;
               fzf.enable = config.programs.fzf.enable;
               btop.enable = config.programs.btop.enable;
@@ -153,7 +154,7 @@ in
         '';
 
       }
-      (lib.mkIf config.dotfiles.programs.vim.enable {
+      (lib.mkIf config.dotfiles.programs.cli.vim.enable {
         home.file.".vim/colors/dotfiles.vim".source = colors {
           templateRepo = inputs.stylix.inputs.base16-vim;
           target = "base16";
@@ -184,7 +185,7 @@ in
           };
         };
       })
-      (lib.mkIf config.dotfiles.programs.tmux.enable {
+      (lib.mkIf config.dotfiles.programs.cli.tmux.enable {
         xdg.configFile."tmux/theme.conf".text = ''
           set -g status-style "bg=${c.base00},fg=${c.base05}"
           set -g pane-border-style "fg=${c.base03}"
