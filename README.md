@@ -15,8 +15,9 @@ that install them.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
 - **Development:** Commands collected in a plain `Justfile`; project environments come from devenv/flox rather than flake templates.
-- **Coding agents:** Native account authentication for Codex, Antigravity, and Copilot;
-  direct DeepSeek/OpenRouter connections for OpenCode and Hermes.
+- **Coding agents:** per-tool opt-in clients (Antigravity, OpenCode, Hermes) with
+  direct DeepSeek connections; a shared core toolset for review, output compaction,
+  and the task queue.
 
 ## Hosts
 
@@ -118,20 +119,27 @@ using those services. The configuration does not provision Windows or a WSL dist
 
 ## Customization
 
-The shared environment lives under `modules/home-manager/programs/`. The `shell`,
-`core`, `nix`, `git`, `tmux` and `vim` modules are enabled by default
-(the "sunnah muakkad" set, overridable); everything else — `terminal`, `gui`,
-`agentic-tools`, the `development.*` bundles (`android`, `devenv`, `direnv`,
-`godot`, `jetbrains`, `mise`, `podman`) plus `dotfiles.dev.stacks` and
-individual applications — is opt-in. Gaming is a NixOS feature
-(`dotfiles.gaming.enable`), not a Home Manager package bundle. Each host adds
-its own applications, system services, and displays.
-Most application modules are opt-in; package definitions stay next to their consumers.
+The shared environment lives under `modules/home-manager/programs/`, split
+into four categories: `cli`, `gui`, `development` and `agentic`. Each category
+has a `default.nix` for the core and one `<pname>.nix` per opt-in package.
+Package config lives beside it in `<category>/config/<pname>/`.
+
+The CLI core (`dotfiles.programs.cli`) is enabled by default: shell, git,
+Nix tooling, vim, tmux, the standard POSIX tools and modern replacements.
+Everything else is opt-in, including GUI applications and the development
+tool bundles. GUI apps are host-local by design: NixOS x13 selects Home Manager
+modules, macOS uses Homebrew casks, and headless hosts install nothing.
+Development stacks are declared with `dotfiles.programs.development.stacks`.
+Gaming is a NixOS feature (`dotfiles.gaming.enable`), not a Home Manager
+package bundle. Each host adds its own applications, system services and
+displays; package definitions stay next to their consumers. See
+[programs/README.md](modules/home-manager/programs/README.md) for the add,
+update and remove convention.
 
 Override shared scalar defaults in the host's Home Manager module:
 
 ```nix
-programs.fish.enable = false;
+dotfiles.programs.cli.shell.fish.enable = false;
 programs.git.settings.user.email = "you@example.com";
 home.packages = [ pkgs.wget ]; # Adds to the shared package list.
 # home.packages = lib.mkForce [ pkgs.git ]; # Replaces the entire package list.
@@ -200,14 +208,22 @@ settings remain application-owned. Native validators check a complete immutable
 copy of the include tree during builds, even when the deployed links are live.
 
 Neovim is assembled from nvf and split by how often things change. Build-time
-configuration - plugins, LSP servers, formatters, parsers - lives in
-`modules/home-manager/programs/neovim/nvf.nix` and is shared by the Home Manager
-module and the standalone `nix run .#neovim` package. The Lua runtime that stays
-live is `modules/home-manager/programs/neovim/runtime/`: with Neovim selected in
-`liveApps`, edit that checkout directly and restart Neovim for a reliable full
-reload, since Lua `require` caches modules within a running process. Markdown is
-read raw by default; `<leader>mr` toggles rendering and `<leader>mR` opens a
-rendered split. Plugins, parsers and external language tools still rebuild
+configuration - plugins, LSP servers, formatters, parsers - lives in the shared
+kernel `modules/nvf/` (`nvf.nix`, `modules/`, `plugins.nix`, `langs.nix`,
+`runtime-layer.nix`), imported by the Home Manager wrapper
+`modules/home-manager/programs/cli/neovim.nix` and the standalone
+`nix run .#neovim` package, so neither can drift. Editor behavior - options,
+keymaps, autocmds, plugins, LSP, formatters and diagnostics - is declared in
+Nix and changes with a rebuild. The live tree is `modules/nvf/runtime/`: with
+Neovim selected in `liveApps`, edit `after/ftplugin`, `after/queries`, editor
+settings (`selene.toml`, `stylua.toml`, `.luarc.json`) and the personal snippet
+library under `runtime/snippets/` directly in the checkout. Every save is
+formatted through conform with LSP fallback; `<leader>ltf` toggles it per buffer
+and `:FormatToggle` flips the global default. Markdown is read raw by default;
+`<leader>mr` toggles rendering and `<leader>mR` opens a rendered split. The
+plugin set is curated from LazyVim/NvChad/NotAShelf: nvim-tree + oil for files,
+lualine + bufferline, aerial + dropbar, review.nvim for agent review, and no
+noice/dashboard/snacks. Plugins, parsers and external language tools rebuild
 through a generation.
 
 Freesm Launcher ships inside the NixOS gaming module
@@ -231,20 +247,41 @@ outside the repository.
 
 ### Coding agents
 
-Enable the integrated bundle in a host's Home Manager configuration:
+Agent tools are selected per host and per tool under the
+`dotfiles.programs.agentic.*` namespace; there is no umbrella switch that installs
+the whole set:
 
 ```nix
-dotfiles.ai.enable = true;
-# Individual tools remain overridable, for example:
-dotfiles.programs.hermes.enable = false;
+dotfiles.programs.agentic = {
+  core.enable = true;        # the shared floor, installed by this module group
+  opencode.enable = true;    # clients stay individual opt-in
+  hermes.enable = true;
+  # Individual switches remain overridable:
+  tokscale.enable = false;
+};
 ```
 
-The bundle selects Codex, Claude Code, OpenCode, Hermes, Beads Rust, CodeGraph,
-RTK, and Tokscale. It does not start workers, index projects, install shell
-rewrite hooks, or purchase provider access. Antigravity, Copilot, and
-other experiments remain independently opt-in with
-`dotfiles.programs.<name>.enable`. The desktop hosts explicitly select
-Antigravity and Copilot for optional use.
+`agentic.core.enable` installs the toolset every agent host should run: Beads Rust
+and Beads Viewer (queue and its graph-aware TUI), CodeGraph, Crit, RTK, and
+Tirith - terminal-only, no browser or display required, so headless hosts and
+future servers keep the same floor. The core is atomic by design; clients
+(Codex, Claude Code, OpenCode, Hermes, Antigravity) and the remaining helpers
+(agent-browser, git-ai, tokscale, workmux) are selected individually, and a
+host without a subscription for a client simply does not select it. Nothing
+here starts workers, indexes projects, installs shell rewrite hooks, or
+purchases provider access. git-ai remains a documented experiment.
+
+Every device runs its own Hermes locally: the terminal interface only, with no
+gateway, no listening port and no cross-machine messaging. It manages that
+device - diagnostics, builds, queue triage - and carries the domain context the
+owner works in there (`dotfiles`, `kuliah`, `works` are seeded as starter
+skills). A messaging gateway is deliberately not wired: if one is ever added it
+belongs on a 24/7 server, never on a laptop, and its platform choice is made
+when that host exists. Seeded profiles also carry an `approvals.deny` list for
+owner-only operations - activation, `pkexec`, push, destructive GC - as a
+documented exception to the no-permission-lists rule; the list blocks before
+`--yolo` is consulted. A profile that already exists is never rewritten, so
+adopt that block by hand with `hermes config edit`.
 
 Agent packages come from the pinned `llm-agents` input. Update them deliberately
 with `just update llm-agents`, then build and review before activation. OpenCode
@@ -266,8 +303,10 @@ commands (`codex mcp add`, `claude mcp add`, `agy mcp add`,
 `opencode mcp add --global`) instead of growing the Nix seed.
 
 Agent CLIs and supporting helpers live together under
-`modules/home-manager/programs/agentic-tools/`; the parent declares its imports
-explicitly and the top-level program index only sees the single directory.
+`modules/home-manager/programs/agentic/`; the category kernel declares the
+`agentic.*` namespace, installs the core toolset directly and auto-imports the
+client modules. `agentic/_seed.nix` seeds absent profiles from the templates
+these modules generate.
 
 | Command | First-use authentication and role |
 | --- | --- |
@@ -291,11 +330,12 @@ retain their settings until reloaded; `opencode2 --standalone` creates an isolat
 server without restarting the shared one.
 
 Every client keeps its own approval, sandbox and permission model. The
-repository no longer ships permission lists, path allowlists or execpolicy
-rules, so the first run behaves like the tool's documented default. Claude's
-Linux sandbox can still need a native approval for the Nix daemon socket;
-Copilot keeps its saved project approvals; Hermes applies its own defaults
-because its pinned version has no arbitrary interactive ask list.
+repository ships no permission lists, path allowlists or execpolicy rules, so
+the first run behaves like the tool's documented default - the single
+exception is the Hermes `approvals.deny` seed described above. Claude's Linux
+sandbox can still need a native approval for the Nix daemon socket; Hermes
+applies its own defaults because its pinned version has no arbitrary
+interactive ask list.
 
 #### Integration and coordination
 
@@ -319,7 +359,7 @@ install order, and known `crit check` noise are documented in
 [docs/agent-setup.md](docs/agent-setup.md).
 
 Project indexing is a separate explicit action; use the CLI when a client has
-not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic-tools/tokscale/README.md)
+not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic/tokscale.README.md)
 runs on demand and unpriced models can appear with zero cost, which must be
 treated as unknown. None of these tools starts a background collector or
 intercepts all shell commands.
@@ -327,7 +367,10 @@ intercepts all shell commands.
 Use a single agent by default. For independent parallel tasks, follow the
 [native workflow](docs/agent-workflow.md): shared Beads claims, separate worktrees,
 explicit write scopes, bounded worker processes, and review before integration.
-Hermes is optional and admits at most two external workers. Parallel workers
+Hermes is the coordinator this owner reaches for by default, not the only one
+available: codex, claude and opencode sessions coordinate their own work too,
+so whoever starts the batch picks. Whoever coordinates admits at most two
+external workers. Parallel workers
 consume their providers' quotas; they do not multiply an account's allowance.
 
 Beads Rust (`br`, not `bd`) owns task status. Every worktree uses the main
@@ -365,8 +408,8 @@ pass passwords through chat, agent stdin, command arguments, or askpass helpers.
 
 #### Optional experiments
 
-Tools such as Tirith, Crit, agent-browser, git-ai, and Workmux
-remain optional. Installing a package alone does not prove agent
+Beyond the core floor, agent-browser, git-ai, Tokscale and Workmux stay
+individual host choices. Installing a package alone does not prove agent
 integration. Enable an integration after its intended workflow has been verified.
 For git-ai, configure a nonempty repository allowlist and review its private
 configuration before enabling hooks; retain the module's upload restrictions.
