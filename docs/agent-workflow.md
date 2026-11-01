@@ -1,14 +1,16 @@
 # Native multi-agent workflow
 
-Use one agent for routine tasks. For independent parallel tasks, Hermes can
-coordinate existing authenticated CLIs as workers. Beads
+Use one agent for routine tasks. For independent parallel tasks, Hermes is the
+coordinator this owner reaches for by default, but it is not the only one: a
+codex, claude or opencode session coordinates its own batch just as well, so the
+choice stays with whoever opens it. Beads
 is the shared task queue and handoff; it does not discover running agents or lock
 source files. No background dispatcher or additional agent service is required.
 
 ## Start and assign
 
-When parallel work is justified, start Hermes in the main checkout and give it
-the desired outcome or Beads issue.
+When parallel work is justified, start the coordinator (Hermes by default) in
+the main checkout and give it the desired outcome or Beads issue.
 A request to implement authorizes routine project read, edit, test, build, and
 delegation. The coordinator continues independent work in that batch and collects
 protected operations for review at the end.
