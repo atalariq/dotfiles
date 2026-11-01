@@ -38,6 +38,7 @@
 | `hosts/linux/lab`, `hosts/wsl/lab` | Standalone, headless Home Manager selections |
 | `modules/home-manager/default.nix` | Shared identity, XDG and Home Manager defaults |
 | `modules/home-manager/programs` | Application modules and colocated packages/configs |
+| `modules/nvf` | Shared editor kernel: nvf settings, runtime tree, standalone package |
 | `modules/home-manager/desktop` | Compositor and desktop-shell configuration |
 | `modules/home-manager/sources.nix` | Immutable/live source mapping and native theme adapters |
 | `modules/nixos`, `modules/darwin`, `modules/stylix` | System integration and appearance |
@@ -67,7 +68,8 @@ The standalone outputs are `homeConfigurations.linux-lab` and
   existing profiles and authentication.
 - Retain both immutable and live modes. Live mapping must reject foreign paths;
   generated theme files still rebuild. Do not replace native configs with reduced examples.
-- Stylix owns themes; Noctalia owns desktop UI/polkit; Look owns launcher/clipboard.
+- Stylix owns themes; Noctalia owns desktop UI/polkit plus the launcher and
+  clipboard panels (Umbriel only binds `noctalia msg panel-toggle ...`).
   TLP is the ThinkPad power manager. Retain GPU Screen Recorder for quick capture
   and OBS for composed scenes. Avoid duplicate services and conflicting owners.
 - Keep credentials and writable login/runtime state outside Git and the Nix store.
