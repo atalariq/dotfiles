@@ -424,6 +424,9 @@ configuration before enabling hooks; retain the module's upload restrictions.
 | [modules/darwin/](modules/darwin/) | macOS system defaults |
 | [modules/stylix/](modules/stylix/) | Theme palettes and adapters |
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for commit, review, signing, and AI-agent
+conventions.
+
 Use `just fmt` to format Nix sources and `just check` to validate the flake and run
 its checks for the current platform. Update dependencies deliberately with
 `just update` or `just update nixpkgs`.

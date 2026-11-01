@@ -12,6 +12,8 @@
 
 - Read README.md, the selected Beads issue and its handoff, and the relevant host/module.
   Inspect `git status --short` before editing. Verify recorded facts against source.
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before staging or committing; its commit
+  and review rules apply to humans and agents.
 - If `.codegraph/` exists, use `codegraph_explore` or `codegraph explore` before
   text searches to locate symbols and call paths. Otherwise use `rg`; project
   indexing remains an explicit selection, not an agent startup side effect.
