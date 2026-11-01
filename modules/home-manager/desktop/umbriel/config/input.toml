@@ -4,12 +4,12 @@
 [input]
 
 [input.focus]
-follows_mouse = true
+follows_mouse = false
 
 [input.keyboard]
 layout = "us"
 numlock_toggle = false
-repeat_delay = 350
+repeat_delay = 250
 repeat_rate = 30
 
 [input.touchpad]
@@ -17,3 +17,8 @@ click_method = "clickfinger"
 disable_while_typing = true
 natural_scroll = true
 tap = true
+
+# [input.pointer]
+# accel_profile = "adaptive"
+# accel_speed = 0.2
+# scroll_factor = 1.0
