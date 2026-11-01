@@ -71,8 +71,8 @@
     security.ssh-server.enable = false;
     security.secrets.enable = true;
     security.tpm.enable = true;
-    development.podman.enable = true;
-    development.emulation.enable = true;
+    system.podman.enable = true;
+    system.emulation.enable = true;
     hardware.thinkpad.enable = true;
     gaming.enable = true;
   };

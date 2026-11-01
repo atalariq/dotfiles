@@ -7,7 +7,7 @@
     stateVersion = "26.05";
     packages = [ pkgs.wget ];
   };
-  dotfiles.dev.stacks = [
+  dotfiles.programs.development.stacks = [
     "node"
     "python"
   ];

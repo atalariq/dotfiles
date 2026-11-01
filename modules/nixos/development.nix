@@ -5,11 +5,11 @@
   ...
 }:
 {
-  options.dotfiles.development.emulation.enable =
+  options.dotfiles.system.emulation.enable =
     lib.mkEnableOption "QEMU binfmt emulation for foreign-architecture builds";
 
   config = lib.mkMerge [
-    (lib.mkIf config.dotfiles.development.podman.enable {
+    (lib.mkIf config.dotfiles.system.podman.enable {
       virtualisation.podman = {
         enable = true;
         # Docker-compatible CLI and socket for dev-workflow tooling.
@@ -25,7 +25,7 @@
         pkgs.docker-compose
       ];
     })
-    (lib.mkIf config.dotfiles.development.emulation.enable {
+    (lib.mkIf config.dotfiles.system.emulation.enable {
       boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
     })
   ];

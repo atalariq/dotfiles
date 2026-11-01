@@ -35,7 +35,7 @@
     security.ssh-server.enable = lib.mkEnableOption "the OpenSSH server";
     security.secrets.enable = lib.mkEnableOption "sops-nix runtime secrets";
     security.tpm.enable = lib.mkEnableOption "TPM (Trusted Platform Module) support";
-    development.podman.enable = lib.mkEnableOption "rootless Podman";
+    system.podman.enable = lib.mkEnableOption "rootless Podman";
     hardware.thinkpad.enable = lib.mkEnableOption "balanced X13 AMD defaults";
     gaming.enable = lib.mkEnableOption "Gaming optimization and support for NixOS";
   };

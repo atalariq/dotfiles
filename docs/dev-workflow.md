@@ -7,9 +7,12 @@ runtime stacks that should not live on the host.
 ## Layer 1: Nix fallback
 
 `hosts/nixos/thinkpad-x13/home.nix` and `hosts/darwin/macpro-m4/home.nix` enable
-the `dotfiles.dev.stacks` toolchain (Node, Bun, Python, Go, Rust, C/C++, and
-similar) through native Nix packages. These are the tools available in any
-directory that does not declare its own environment.
+the `dotfiles.programs.development.stacks` toolchain (Node, Bun, Python, Go, Rust, C/C++, JVM,
+Dart, plus the gate-only PHP/Vue/Svelte/SQL) through native Nix packages. The
+gate-only values install no PATH runtime - they select nvf language servers and
+the derived JetBrains IDE while the real toolchain stays per-project (mise,
+containers). These are the tools available in any directory that does not
+declare its own environment.
 
 Enable the development-tools modules on a host with:
 
@@ -23,7 +26,7 @@ dotfiles.programs.development.mise.enable = true;
 The NixOS side also needs rootless Podman:
 
 ```nix
-dotfiles.development.podman.enable = true;
+dotfiles.system.podman.enable = true;
 ```
 
 ## Layer 2: mise per project
@@ -94,7 +97,7 @@ Manager podman bundle.
 
 ### Multi-architecture builds
 
-ThinkPad hosts enable `dotfiles.development.emulation.enable`, which registers
+ThinkPad hosts enable `dotfiles.system.emulation.enable`, which registers
 `aarch64-linux` through QEMU binfmt. Build for both targets with:
 
 ```sh

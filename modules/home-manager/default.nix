@@ -8,7 +8,6 @@
   # Modules declare features; each host makes its own explicit selection.
   imports = [
     ./programs
-    ./ai.nix
     ./services/secrets.nix
     ./services/syncthing.nix
     ./desktop

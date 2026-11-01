@@ -9,15 +9,6 @@
     stateVersion = "26.05";
   };
   dotfiles = {
-    ai.enable = true;
-    dev.stacks = [
-      "node"
-      "bun"
-      "python"
-      "go"
-      "rust"
-      "cc"
-    ];
     deployment.liveApps = [
       "espanso"
       "vim"
@@ -46,27 +37,54 @@
       noctalia.enable = true;
     };
     programs = {
-      core.enable = true;
-      gui.enable = true;
-      terminal.enable = true;
-      aria2.enable = true;
-      atuin.enable = true;
-      espanso.enable = true;
-      gh.enable = true;
-      glab.enable = true;
-      kitty.enable = true;
-      mpd.enable = true;
-      mpv.enable = true;
-      neovim.enable = true;
-      obs-studio.enable = true;
-      television.enable = true;
-      typst.enable = true;
-      yazi.enable = true;
-      yt-dlp.enable = true;
+      development.stacks = [
+        "node"
+        "bun"
+        "python"
+        "go"
+        "rust"
+        "cc"
+        # gate-only (no PATH runtime): drives nvf languages + PhpStorm.
+        "php"
+        "vue"
+        "sql"
+      ];
+      cli = {
+        enable = true;
+        terminal-tools.enable = true;
+        aria2.enable = true;
+        atuin.enable = true;
+        gh.enable = true;
+        glab.enable = true;
+        mpd.enable = true;
+        neovim.enable = true;
+        television.enable = true;
+        typst.enable = true;
+        yazi.enable = true;
+        yt-dlp.enable = true;
+      };
+      gui = {
+        workstation.enable = true;
+      };
+      # Per-tool opt-in (no umbrella): codex/claude stay off until there is a
+      # subscription for them; git-ai stays off as a documented experiment.
+      agentic = {
+        core.enable = true;
+        experimental.enable = true;
+        agy.enable = true;
+        agent-browser.enable = true;
+        hermes.enable = true;
+        opencode.enable = true;
+        tokscale.enable = true;
+        workmux.enable = true;
+      };
       development = {
         android.enable = true;
         devenv.enable = true;
         direnv.enable = true;
+        # IDEs derive from development.stacks above: node/bun->webstorm,
+        # go->goland, rust->rustrover, php->phpstorm. python/cc intentionally
+        # have no mapping (Neovim covers them).
         jetbrains.enable = true;
         mise.enable = true;
         podman.enable = true;
