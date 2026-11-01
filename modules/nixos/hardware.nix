@@ -25,14 +25,24 @@
         CPU_SCALING_GOVERNOR_ON_SAV = "powersave";
         # Since TLP 1.9, suffixes designate profiles: AC=performance,
         # BAT=balanced, SAV=power-saver, independent of the current power source.
-        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        # Verified against tlp 1.10.2 func.d/10-tlp-func-cpu: profile
+        # PRF/BAL/SAV selects the _ON_AC/_ON_BAT/_ON_SAV value, so a profile
+        # chosen by hand or left over from an unplug applies _ON_AC on battery
+        # too. That is what pinned this Ryzen 7 PRO 5850U to EPP=performance
+        # plus platform_profile=performance while on battery (owner complaint:
+        # "gampang panas"; observed last_pwr="0 1" on 2026-10-31).
+        #
+        # Thermal-first: every profile bucket now caps at balanced, so no
+        # selection - manual, stale, or assigned - can run the machine hot.
+        # Power-saver stays the coolest and boost policy is untouched.
+        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
         CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_performance";
         CPU_ENERGY_PERF_POLICY_ON_SAV = "power";
         CPU_BOOST_ON_AC = 1;
         CPU_BOOST_ON_BAT = 1;
         CPU_BOOST_ON_SAV = 0;
         # X13 Gen 2a firmware advertises all three through platform_profile.
-        PLATFORM_PROFILE_ON_AC = "performance";
+        PLATFORM_PROFILE_ON_AC = "balanced";
         PLATFORM_PROFILE_ON_BAT = "balanced";
         PLATFORM_PROFILE_ON_SAV = "low-power";
         USB_EXCLUDE_AUDIO = 1;
