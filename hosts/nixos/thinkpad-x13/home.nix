@@ -65,6 +65,7 @@
       };
       gui = {
         workstation.enable = true;
+        jellyfin.enable = true;
       };
       # Per-tool opt-in (no umbrella): codex/claude stay off until there is a
       # subscription for them; git-ai stays off as a documented experiment.

@@ -78,5 +78,23 @@
   };
   services.displayManager.defaultSession = "umbriel";
   services.displayManager.noctalia-greeter.settings.session.default = "Umbriel";
+
+  # Remote access to the homelab and to the tailnet; the shared LAN is not
+  # trusted. Headscale later only changes the login server.
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+
+  # Attic CLI for pushing store paths. Substituter URL and the cache public key
+  # are filled in after `attic cache create main` on the homelab:
+  #   dotfiles.system.binary-cache.client = {
+  #     enable = true;
+  #     url = "http://homelab-x456urk:8080/main";
+  #     publicKey = "main:...";
+  #   };
+  environment.systemPackages = [
+    pkgs.attic-client
+    pkgs.tailscale
+  ];
+
   system.stateVersion = "26.05";
 }
