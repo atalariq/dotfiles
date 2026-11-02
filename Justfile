@@ -52,6 +52,32 @@ build-wsl-lab:
     nh home build . -c wsl-lab
     # native: nix build .#homeConfigurations.wsl-lab.activationPackage --no-link
 
+# ── Homelab server (fresh install: direct installer or nixos-anywhere) ──────
+
+build-homelab-x456urk:
+    nh os build . -H homelab-x456urk
+    # native: nix build .#nixosConfigurations.homelab-x456urk.config.system.build.toplevel --no-link
+
+# Owner-only, destructive: formats and mounts both homelab disks. Run this
+# from the target installer, then create secrets and run nixos-install as
+# documented in docs/homelab.md.
+disko-homelab-x456urk:
+    test "$(id -u)" = "0"
+    nix run .#disko -- --mode destroy,format,mount hosts/nixos/homelab-x456urk/disko.nix
+
+# Owner-only alternative: destroys the declared disks and installs over SSH
+# from another machine. TARGET is user@host of the running installer.
+install-homelab-x456urk TARGET:
+    test -n "{{ TARGET }}"
+    nix run .#nixos-anywhere -- --flake .#homelab-x456urk {{ TARGET }}
+    # native: nixos-anywhere --flake .#homelab-x456urk user@host
+
+# Owner-only, destructive: mounts the declared ThinkPad layout so a fresh
+# install can be performed. See docs/homelab.md for the full reinstall steps.
+disko-thinkpad-x13:
+    test "$(id -u)" = "0"
+    nix run .#disko -- --mode destroy,format,mount hosts/nixos/thinkpad-x13/disko.nix
+
 # ── Activation (owner-only; agents never run these) ─────────────────────────
 
 # Activate on the next boot, leaving the running system untouched.

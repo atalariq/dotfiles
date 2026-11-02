@@ -40,6 +40,18 @@ in
       ];
     };
 
+    # Headless homelab server, installed fresh with disko + nixos-anywhere.
+    # No desktop modules: the host owns a volatile root and a persistence list.
+    nixosConfigurations.homelab-x456urk = lib.nixosSystem {
+      system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
+      modules = [
+        ../hosts/nixos/homelab-x456urk
+        inputs.home-manager.nixosModules.home-manager
+        (withHome ../hosts/nixos/homelab-x456urk/home.nix)
+      ];
+    };
+
     darwinConfigurations.macpro-m4 = inputs.nix-darwin.lib.darwinSystem {
       system = "aarch64-darwin";
       specialArgs = { inherit inputs; };

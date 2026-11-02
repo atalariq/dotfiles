@@ -24,6 +24,7 @@ that install them.
 | Configuration | Platform | Manages |
 | --- | --- | --- |
 | `thinkpad-x13` | NixOS · x86_64 | System and Home Manager; Wayland desktop |
+| `homelab-x456urk` | NixOS · x86_64 | System and Home Manager; headless, volatile root ([homelab](docs/homelab.md)) |
 | `macpro-m4` | macOS · Apple Silicon | nix-darwin and Home Manager |
 | `linux-lab` | Linux · x86_64 | Standalone Home Manager; command-line environment |
 | `wsl-lab` | Ubuntu WSL2 · x86_64 | Standalone Home Manager; command-line environment |

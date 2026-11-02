@@ -36,6 +36,7 @@
 | `flake.nix`, `flake/hosts.nix`, `flake/packages.nix` | Inputs, host wiring, packages, devShell |
 | `Justfile` | Direct build, diff, apply, formatting, and update commands |
 | `hosts/nixos/thinkpad-x13` | NixOS system and desktop Home Manager selections |
+| `hosts/nixos/homelab-x456urk` | Headless NixOS host: disko layout, volatile root, persistence list |
 | `hosts/darwin/macpro-m4` | nix-darwin system and Home Manager selections |
 | `hosts/linux/lab`, `hosts/wsl/lab` | Standalone, headless Home Manager selections |
 | `modules/home-manager/default.nix` | Shared identity, XDG and Home Manager defaults |
@@ -47,7 +48,8 @@
 
 The standalone outputs are `homeConfigurations.linux-lab` and
 `homeConfigurations.wsl-lab`. The system outputs are
-`nixosConfigurations.thinkpad-x13` and `darwinConfigurations.macpro-m4`.
+`nixosConfigurations.thinkpad-x13`, `nixosConfigurations.homelab-x456urk` and
+`darwinConfigurations.macpro-m4`.
 
 ## Preserve the design and existing work
 
