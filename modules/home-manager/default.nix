@@ -53,6 +53,11 @@
     home.username = lib.mkDefault "atalariq";
     xdg.enable = lib.mkDefault true;
     programs.home-manager.enable = lib.mkDefault true;
+    # Stylix auto-enables its per-target modules (and defines
+    # `nixpkgs.overlays`) unless a host selects appearance. NixOS hosts run
+    # Home Manager with useGlobalPkgs, which rejects those overlay
+    # definitions, so the catalogue stays inert until appearance is selected.
+    stylix.autoEnable = lib.mkDefault false;
     assertions = [
       {
         assertion =
