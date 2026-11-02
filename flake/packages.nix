@@ -15,6 +15,8 @@
         default = editor;
         # Pinned CLI for the bootstrap recipe before the first activation.
         home-manager = inputs.home-manager.packages.${system}.home-manager;
+        # Fresh-install tooling; the Justfile recipes run these from the flake.
+        inherit (pkgs) disko nixos-anywhere;
       };
 
       formatter = pkgs.nixfmt;

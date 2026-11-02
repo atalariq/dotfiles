@@ -43,6 +43,18 @@
       # Otherwise the lock keeps two copies of flake-parts.
       inputs.flake-parts.follows = "flake-parts";
     };
+    # Fresh-install tooling: disko renders the disk layout (and mounts it for
+    # nixos-anywhere), impermanence keeps the server's root volatile.
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # Only the NixOS module is used; keep one Home Manager pin in the lock.
+      inputs.home-manager.follows = "home-manager";
+    };
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 

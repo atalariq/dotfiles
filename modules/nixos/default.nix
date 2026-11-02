@@ -13,10 +13,16 @@
     inputs.umbriel.nixosModules.default
     inputs.sops-nix.nixosModules.sops
     inputs.lanzaboote.nixosModules.lanzaboote
+    # Catalogue-only too: hosts that enable the option get the layout and the
+    # persistence units; nothing changes for hosts that leave it off.
+    inputs.disko.nixosModules.disko
+    inputs.impermanence.nixosModules.impermanence
     ./desktop.nix
     ./security.nix
     ./development.nix
     ./hardware.nix
+    ./impermanence.nix
+    ./binary-cache.nix
     ./gaming
   ];
   options.dotfiles = {
@@ -35,6 +41,24 @@
     security.ssh-server.enable = lib.mkEnableOption "the OpenSSH server";
     security.secrets.enable = lib.mkEnableOption "sops-nix runtime secrets";
     security.tpm.enable = lib.mkEnableOption "TPM (Trusted Platform Module) support";
+    system.impermanence = {
+      enable = lib.mkEnableOption "root-on-tmpfs with a persistence list";
+      persistPath = lib.mkOption {
+        type = lib.types.str;
+        default = "/persist";
+        description = "Mount point of the filesystem that holds every persisted path.";
+      };
+      directories = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Extra directories to bind-mount from the persistence root.";
+      };
+      files = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Extra files to copy into and out of the persistence root.";
+      };
+    };
     system.podman.enable = lib.mkEnableOption "rootless Podman";
     hardware.thinkpad.enable = lib.mkEnableOption "balanced X13 AMD defaults";
     gaming.enable = lib.mkEnableOption "Gaming optimization and support for NixOS";
