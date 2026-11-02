@@ -6,6 +6,8 @@
   # Standalone has no checkout to link, so the store copy of the live tree is
   # the default.
   runtime ? ./runtime,
+  # The standalone build represents the primary workstation.
+  nerdFont ? true,
 }:
 let
   stacks = [
@@ -24,7 +26,7 @@ in
 (inputs.nvf.lib.neovimConfiguration {
   inherit pkgs;
   modules = [
-    (import ./nvf.nix { inherit runtime; })
+    (import ./nvf.nix { inherit runtime nerdFont; })
     nvfPlugins.module
     (import ./runtime-layer.nix { inherit runtime; })
     # Standalone default = the x13 stack set (minus the dotfiles-specific

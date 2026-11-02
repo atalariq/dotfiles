@@ -10,15 +10,96 @@
 # commands). The live `runtime/` tree is native Neovim data only: after/
 # overrides, queries, snippets and editor tool config.
 #
-# Curried: the outer argument is ours (the runtime tree path), the inner one is
-# supplied by nvf's module system. The kernel takes `runtime` so the blink
-# snippet source can read `<runtime>/snippets` directly instead of a parallel
-# linkFarm - in live mode that makes snippets editable without a rebuild.
-{ runtime }:
+# Curried: the outer arguments are ours (the runtime tree path and the Nerd Font
+# switch), the inner ones are supplied by nvf's module system. The kernel takes
+# `runtime` so the blink snippet source can read `<runtime>/snippets` directly
+# instead of a parallel linkFarm - in live mode that makes snippets editable
+# without a rebuild. `nerdFont` feeds both `vim.g.have_nerd_font` and every
+# glyph-dependent setup below.
+{
+  runtime,
+  nerdFont ? true,
+}:
 { pkgs, lib, ... }:
+let
+  inherit (lib.generators) mkLuaInline;
+
+  renderMarkdownOpts =
+    lib.recursiveUpdate
+      {
+        enabled = true;
+        preset = "none";
+        render_modes = [
+          "n"
+          "c"
+        ];
+        anti_conceal.enabled = true;
+        latex.enabled = false;
+        nested = false;
+        # The plugin has no public "default off per buffer" switch; its attach
+        # hook runs before the first render, so flipping the buffer config here
+        # keeps normal markdown raw while leaving preview buffers rendered.
+        on.attach = mkLuaInline ''
+          function(ctx)
+            if vim.bo[ctx.buf].buftype == "" then
+              require("render-markdown.state").get(ctx.buf).enabled = false
+            end
+          end
+        '';
+      }
+      (
+        lib.optionalAttrs (!nerdFont) {
+          heading = {
+            icons = [ ];
+            signs = [ ];
+            sign = false;
+          };
+          checkbox = {
+            unchecked.icon = "[ ]";
+            checked.icon = "[x]";
+            custom.todo.rendered = "[ ]";
+          };
+          link.enabled = false;
+          callout =
+            lib.genAttrs
+              [
+                "note"
+                "tip"
+                "important"
+                "warning"
+                "caution"
+                "abstract"
+                "summary"
+                "tldr"
+                "info"
+                "todo"
+                "hint"
+                "success"
+                "check"
+                "done"
+                "question"
+                "help"
+                "faq"
+                "attention"
+                "failure"
+                "fail"
+                "missing"
+                "danger"
+                "error"
+                "bug"
+                "example"
+                "quote"
+                "cite"
+              ]
+              (name: {
+                rendered = "[!${lib.toUpper name}]";
+              });
+        }
+      );
+in
 {
   imports = [
-    (import ./modules/core.nix)
+    (import ./modules/core.nix { inherit nerdFont; })
     (import ./modules/maps.nix)
     (import ./modules/commands.nix)
   ];
@@ -137,13 +218,23 @@
         keymap = {
           preset = "super-tab";
         };
-        appearance.nerd_font_variant = "mono";
+        appearance = lib.optionalAttrs nerdFont {
+          nerd_font_variant = "mono";
+        };
         completion = {
           ghost_text.enabled = true;
           documentation = {
             auto_show = true;
             auto_show_delay_ms = 200;
           };
+        }
+        // lib.optionalAttrs (!nerdFont) {
+          menu.draw.columns = [
+            [
+              "label"
+              "label_description"
+            ]
+          ];
         };
         signature.enabled = true;
         sources = {
@@ -195,28 +286,12 @@
       enable = true;
       profile = "borderless";
     };
-    filetree.nvimTree = {
-      enable = true;
-      openOnSetup = false;
-      mappings.toggle = "<leader>e";
-      setupOpts = {
-        hijack_netrw = true;
-        disable_netrw = true;
-        git.enable = true;
-        view.width = 32;
-        renderer.indent_markers.enable = true;
-      };
-    };
     projects.project-nvim.enable = true;
     utility.outline.aerial-nvim = {
       enable = true;
       mappings.toggle = "<leader>o";
+      setupOpts.nerd_font = nerdFont;
     };
-    ui.dropbar-nvim.enable = true;
-    notes.todo-comments.enable = true;
-    lsp.lspkind.enable = true;
-    lsp.lightbulb.enable = true;
-    lsp.trouble.enable = true;
     binds.whichKey.enable = true;
     formatter.conform-nvim.enable = true;
     diagnostics.nvim-lint = {
@@ -236,16 +311,6 @@
     # real option is `utility.motion.flash-nvim` (nvf's spider module is absent
     # from this pin, so that add was dropped).
     utility.motion.flash-nvim.enable = true;
-
-    # DAP: adapters only, no UI preset (dap-view is lazy-loaded below). The Go
-    # adapter stays host-gated in langs.nix.
-    debugger.nvim-dap = {
-      enable = true;
-      presets = {
-        codelldb.enable = true;
-        debugpy.enable = true;
-      };
-    };
 
     git.gitsigns = {
       enable = true;
@@ -293,7 +358,6 @@
     mini.move.enable = true;
     mini.splitjoin.enable = true;
     mini.bracketed.enable = true;
-    mini.cursorword.enable = true;
     mini.bufremove.enable = true;
     terminal.toggleterm.enable = true;
 
@@ -314,44 +378,16 @@
     # ── Visuals ────────────────────────────────────────────────────────────
     # mini.* inherits the standard highlight groups, so Stylix colours it with
     # no extra theme glue.
-    statusline.lualine = {
+    mini.statusline.enable = true;
+    mini.tabline = {
       enable = true;
-      setupOpts.options.theme = "base16";
+      setupOpts.show_icons = nerdFont;
     };
-    tabline.nvimBufferline = {
+    mini.icons = {
       enable = true;
-      mappings = {
-        cycleNext = null;
-        cyclePrevious = null;
-      };
-    };
-    visuals.nvim-web-devicons.enable = true;
-    visuals.indent-blankline = {
-      enable = true;
-      setupOpts = {
-        scope = {
-          show_start = false;
-          show_end = false;
-        };
-      };
-    };
-    visuals.rainbow-delimiters.enable = true;
-    visuals.fidget-nvim = {
-      enable = true;
-      setupOpts = {
-        progress = {
-          display = {
-            done_icon = " ";
-          };
-        };
-        notification = {
-          # LSP progress only; never let a completed task steal a notification.
-          override_vim_notify = false;
-        };
-      };
+      setupOpts.style = if nerdFont then "glyph" else "ascii";
     };
     autopairs.nvim-autopairs.enable = true;
-    ui.colorizer.enable = true;
 
     # Spell dictionaries as a data-only plugin: compiled `.spl` files on the
     # runtimepath are what Neovim reads (hunspell sources are not accepted).
@@ -399,19 +435,6 @@
       '';
     };
 
-    extraPlugins.blink-indent = {
-      package = pkgs.vimPlugins.blink-indent;
-      setup = "require('blink.indent').setup()";
-    };
-
-    extraPlugins.lsp-lines = {
-      package = pkgs.vimPlugins.lsp_lines-nvim;
-      setup = ''
-        require("lsp_lines").setup()
-        vim.diagnostic.config({ virtual_text = false })
-      '';
-    };
-
     # ── Lazy loading ───────────────────────────────────────────────────────
     # Heavy or occasional plugins load on their trigger instead of at startup.
     # Keys must match the package pname, which is what lz.n resolves against.
@@ -421,17 +444,15 @@
         # Markdown is read raw first; rendering is a deliberate action.
         ft = "markdown";
         setupModule = "render-markdown";
-        setupOpts = {
-          enabled = false;
-          preset = "obsidian";
-          render_modes = [
-            "n"
-            "c"
-          ];
-          anti_conceal.enabled = true;
-          latex.enabled = false;
-          nested = false;
-        };
+        setupOpts = renderMarkdownOpts;
+        # The plugin directory calls setup() once before lz.n applies our
+        # options; that first pass can attach the current buffer with rendering
+        # enabled. This second pass makes the initial view raw.
+        after = ''
+          if vim.bo.buftype == "" and vim.bo.filetype == "markdown" then
+            require("render-markdown").buf_disable()
+          end
+        '';
       };
       "hunk.nvim" = {
         package = pkgs.vimPlugins.hunk-nvim;
@@ -449,7 +470,7 @@
         setupOpts = {
           default_file_explorer = true;
           delete_to_trash = true;
-          columns = [ "icon" ];
+          columns = lib.optionals nerdFont [ "icon" ];
           view_options.show_hidden = true;
           keymaps = {
             "q" = "actions.close";
@@ -486,15 +507,6 @@
           };
           filetypes.typst.template = "#image(\"$FILE_PATH\")";
         };
-      };
-      "nvim-dap-view" = {
-        package = pkgs.vimPlugins.nvim-dap-view;
-        cmd = [
-          "DapViewOpen"
-          "DapViewToggle"
-        ];
-        setupModule = "dap-view";
-        setupOpts = { };
       };
     };
   };

@@ -3,7 +3,7 @@
 # Everything editor-behavioural lives there (imported by both this wrapper and
 # the standalone `nix run .#neovim` package). This file owns only the
 # Home-Manager-specific glue: the opt-in flag, the live runtime path, the
-# stylix/wana theme gate, and editor environment variables.
+# stylix/wana theme gate, the Nerd Font gate, and editor environment variables.
 {
   config,
   lib,
@@ -22,7 +22,14 @@ in
 {
   imports = [ inputs.nvf.homeManagerModules.nvf ];
 
-  options.dotfiles.programs.cli.neovim.enable = lib.mkEnableOption "nvf workstation editor";
+  options.dotfiles.programs.cli.neovim = {
+    enable = lib.mkEnableOption "nvf workstation editor";
+    nerdFont = lib.mkOption {
+      type = lib.types.bool;
+      default = config.dotfiles.appearance.gui;
+      description = "Use Nerd Font glyphs in Neovim. Defaults to selecting a GUI host.";
+    };
+  };
 
   config = lib.mkIf config.dotfiles.programs.cli.neovim.enable {
     programs.nvf = {
@@ -32,23 +39,23 @@ in
       # One nvf kernel, two consumers: package.nix next to it imports the same
       # files for `nix run .#neovim`.
       settings.imports = [
-        (import ../../../nvf/nvf.nix { inherit runtime; })
+        (import ../../../nvf/nvf.nix {
+          inherit runtime;
+          nerdFont = config.dotfiles.programs.cli.neovim.nerdFont;
+        })
         nvfPlugins.module
         (import ../../../nvf/runtime-layer.nix { inherit runtime; })
         (import ../../../nvf/langs.nix { stacks = config.dotfiles.programs.development.stacks; })
       ];
-      # Theme: Stylix owns the palette, but its nvf target still writes the
-      # deprecated lualine.theme option, so nvf's base16 theme is wired below.
-      # When Stylix is off (lab/wsl-class hosts) the owner's wana.nvim loads,
-      # with habamax as the in-editor fallback.
+      # Theme: Stylix owns the palette. When Stylix is off (lab/wsl-class
+      # hosts) the owner's wana.nvim loads, with habamax as the in-editor
+      # fallback.
       settings.vim.startPlugins = lib.optionals (!config.stylix.enable) [
         nvfPlugins.packages.wana
       ];
       settings.vim.luaConfigRC.dotfilesTheme = lib.mkIf (!config.stylix.enable) ''
         vim.g.dotfiles_theme = "wana"
       '';
-      # Stylix owns the palette; nvf's own target still writes the deprecated
-      # lualine.theme option, so the theme is wired explicitly here.
       settings.vim.theme = lib.mkIf (config.stylix.enable && config.dotfiles.appearance.gui) {
         enable = true;
         name = "base16";
@@ -73,9 +80,6 @@ in
             ;
         };
       };
-      settings.vim.statusline.lualine.setupOpts.options.theme = lib.mkIf (
-        config.stylix.enable && config.dotfiles.appearance.gui
-      ) "base16";
     };
     home.sessionVariables = {
       VISUAL = "nvim";

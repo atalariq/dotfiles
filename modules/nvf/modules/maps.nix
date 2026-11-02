@@ -108,14 +108,6 @@ in
       "g<C-x>" =
         luaMap "function() require('dial.map').manipulate('decrement', 'gnormal') end" "Decrement sequence";
 
-      # DAP.
-      "<F5>" = luaMap "function() require('dap').continue() end" "DAP continue";
-      "<F10>" = luaMap "function() require('dap').step_over() end" "DAP step over";
-      "<F11>" = luaMap "function() require('dap').step_into() end" "DAP step into";
-      "<S-F11>" = luaMap "function() require('dap').step_out() end" "DAP step out";
-      "<F9>" = luaMap "function() require('dap').toggle_breakpoint() end" "DAP breakpoint";
-      "<leader>do" = cmd "DapViewToggle" "DAP view";
-
       # Terminal.
       "<leader>tt" = cmd "ToggleTerm direction=horizontal" "Terminal horizontal";
       "<leader>tv" = cmd "ToggleTerm direction=vertical" "Terminal vertical";

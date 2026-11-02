@@ -30,7 +30,6 @@ let
       python = {
         enable = true;
         format.type = [ "ruff" ];
-        dap.enable = true;
       };
     };
     go = {
@@ -43,20 +42,12 @@ let
             "gofumpt"
           ];
         };
-        # dlv/nvim-dap-go; gated here because it must follow the host's stack.
-        dap.enable = true;
       };
     };
     # rust-analyzer only: nvf's rust module does not add rustc/cargo to the
     # wrapper, so mise's per-project toolchains are never PATH-shadowed.
-    rust.rust = {
-      enable = true;
-      dap.enable = true;
-    };
-    cc.clang = {
-      enable = true;
-      dap.enable = true;
-    };
+    rust.rust.enable = true;
+    cc.clang.enable = true;
     java.java.enable = true;
     kotlin.kotlin.enable = true;
     dart.dart.enable = true;

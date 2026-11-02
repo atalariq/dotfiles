@@ -1,16 +1,36 @@
 # Core Neovim state: globals, options, diagnostics and the editor-wide
 # autocommands. This is build-time configuration; ftplugin/query/snippet files
 # stay in the live runtime tree because they are native Neovim data.
+{ nerdFont }:
 { lib, ... }:
 let
   inherit (lib.generators) mkLuaInline;
+  diagnosticSigns =
+    if nerdFont then
+      ''
+        {
+          [vim.diagnostic.severity.ERROR] = "󰅚 ",
+          [vim.diagnostic.severity.WARN] = "󰀪 ",
+          [vim.diagnostic.severity.INFO] = "󰋽 ",
+          [vim.diagnostic.severity.HINT] = "󰌵 ",
+        }
+      ''
+    else
+      ''
+        {
+          [vim.diagnostic.severity.ERROR] = "E ",
+          [vim.diagnostic.severity.WARN] = "W ",
+          [vim.diagnostic.severity.INFO] = "I ",
+          [vim.diagnostic.severity.HINT] = "H ",
+        }
+      '';
 in
 {
   vim = {
     globals = {
       mapleader = " ";
       maplocalleader = "\\";
-      have_nerd_font = true;
+      have_nerd_font = nerdFont;
     };
 
     # nvf owns the option surface; these are the values that are not covered
@@ -62,14 +82,7 @@ in
       enable = true;
       config = {
         signs = {
-          text = mkLuaInline ''
-            {
-              [vim.diagnostic.severity.ERROR] = "󰅚 ",
-              [vim.diagnostic.severity.WARN] = "󰀪 ",
-              [vim.diagnostic.severity.INFO] = "󰋽 ",
-              [vim.diagnostic.severity.HINT] = "󰌵 ",
-            }
-          '';
+          text = mkLuaInline diagnosticSigns;
         };
         virtual_text = true;
         update_in_insert = false;
@@ -149,7 +162,6 @@ in
         pattern = [
           "PlenaryTestPopup"
           "checkhealth"
-          "dap-float"
           "dbout"
           "gitsigns-blame"
           "grug-far"
@@ -158,7 +170,6 @@ in
           "notify"
           "qf"
           "startuptime"
-          "trouble"
           "tsplayground"
         ];
         desc = "Close transient buffers with q";
