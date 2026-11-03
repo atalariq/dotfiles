@@ -9,6 +9,12 @@ __pycache__/
 *.bak.*
 *.orig
 *~
+*.iso
+*.img
+*.qcow2
+*.vhdx
+*.vmdk
+node_modules/
 .env
 .env.*
 !.env.example

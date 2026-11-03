@@ -17,6 +17,8 @@ review, and landing conventions.
 4. Validate before committing: evaluate/build affected hosts, run `just fmt`
    and `just lint`, and check generated or native-config validators where
    relevant. Docs-only changes need link/command checks, not a full rebuild.
+   Enable the shared large-file guard once per clone:
+   `git config core.hooksPath .githooks`.
 5. Stage named files. Do not stage unrelated owner edits, generated receipts,
    credentials, or runtime state.
 6. Commit locally when authorized. Do not push, activate, rewrite history, or
