@@ -24,6 +24,8 @@
           NODE_ENV = "production";
           PORT = "3000";
           BOOKS_HOST_PATH = "/books";
+          PUID = toString config.users.users.atalariq.uid;
+          PGID = toString config.users.groups.media.gid;
         };
         volumes = [
           "/data/media/books:/books"

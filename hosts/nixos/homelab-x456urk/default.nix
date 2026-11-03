@@ -80,6 +80,7 @@
 
   users.users.atalariq = {
     isNormalUser = true;
+    uid = 1000;
     description = "Atalariq Barra Hadinugraha";
     shell = pkgs.bash;
     extraGroups = [

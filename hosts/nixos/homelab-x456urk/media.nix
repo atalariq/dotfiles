@@ -3,9 +3,10 @@
 # the old spinning disk. The service is ordered after `data.mount` so it never
 # starts with an empty library when the HDD is missing.
 {
-  # Fixed GID so containerised apps can use the same group as native services.
+  # Pin the GID the host already allocated; BookOrbit receives the same value
+  # from `config.users.groups.media.gid` below.
   users.groups.media = {
-    gid = 2000;
+    gid = 996;
   };
 
   users.users.jellyfin.extraGroups = [

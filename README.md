@@ -340,7 +340,8 @@ Getting the values:
   `RESTIC_REPOSITORY=s3:https://<account>.r2.cloudflarestorage.com/<bucket>`.
 - `bookorbit_env`: random `POSTGRES_PASSWORD` (`openssl rand -hex 24`),
   `JWT_SECRET` (`openssl rand -hex 32`), `SETUP_BOOTSTRAP_TOKEN`
-  (`openssl rand -hex 16`), plus `APP_URL`, `PUID=1000`, `PGID=2000`.
+  (`openssl rand -hex 16`), plus `APP_URL`. The app UID/GID come from the NixOS
+  user and `media` group, not from this file.
 
 Select actual encrypted files before enabling secrets. Credentials are decrypted
 at runtime rather than interpolated into Nix expressions. Treat dotenv files as
