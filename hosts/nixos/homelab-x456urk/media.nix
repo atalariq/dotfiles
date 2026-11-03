@@ -3,7 +3,10 @@
 # the old spinning disk. The service is ordered after `data.mount` so it never
 # starts with an empty library when the HDD is missing.
 {
-  users.groups.media = { };
+  # Fixed GID so containerised apps can use the same group as native services.
+  users.groups.media = {
+    gid = 2000;
+  };
 
   users.users.jellyfin.extraGroups = [
     "media"
@@ -37,7 +40,10 @@
 
   # Phones on the LAN need 8096; 7359 is Jellyfin's server discovery beacon.
   networking.firewall = {
-    allowedTCPPorts = [ 8096 ];
+    allowedTCPPorts = [
+      4533
+      8096
+    ];
     allowedUDPPorts = [ 7359 ];
   };
 
@@ -48,8 +54,13 @@
 
   systemd.tmpfiles.rules = [
     "d /data/media 2775 atalariq media -"
+    "d /data/media/books 2775 atalariq media -"
+    "d /data/media/books/incoming 2775 atalariq media -"
+    "d /data/media/downloads 2775 atalariq media -"
     "d /data/media/movies 2775 atalariq media -"
-    "d /data/media/series 2775 atalariq media -"
     "d /data/media/music 2775 atalariq media -"
+    "d /data/media/music/incoming 2775 atalariq media -"
+    "d /data/media/music/library 2775 atalariq media -"
+    "d /data/media/series 2775 atalariq media -"
   ];
 }

@@ -184,6 +184,55 @@ direct cable between the ThinkPad (USB Ethernet adapter) and the homelab's
   Then set `dotfiles.system.binary-cache.client` on the ThinkPad with the URL
   `http://homelab-x456urk:8080/main` and that public key, and rebuild.
 
+## Network, secrets, and service endpoints
+
+The host uses NetworkManager for Ethernet, Wi-Fi, and phone USB tethering. The
+tailnet is Headscale (`https://headscale.atalariq.dev`), not Tailscale SaaS.
+Secrets are decrypted from `secrets/homelab-x456urk/secrets.sops.yaml` by the
+dedicated age key; the key is seeded to `/persist/var/lib/sops-nix/key.txt`.
+
+Before first boot, copy the age private key to the target:
+
+```sh
+sudo install -d -m 0700 /mnt/persist/var/lib/sops-nix
+sudo install -m 0600 /path/to/homelab-age.key \
+  /mnt/persist/var/lib/sops-nix/key.txt
+```
+
+Fill the encrypted file from a machine that has the same age key:
+
+```sh
+sops secrets/homelab-x456urk/secrets.sops.yaml
+```
+
+Required values:
+- `wifi_ssid`, `wifi_psk`
+- `headscale_authkey` (Headscale preauth key)
+- `attic_env` (Attic JWT secret)
+- `restic_env` (R2 credentials and restic password)
+- `bookorbit_env` (Postgres/JWT/setup token and app URL)
+
+The Wi-Fi profile is generated from sops before NetworkManager starts. The PSK
+is never in the Nix store or Git.
+
+Enabled services and endpoints:
+
+| Service | Port | Access |
+|---|---:|---|
+| Jellyfin | 8096/tcp | LAN + tailnet |
+| Navidrome | 4533/tcp | LAN + tailnet |
+| Sonarr / Radarr / Prowlarr / Bazarr / qBittorrent | app defaults | tailnet only |
+| Actual Budget | 5006/tcp | tailnet only |
+| Vikunja | 3456/tcp | tailnet only |
+| Memos | 5230/tcp | tailnet only |
+| BookOrbit | 3000/tcp | tailnet only |
+
+BookOrbit runs as the official app container plus a pgvector PostgreSQL
+sidecar. App data and Postgres live under `/var/lib/bookorbit` (persisted),
+while the library is `/data/media/books` on the XFS disk. The official image is
+intentionally not exposed on the LAN; use the tailnet or an authenticated
+reverse proxy.
+
 ## Media restore and Jellyfin
 
 Jellyfin runs natively and reads `/data/media`; its config and cache live in

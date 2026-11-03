@@ -9,3 +9,7 @@ creation_rules:
     age: age1ke0n93k27htpwau0qqskjekjyrm5ztrvln7ewguyrz29rxt499qq48s773
   - path_regex: (^secrets/secrets\.yaml$|^secrets/thinkpad-x13/[^/]+\.sops\.yaml$)
     age: age17q3dv06mpf2udvsd77ve4eadwkd9te0anvs5vlhu0auc7x8zl50sdr45lq
+  # Dedicated identity for homelab-x456urk; the private key is seeded to
+  # /persist/var/lib/sops-nix/key.txt and never enters Git.
+  - path_regex: '^secrets/homelab-x456urk/.*\.sops\.yaml$'
+    age: age1790t2dxdv4zf9ulrx786yf4qcvypuzagqqja9gcsrq4m2f8u750qrfq9hu
