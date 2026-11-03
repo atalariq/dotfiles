@@ -90,7 +90,7 @@
     linger = true;
     hashedPasswordFile = "/persist/secrets/atalariq.passwd";
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJsjBE2+Q+1AYl7COPrxFpG4hqvI/7M6qGgCGDtUJmpc atalariq.dev@outlook.com"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJsjBE2+Q+1AYl7COPrxFpG4hqvI/7M6qGgCGDtUJmpc atalariq@thinkpad-x13"
     ];
   };
 
