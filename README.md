@@ -153,12 +153,15 @@ version, for a target already booted from the NixOS installer:
    uncommitted files; a Git clone only sees committed history.
 
 3. **Run the direct-installer bootstrap** as root. It verifies the age key and
-   sops file, asks you to type `WIPE`, formats both disks, seeds the age key,
-   and runs `nixos-install`:
+   sops file, prompts for the `atalariq` password, asks you to type `WIPE`,
+   formats both disks, seeds the key/password hash, and runs `nixos-install`:
 
    ```sh
    sudo just homelab-bootstrap /path/to/homelab-x456urk.txt
    ```
+
+   The installer may not ship `just`; use
+   `nix shell nixpkgs#just -c just homelab-bootstrap /path/to/homelab-x456urk.txt`.
 
 4. Reboot, log in as `atalariq`, run `sudo tailscale up` (Headscale), and open
    the service endpoints from [docs/homelab.md](docs/homelab.md).

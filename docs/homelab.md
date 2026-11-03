@@ -57,30 +57,18 @@ data lives on the persistence subvolume.
 4. Disconnect the backup disk. `disko.nix` already sets
    `includeDataDisk = true`, so the next destructive command wipes both the SSD
    and the HDD.
-5. Create the password hash file **on the target's `/persist`** before the
-   first boot, otherwise `users.mutableUsers = false` locks console and sudo.
-   During a direct install, run this after `disko` has mounted `/mnt`:
+5. Fill the homelab sops file from a trusted machine. The same identity is
+   copied to the target in the next step; `just homelab-bootstrap` prompts for
+   the `atalariq` password and writes its hash, because
+   `users.mutableUsers = false` locks console and sudo without it.
 
    ```sh
-   sudo mkdir -p /mnt/persist/secrets
-   nix shell nixpkgs#mkpasswd -c mkpasswd -m sha-512 > /mnt/persist/secrets/atalariq.passwd
-   chmod 600 /mnt/persist/secrets/atalariq.passwd
+   just secrets-edit secrets/homelab-x456urk/secrets.sops.yaml
+   just secrets-check secrets/homelab-x456urk/secrets.sops.yaml
    ```
 
-   With `nixos-anywhere`, either use `--phases kexec,disko,install` so the
-   target stays mounted, or supply the files with `--extra-files`.
-
-6. Create the Attic JWT secret on the target before the first boot:
-
-   ```sh
-   sudo mkdir -p /mnt/persist/var/lib/atticd
-   sudo sh -c 'printf "ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=%s\n" \
-        "$(openssl genrsa -traditional 4096 | base64 -w0)" \
-        > /mnt/persist/var/lib/atticd/atticd.env'
-   sudo chmod 600 /mnt/persist/var/lib/atticd/atticd.env
-   ```
-
-   It is persisted with `/var/lib/atticd` and never enters Git or the store.
+6. The Attic JWT secret and Restic/R2 credentials are fields in the same sops
+   file (`attic_env`, `restic_env`); no plaintext file is written manually.
 
 ## Installing directly from the target installer
 
@@ -116,25 +104,24 @@ installer needs internet for the flake inputs and packages.
    cd /mnt/usb/dotfiles
    ```
 
-4. Format and mount both disks. This is destructive:
+4. Fill the homelab sops file on the trusted machine first, then copy the age
+   key path. The one-command bootstrap checks the secrets, prompts twice for the
+   `atalariq` password, asks you to type `WIPE`, formats both disks, seeds the
+   age key and password hash, and runs `nixos-install`:
 
    ```sh
-   sudo just disko-homelab-x456urk
-   ```
-
-5. Create the password hash and Attic secret under `/mnt/persist` as described
-   above, before the first boot.
-
-6. Install without asking for a root password. The user's password comes from
-   the persisted hash file:
-
-   ```sh
-   sudo nixos-install \
-     --flake "path:$(pwd)#homelab-x456urk" \
-     --root /mnt \
-     --no-root-passwd
+   nix shell nixpkgs#just -c just homelab-bootstrap \
+     ~/.config/sops/age/homelab-x456urk.txt
    sudo reboot
    ```
+
+   The command refuses to continue while `CHANGE_ME` remains in
+   `secrets/homelab-x456urk/secrets.sops.yaml`.
+
+5. If you prefer the manual path, format/mount with
+   `sudo just disko-homelab-x456urk`, then seed the age key and run
+   `nixos-install --flake "path:$(pwd)#homelab-x456urk" --root /mnt
+   --no-root-passwd` yourself.
 
 ## Alternative: installing over SSH with direct cable and dnsmasq
 

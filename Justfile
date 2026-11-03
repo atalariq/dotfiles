@@ -186,6 +186,18 @@ homelab-bootstrap AGE_KEY:
       exit 1
     fi
 
+    read -r -s -p 'Password for atalariq: ' password
+    printf '\n'
+    read -r -s -p 'Confirm password: ' password_confirm
+    printf '\n'
+    [ "$password" = "$password_confirm" ] || {
+      printf 'passwords do not match\n' >&2
+      exit 1
+    }
+    password_hash="$(printf '%s\n' "$password" | \
+      nix shell nixpkgs#openssl -c openssl passwd -6 -stdin)"
+    unset password password_confirm
+
     printf 'This will WIPE the SSD and HDD declared in disko.nix.\n'
     read -r -p 'Type WIPE to continue: ' answer
     [ "$answer" = "WIPE" ] || { printf 'aborted\n' >&2; exit 1; }
@@ -195,6 +207,11 @@ homelab-bootstrap AGE_KEY:
 
     install -d -m 0700 /mnt/persist/var/lib/sops-nix
     install -m 0600 "$age_key" /mnt/persist/var/lib/sops-nix/key.txt
+
+    install -d -m 0700 /mnt/persist/secrets
+    printf '%s\n' "$password_hash" > /mnt/persist/secrets/atalariq.passwd
+    chmod 600 /mnt/persist/secrets/atalariq.passwd
+    unset password_hash
 
     nixos-install \
       --flake "path:$root#homelab-x456urk" \
@@ -222,13 +239,28 @@ install-homelab-x456urk-staged TARGET AGE_KEY:
     command -v ssh >/dev/null
     command -v scp >/dev/null
 
+    read -r -s -p 'Password for atalariq: ' password
+    printf '\n'
+    read -r -s -p 'Confirm password: ' password_confirm
+    printf '\n'
+    [ "$password" = "$password_confirm" ] || {
+      printf 'passwords do not match\n' >&2
+      exit 1
+    }
+    password_hash="$(printf '%s\n' "$password" | \
+      nix shell nixpkgs#openssl -c openssl passwd -6 -stdin)"
+    unset password password_confirm
+
     nix run .#nixos-anywhere -- \
       --phases kexec,disko,install \
       --flake .#homelab-x456urk \
       "$target"
 
-    ssh "$target" 'install -d -m 0700 /mnt/persist/var/lib/sops-nix'
+    ssh "$target" 'install -d -m 0700 /mnt/persist/var/lib/sops-nix /mnt/persist/secrets'
     scp "$age_key" "$target:/mnt/persist/var/lib/sops-nix/key.txt"
+    printf '%s\n' "$password_hash" | \
+      ssh "$target" 'cat > /mnt/persist/secrets/atalariq.passwd && chmod 600 /mnt/persist/secrets/atalariq.passwd'
+    unset password_hash
     ssh "$target" 'chmod 600 /mnt/persist/var/lib/sops-nix/key.txt && reboot'
 
     printf '\nReboot requested. Reconnect after the target gets its network.\n'
