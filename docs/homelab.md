@@ -191,18 +191,20 @@ tailnet is Headscale (`https://headscale.atalariq.dev`), not Tailscale SaaS.
 Secrets are decrypted from `secrets/homelab-x456urk/secrets.sops.yaml` by the
 dedicated age key; the key is seeded to `/persist/var/lib/sops-nix/key.txt`.
 
-Before first boot, copy the age private key to the target:
+Before first boot, copy the age private key to the target. The canonical local
+key is `~/.config/sops/age/homelab-x456urk.txt`:
 
 ```sh
 sudo install -d -m 0700 /mnt/persist/var/lib/sops-nix
-sudo install -m 0600 /path/to/homelab-age.key \
+sudo install -m 0600 ~/.config/sops/age/homelab-x456urk.txt \
   /mnt/persist/var/lib/sops-nix/key.txt
 ```
 
-Fill the encrypted file from a machine that has the same age key:
+Fill the encrypted file with the matching identity:
 
 ```sh
-sops secrets/homelab-x456urk/secrets.sops.yaml
+just secrets-edit secrets/homelab-x456urk/secrets.sops.yaml
+just secrets-check secrets/homelab-x456urk/secrets.sops.yaml
 ```
 
 Required values:

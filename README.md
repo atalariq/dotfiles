@@ -47,6 +47,19 @@ just --list
 just check
 ```
 
+### Bootstrap
+
+Run this once per checkout. It enables the shared Git hook, creates the
+canonical age directory, checks the secret tooling, and prints the identity map:
+
+```sh
+just bootstrap
+```
+
+The canonical private-key directory is `~/.config/sops/age` (mode `0700`, files
+mode `0600`). `~/.config/age` is no longer used. Keep each machine's identity
+separate; never commit a private age key or paste it into chat.
+
 Build the configuration for the target machine:
 
 ```sh
@@ -117,6 +130,51 @@ are outside the Nix lockfile.
 Install Nix in the existing distribution before applying `linux-lab` or `wsl-lab`.
 User services such as sops-nix require systemd support; enable it in WSL when
 using those services. The configuration does not provision Windows or a WSL distro.
+
+### Fresh NixOS install (homelab)
+
+The destructive runbook lives in [docs/homelab.md](docs/homelab.md). The short
+version, for a target already booted from the NixOS installer:
+
+1. **Prepare the secrets** on a trusted machine:
+
+   ```sh
+   just bootstrap
+   just age-init homelab-x456urk        # only if the identity does not exist yet
+   just secrets-edit secrets/homelab-x456urk/secrets.sops.yaml
+   just secrets-check secrets/homelab-x456urk/secrets.sops.yaml
+   ```
+
+   Fill the Wi-Fi, Headscale, Attic, R2/restic, and BookOrbit values described in
+   [Secrets](#secrets). A placeholder `CHANGE_ME` is rejected by
+   `homelab-bootstrap`.
+
+2. **Copy the working tree** to the installer. A `path:` flake includes
+   uncommitted files; a Git clone only sees committed history.
+
+3. **Run the direct-installer bootstrap** as root. It verifies the age key and
+   sops file, asks you to type `WIPE`, formats both disks, seeds the age key,
+   and runs `nixos-install`:
+
+   ```sh
+   sudo just homelab-bootstrap /path/to/homelab-x456urk.txt
+   ```
+
+4. Reboot, log in as `atalariq`, run `sudo tailscale up` (Headscale), and open
+   the service endpoints from [docs/homelab.md](docs/homelab.md).
+
+For `nixos-anywhere`, the target must already be reachable over SSH. The default
+recipe reboots before the age key is seeded, so use the staged recipe:
+
+```sh
+just build-homelab-x456urk
+just install-homelab-x456urk-staged root@10.10.10.100 /path/to/homelab-x456urk.txt
+```
+
+Prerequisites for either path: verified backup, the target's disk by-id still
+matches `disko.nix`, an age identity for `homelab-x456urk`, filled sops values,
+and outbound internet (or a complete Nix store). Both paths wipe the SSD **and**
+the media HDD.
 
 ## Customization
 
@@ -237,9 +295,49 @@ instances are not migrated.
 
 Configure recipients in [.sops.yaml](.sops.yaml) and supply encrypted files using
 [the secrets module](modules/home-manager/services/secrets.nix). Keep private age
-identities outside the checkout and Nix store. The default identity location is
-`~/.config/sops/age/keys.txt`; restrict the directory to `0700` and the file to `0600`.
-Use separate device identities and retain a tested recovery recipient.
+identities outside the checkout and Nix store. The canonical directory is
+`~/.config/sops/age` (mode `0700`, files mode `0600`). Use one identity per
+machine/purpose and retain a tested recovery recipient.
+
+| File | Recipient | Used for |
+|---|---|---|
+| `keys.txt` | `age17q3...` | legacy/default fallback |
+| `thinkpad-x13.txt` | `age1ke0...` | `secrets/thinkpad-x13/*` |
+| `homelab-x456urk.txt` | `age1790...` | `secrets/homelab-x456urk/*` |
+
+`~/.config/age` is not used; use the canonical path above. SOPS does not select
+identities by file path automatically, so pass `SOPS_AGE_KEY_FILE` or use the
+helpers:
+
+```sh
+just secrets-edit secrets/thinkpad-x13/credentials.sops.yaml
+just secrets-edit secrets/homelab-x456urk/secrets.sops.yaml
+just secrets-check secrets/homelab-x456urk/secrets.sops.yaml
+```
+
+Equivalent manual commands:
+
+```sh
+SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/thinkpad-x13.txt" \
+  sops secrets/thinkpad-x13/credentials.sops.yaml
+
+SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/homelab-x456urk.txt" \
+  sops secrets/homelab-x456urk/secrets.sops.yaml
+```
+
+Getting the values:
+
+- `wifi_ssid` / `wifi_psk`: from the router or phone Wi-Fi settings.
+- `headscale_authkey`: on the Headscale VPS, `headscale preauthkeys create
+  --user <user> --expiration 24h`.
+- `attic_env`: `ATTIC_SERVER_TOKEN_RS256_SECRET_BASE64=$(openssl genrsa
+  -traditional 4096 | base64 -w0)`.
+- `restic_env`: create an R2 API token with object read/write, then set
+  `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `RESTIC_PASSWORD` and
+  `RESTIC_REPOSITORY=s3:https://<account>.r2.cloudflarestorage.com/<bucket>`.
+- `bookorbit_env`: random `POSTGRES_PASSWORD` (`openssl rand -hex 24`),
+  `JWT_SECRET` (`openssl rand -hex 32`), `SETUP_BOOTSTRAP_TOKEN`
+  (`openssl rand -hex 16`), plus `APP_URL`, `PUID=1000`, `PGID=2000`.
 
 Select actual encrypted files before enabling secrets. Credentials are decrypted
 at runtime rather than interpolated into Nix expressions. Treat dotenv files as

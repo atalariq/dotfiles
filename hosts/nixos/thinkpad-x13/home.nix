@@ -95,7 +95,7 @@
       syncthing.enable = true;
       secrets = {
         enable = true;
-        keyFile = "${config.home.homeDirectory}/.config/age/ssh-keys.txt";
+        keyFile = "${config.home.homeDirectory}/.config/sops/age/thinkpad-x13.txt";
         files.aiProviders = ../../../secrets/thinkpad-x13/ai-providers.sops.yaml;
         files.credentials = ../../../secrets/thinkpad-x13/credentials.sops.yaml;
       };
