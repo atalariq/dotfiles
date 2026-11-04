@@ -1,7 +1,7 @@
 # Core Neovim state: globals, options, diagnostics and the editor-wide
 # autocommands. This is build-time configuration; ftplugin/query/snippet files
 # stay in the live runtime tree because they are native Neovim data.
-{ nerdFont }:
+{ nerdFont, isFull }:
 { lib, ... }:
 let
   inherit (lib.generators) mkLuaInline;
@@ -75,7 +75,9 @@ in
       virtualedit = "block";
       winborder = "rounded";
       spelllang = "en_us,id";
-      formatexpr = "v:lua.require'conform'.formatexpr()";
+      # conform only exists in the full profile; a missing require would break
+      # `gq` on the minimal editor.
+      formatexpr = lib.mkIf isFull "v:lua.require'conform'.formatexpr()";
     };
 
     diagnostics = {

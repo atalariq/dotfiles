@@ -1,0 +1,32 @@
+[metadata]
+name = "dotfiles"
+description = "Tracked files in the dotfiles checkout"
+requirements = ["git", "bat"]
+
+[source]
+command = "git -C \"$HOME/.dotfiles\" ls-files"
+display = "{split:/:-1}"
+
+[preview]
+command = "bat -n --color=always \"$HOME/.dotfiles/{}\""
+env = { BAT_THEME = "ansi" }
+
+[ui]
+layout = "portrait"
+preview_panel = { size = 60 }
+
+[keybindings]
+f12 = "actions:edit"
+ctrl-e = "actions:edit_here"
+
+[actions.edit]
+description = "Open the selected file in the editor"
+command = "${EDITOR:-vim} \"$HOME/.dotfiles/{}\""
+shell = "bash"
+mode = "execute"
+
+[actions.edit_here]
+description = "Open the dotfiles checkout and select this file"
+command = "cd \"$HOME/.dotfiles\" && ${EDITOR:-vim} '{}'"
+shell = "bash"
+mode = "execute"

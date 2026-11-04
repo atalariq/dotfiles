@@ -15,17 +15,19 @@ not in per-tool modules:
 - **CodeGraph** - the shared code-intelligence MCP server;
 - **Crit** - inline review of what an agent produced;
 - **RTK** - compaction for noisy command output;
-- **Tirith** - policy lint for shell/agent actions.
+- **Tirith** - policy lint for shell/agent actions;
+- **Tokscale** - local AI token-usage tracking.
 
-All six are terminal-only and need no browser or display, so headless hosts and
-future servers keep the same floor. The core is deliberately atomic: to drop one
-member later, extract it back into its own module rather than adding a flag per
-tool now.
+All of them are terminal-only and need no browser or display, so headless hosts
+and future servers keep the same floor. The core is deliberately atomic: to drop
+one member later, extract it back into its own module rather than adding a flag
+per tool now.
 
-The clients (`codex`, `claude`, `agy`, `opencode`, `hermes`) and the remaining
-helpers (`agent-browser`, `git-ai`, `tokscale`, `workmux`) keep their own
-modules and stay individually opt-in - not every host (or subscription) wants
-them.
+The clients (`codex`, `claude`, `opencode`, `hermes`) and the remaining helper
+(`agent-browser`) keep their own modules and stay individually opt-in - not
+every host (or subscription) wants them. The trial bundle
+(`experimental.enable`) is deliberately small: `luvus`, `openresearch` and
+`tuicr`.
 
 ## CodeGraph
 

@@ -96,9 +96,14 @@ in
       "<leader>cd" =
         luaMap "function() local root = vim.fs.root(0, { '.git', 'package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml' }); vim.cmd.cd(root or vim.fn.expand('%:p:h')) end" "Cd to project root";
 
-      # Git hunks.
+      # Git: hunks, Neogit, fugitive.
       "<leader>hp" = cmd "Gitsigns preview_hunk_inline" "Preview hunk inline";
       "<leader>hB" = cmd "Gitsigns blame" "Blame buffer";
+      "<leader>gg" = cmd "Neogit" "Git status (Neogit)";
+      "<leader>gs" = cmd "Git" "Git status (fugitive)";
+      "<leader>gc" = cmd "Git commit" "Git commit";
+      "<leader>gp" = cmd "Git push" "Git push";
+      "<leader>gl" = cmd "Git log --oneline --graph" "Git log";
 
       # Dial.
       "<C-a>" = luaMap "function() require('dial.map').manipulate('increment', 'normal') end" "Increment";

@@ -17,13 +17,29 @@ let
   # after/ftplugin, queries and snippets can be edited without a rebuild.
   # Keymaps, options and autocmds are declared in Nix and rebuild normally.
   runtime = dotfilesLib.sourceFor "neovim" ../../../nvf/runtime;
-  nvfPlugins = import ../../../nvf/plugins.nix { inherit pkgs; };
+  cfg = config.dotfiles.programs.cli.neovim;
+  nvfPlugins = import ../../../nvf/plugins.nix {
+    inherit pkgs;
+    profile = cfg.profile;
+  };
 in
 {
   imports = [ inputs.nvf.homeManagerModules.nvf ];
 
   options.dotfiles.programs.cli.neovim = {
     enable = lib.mkEnableOption "nvf workstation editor";
+    profile = lib.mkOption {
+      type = lib.types.enum [
+        "full"
+        "minimal"
+      ];
+      default = "minimal";
+      description = ''
+        "full" enables language servers, formatters, linters and the language
+        modules. "minimal" keeps the editor self-contained on hosts that only
+        have Nix: no toolchain beyond git, ripgrep, fd and fzf.
+      '';
+    };
     nerdFont = lib.mkOption {
       type = lib.types.bool;
       default = config.dotfiles.appearance.gui;
@@ -41,10 +57,12 @@ in
       settings.imports = [
         (import ../../../nvf/nvf.nix {
           inherit runtime;
-          nerdFont = config.dotfiles.programs.cli.neovim.nerdFont;
+          inherit (cfg) profile nerdFont;
         })
         nvfPlugins.module
         (import ../../../nvf/runtime-layer.nix { inherit runtime; })
+      ]
+      ++ lib.optionals (cfg.profile == "full") [
         (import ../../../nvf/langs.nix { stacks = config.dotfiles.programs.development.stacks; })
       ];
       # Theme: Stylix owns the palette. When Stylix is off (lab/wsl-class

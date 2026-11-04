@@ -22,8 +22,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package ];
-
+    # The host owns the package; this module owns the wrapper, desktop entry
+    # and the headless connector service.
     # Zotero's GUI and headless connector service share one profile and
     # cannot run at the same time. The desktop entry goes through this
     # wrapper: stop the service, run the GUI, then restore the service.

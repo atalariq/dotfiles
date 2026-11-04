@@ -1,6 +1,0 @@
-{
-  "rate_control": "CQP",
-  "qp": 20,
-  "profile": 100,
-  "keyint_sec": 2
-}

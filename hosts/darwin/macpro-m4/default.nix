@@ -1,4 +1,7 @@
 { pkgs, ... }:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+in
 {
   imports = [ ../../../modules/darwin ];
   networking.hostName = "macpro-m4";
@@ -11,17 +14,6 @@
   system.stateVersion = 6;
   homebrew = {
     enable = true;
-    casks = [
-      "google-chrome"
-      "brave-browser"
-      "bitwarden"
-      "discord"
-      "slack"
-      "obsidian"
-      "localsend"
-      "linear"
-      "flutter"
-      "android-studio"
-    ];
+    inherit (apps) casks;
   };
 }

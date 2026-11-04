@@ -70,8 +70,6 @@ in
         steam-run
         steamtinkerlaunch
         dxvk
-        lsfg-vk
-        lsfg-vk-ui
         mangohud
         bottles
         heroic

@@ -19,10 +19,15 @@
 {
   runtime,
   nerdFont ? true,
+  # "full" adds language servers, formatters and linters. "minimal" keeps the
+  # editor self-contained: no toolchain beyond git/rg/fd/fzf, so it runs on any
+  # host that only has Nix (`nix run github:atalariq/dotfiles#neovim`).
+  profile ? "full",
 }:
 { pkgs, lib, ... }:
 let
   inherit (lib.generators) mkLuaInline;
+  isFull = profile == "full";
 
   renderMarkdownOpts =
     lib.recursiveUpdate
@@ -99,7 +104,7 @@ let
 in
 {
   imports = [
-    (import ./modules/core.nix { inherit nerdFont; })
+    (import ./modules/core.nix { inherit nerdFont isFull; })
     (import ./modules/maps.nix)
     (import ./modules/commands.nix)
   ];
@@ -114,7 +119,8 @@ in
     startPlugins = [ pkgs.vimPlugins.blink-cmp-git ];
 
     # Tools the config shells out to: fzf-lua needs rg/fd/fzf, gitsigns needs
-    # git, image and markdown helpers need curl/gzip.
+    # git, image and markdown helpers need curl/gzip. Minimal keeps only the
+    # portable four; every other binary is a language-toolchain dependency.
     extraPackages =
       with pkgs;
       [
@@ -122,17 +128,19 @@ in
         ripgrep
         fd
         fzf
+      ]
+      ++ lib.optionals isFull [
         curl
         gzip
         yamllint
         zoxide
         fish
       ]
-      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      ++ lib.optionals (isFull && pkgs.stdenv.hostPlatform.isLinux) [
         wl-clipboard
       ];
 
-    lsp = {
+    lsp = lib.mkIf isFull {
       enable = true;
       # Conform formats every save and falls back to LSP when no formatter is
       # configured. <leader>ltf toggles it per buffer; :FormatToggle flips the
@@ -150,51 +158,54 @@ in
       };
     };
 
-    languages = {
-      enableTreesitter = true;
-      enableFormat = true;
-      enableExtraDiagnostics = true;
-
-      nix = {
-        enable = true;
-        lsp.servers = [ "nixd" ];
-        format.type = [ "nixfmt" ];
-      };
-      lua = {
-        enable = true;
-        extraDiagnostics.types = [ "selene" ];
-        extensions.lazydev.enable = true;
-      };
-      # Everything a host works in - heavy (node/tsx, python, go, rust, clang,
-      # java, kotlin, dart) and gate-only (php, vue, svelte, sql, whose
-      # runtimes stay per-project in containers or mise) - is driven by
-      # `dotfiles.programs.development.stacks` and arrives from `langs.nix`; enabling any of
-      # them here would defeat that gate.
-      #
-      # Everything below is baseline markup/config/shell tooling, useful on
-      # every host regardless of declared stacks.
-      html.enable = true;
-      css.enable = true;
-      scss.enable = true;
-      markdown = {
-        enable = true;
-        format.type = [ "rumdl" ];
-        extraDiagnostics.types = [ "rumdl" ];
-      };
-      typst.enable = true;
-      tex.enable = true;
-      fish.enable = true;
-      bash.enable = true;
-      zsh.enable = true;
-      json.enable = true;
-      yaml.enable = true;
-      toml = {
-        enable = true;
-        lsp.servers = [ "tombi" ];
-        format.type = [ "tombi" ];
-        extraDiagnostics.types = [ "tombi" ];
-      };
-    };
+    languages = lib.mkMerge [
+      {
+        enableTreesitter = true;
+        enableFormat = isFull;
+        enableExtraDiagnostics = isFull;
+      }
+      (lib.mkIf isFull {
+        nix = {
+          enable = true;
+          lsp.servers = [ "nixd" ];
+          format.type = [ "nixfmt" ];
+        };
+        lua = {
+          enable = true;
+          extraDiagnostics.types = [ "selene" ];
+          extensions.lazydev.enable = true;
+        };
+        # Everything a host works in - heavy (node/tsx, python, go, rust, clang,
+        # java, kotlin, dart) and gate-only (php, vue, svelte, sql, whose
+        # runtimes stay per-project in containers or mise) - is driven by
+        # `dotfiles.programs.development.stacks` and arrives from `langs.nix`; enabling any of
+        # them here would defeat that gate.
+        #
+        # Everything below is baseline markup/config/shell tooling, useful on
+        # every host regardless of declared stacks.
+        html.enable = true;
+        css.enable = true;
+        scss.enable = true;
+        markdown = {
+          enable = true;
+          format.type = [ "rumdl" ];
+          extraDiagnostics.types = [ "rumdl" ];
+        };
+        typst.enable = true;
+        tex.enable = true;
+        fish.enable = true;
+        bash.enable = true;
+        zsh.enable = true;
+        json.enable = true;
+        yaml.enable = true;
+        toml = {
+          enable = true;
+          lsp.servers = [ "tombi" ];
+          format.type = [ "tombi" ];
+          extraDiagnostics.types = [ "tombi" ];
+        };
+      })
+    ];
 
     treesitter = {
       # Legacy nvim-ts-autotag parity for html.
@@ -202,7 +213,25 @@ in
       # Native async treesitter folding (0.11+; this pin is 0.12).
       fold = true;
       # KDL is injected from #USAGE comments by the live after/queries tree.
-      grammars = [ pkgs.tree-sitter-grammars.tree-sitter-kdl ];
+      # Minimal adds the light, LSP-free parsers so a fresh host still gets
+      # highlighting for the formats this repository is written in.
+      grammars = [
+        pkgs.tree-sitter-grammars.tree-sitter-kdl
+      ]
+      ++ lib.optionals (!isFull) (
+        with pkgs.vimPlugins.nvim-treesitter.grammarPlugins;
+        [
+          markdown
+          markdown_inline
+          json
+          yaml
+          toml
+          bash
+          fish
+          nix
+          typst
+        ]
+      );
     };
 
     autocomplete.blink-cmp = {
@@ -238,28 +267,36 @@ in
         };
         signature.enabled = true;
         sources = {
-          default = lib.mkForce [
-            "git"
-            "lazydev"
-            "lsp"
-            "path"
-            "snippets"
-            "buffer"
-          ];
+          # lazydev and LSP only exist in the full profile; minimal still gets
+          # git, path, snippet and buffer completion without any toolchain.
+          default = lib.mkForce (
+            [ "git" ]
+            ++ lib.optionals isFull [
+              "lazydev"
+              "lsp"
+            ]
+            ++ [
+              "path"
+              "snippets"
+              "buffer"
+            ]
+          );
           providers = {
             git = {
               module = "blink-cmp-git";
               name = "Git";
               opts = { };
             };
+            snippets.opts = {
+              friendly_snippets = true;
+              search_paths = [ "${runtime}/snippets" ];
+            };
+          }
+          // lib.optionalAttrs isFull {
             lazydev = {
               name = "LazyDev";
               module = "lazydev.integrations.blink";
               score_offset = 100;
-            };
-            snippets.opts = {
-              friendly_snippets = true;
-              search_paths = [ "${runtime}/snippets" ];
             };
           };
         };
@@ -293,7 +330,7 @@ in
       setupOpts.nerd_font = nerdFont;
     };
     binds.whichKey.enable = true;
-    formatter.conform-nvim = {
+    formatter.conform-nvim = lib.mkIf isFull {
       enable = true;
       # nvf's presets predate the current CLI flags: nixfmt now needs an
       # explicit stdin marker, and tombi renamed --stdin-filepath to
@@ -315,7 +352,7 @@ in
         ];
       };
     };
-    diagnostics.nvim-lint = {
+    diagnostics.nvim-lint = lib.mkIf isFull {
       enable = true;
       linters_by_ft = {
         fish = [ "fish" ];
@@ -340,6 +377,11 @@ in
         previousHunk = "[h";
       };
     };
+
+    # vim-fugitive replaces lazygit for staging/:Git; Neogit is the structured
+    # status/branch/commit UI. Both work with plain git, no external helper.
+    git.vim-fugitive.enable = true;
+    git.neogit.enable = true;
 
     # mini.surround replaces nvim-surround so the legacy sa/sd/sr maps stay.
     utility.surround.enable = false;

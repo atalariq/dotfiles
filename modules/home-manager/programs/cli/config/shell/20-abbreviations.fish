@@ -46,7 +46,14 @@ abbr -a gst "git stash"
 abbr -a gstu "git stash push -u"
 abbr -a gstp "git stash pop"
 
-abbr -a lg lazygit
+# ── Television ─────────────────────────────────────────
+# One fuzzy-finder entry point per intent. Ctrl-T stays the shell-integration
+# launcher; these are the deliberate, named pickers.
+abbr -a tvf "tv files"
+abbr -a tvg "tv git-log"
+abbr -a tvd "tv dotfiles"
+abbr -a tvo "tv opencode-sessions"
+abbr -a tvj "tv just-recipes"
 
 if test (uname) = Linux
     # ── System ─────────────────────────────────────────────

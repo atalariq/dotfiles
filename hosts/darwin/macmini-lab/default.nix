@@ -1,4 +1,7 @@
 { pkgs, ... }:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+in
 {
   imports = [ ../../../modules/darwin ];
 
@@ -15,18 +18,6 @@
   # tooling in the Home Manager profile.
   homebrew = {
     enable = true;
-    casks = [
-      "kitty"
-      "android-studio"
-      "android-platform-tools"
-      "helium-browser"
-      "google-chrome"
-      "bitwarden"
-      "discord"
-      "slack"
-      "obsidian"
-      "orbstack"
-      "localsend"
-    ];
+    inherit (apps) casks;
   };
 }

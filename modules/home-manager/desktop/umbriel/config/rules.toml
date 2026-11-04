@@ -71,13 +71,6 @@ default_floating = true
 [window_rule.match]
 title = "^(Open File.*|Open Folder|Save As|Save File|Choose wallpaper|Steam Guard)$"
 
-# mpv opens floating (video-in-corner style).
-[[window_rule]]
-default_floating = true
-
-[window_rule.match]
-app_id = "^mpv$"
-
 # Steam/Proton games: keep the mouse inside the window.
 [[window_rule]]
 confine_pointer = true

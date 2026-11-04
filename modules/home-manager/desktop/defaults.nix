@@ -28,14 +28,6 @@ in
         message = "The terminal file chooser uses yazi; enable dotfiles.programs.cli.yazi.";
       }
       {
-        assertion = config.dotfiles.programs.gui.miro.enable;
-        message = "The default PDF viewer is Miro; enable dotfiles.programs.gui.miro.";
-      }
-      {
-        assertion = config.dotfiles.programs.gui.oculante.enable;
-        message = "The default image viewer is Oculante; enable dotfiles.programs.gui.oculante.";
-      }
-      {
         assertion = config.dotfiles.programs.gui.brave-origin.enable;
         message = "The Chrome compatibility shims and default browser point at Brave Origin; enable dotfiles.programs.gui.brave-origin.";
       }
@@ -65,8 +57,8 @@ in
         "application/x-fictionbook+xml" = "readest.desktop";
         "application/vnd.comicbook+zip" = "readest.desktop";
         "image/*" = "oculante.desktop";
-        "audio/*" = "mpv.desktop";
-        "video/*" = "mpv.desktop";
+        "audio/*" = "vlc.desktop";
+        "video/*" = "vlc.desktop";
         "application/zip" = "org.gnome.FileRoller.desktop";
         "application/gzip" = "org.gnome.FileRoller.desktop";
         "application/bzip2" = "org.gnome.FileRoller.desktop";
@@ -156,6 +148,23 @@ in
         StartupNotify=false
       '';
     };
+
+    # Miro is CLI-first and ships no desktop entry. The package is owned by the
+    # host, but the desktop entry stays here so the MIME default keeps working
+    # on every host that installs it.
+    xdg.dataFile."applications/miro-pdf.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Version=1.0
+      Name=Miro
+      Comment=Native PDF viewer with auto-reload
+      Exec=${pkgs.miro}/bin/miro-pdf %F
+      Icon=application-pdf
+      Terminal=false
+      Categories=Office;Viewer;
+      MimeType=application/pdf;application/x-pdf;text/pdf;text/x-pdf;
+      StartupNotify=false
+    '';
 
     # termfilechooser reads this before its default ranger config. The yazi
     # wrapper launches the configured terminal (kitty by default).

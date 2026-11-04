@@ -17,8 +17,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package ];
-
+    # The package belongs to the host (environment.systemPackages on NixOS,
+    # Homebrew on macOS). This module only owns the writable profile glue.
     # Bitwarden Desktop only looks for Brave at its hardcoded
     # `Brave-Browser` profile directory, while this host runs Brave Origin.
     home.activation.braveOriginBitwardenBridge = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (

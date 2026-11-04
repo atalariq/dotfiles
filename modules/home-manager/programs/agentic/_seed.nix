@@ -27,11 +27,6 @@ let
       target = "${config.home.homeDirectory}/.claude/settings.json";
     }
     {
-      enable = programs.agy.enable;
-      template = "agy.json";
-      target = "${config.home.homeDirectory}/.gemini/antigravity-cli/settings.json";
-    }
-    {
       enable = programs.opencode.enable;
       template = "opencode.jsonc";
       target = "${config.xdg.configHome}/opencode/opencode.jsonc";
@@ -40,11 +35,6 @@ let
       enable = programs.hermes.enable;
       template = "hermes.yaml";
       target = "${config.home.homeDirectory}/.hermes/config.yaml";
-    }
-    {
-      enable = programs.agy.enable && programs.core.enable;
-      template = "agy-mcp.json";
-      target = "${config.home.homeDirectory}/.gemini/config/mcp_config.json";
     }
     {
       enable = programs.claude.enable && programs.core.enable;

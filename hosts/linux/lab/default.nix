@@ -1,11 +1,15 @@
 { pkgs, ... }:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+in
 {
   imports = [ ../../../modules/home-manager ];
   home = {
     sessionVariables.DOTFILES_HOST = "linux-lab";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
-    packages = [ pkgs.wget ];
+    packages = apps.cli;
   };
+  dotfiles.programs.development.stacks = apps.stacks;
   targets.genericLinux.enable = true;
 }

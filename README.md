@@ -15,7 +15,7 @@ that install them.
 - **Configuration:** Home Manager modules, immutable generations, and optional live editing of native files.
 - **Secrets:** Application-scoped SOPS files with age identities provisioned separately.
 - **Development:** Commands collected in a plain `Justfile`; project environments come from devenv/flox rather than flake templates.
-- **Coding agents:** per-tool opt-in clients (Antigravity, OpenCode, Hermes) with
+- **Coding agents:** per-tool opt-in clients (OpenCode, Hermes) with
   direct DeepSeek connections; a shared core toolset for review, output compaction,
   and the task queue.
 
@@ -182,16 +182,20 @@ the media HDD.
 ## Customization
 
 The shared environment lives under `modules/home-manager/programs/`, split
-into four categories: `cli`, `gui`, `development` and `agentic`. Each category
-has a `default.nix` for the core and one `<pname>.nix` per opt-in package.
-Package config lives beside it in `<category>/config/<pname>/`.
+into four categories: `cli`, `gui`, `development` and `agentic`. A file in that
+tree must own configuration, a service or a wrapper - package-only entries do
+not get a module. Package config lives beside it in
+`<category>/config/<pname>/`.
 
 The CLI core (`dotfiles.programs.cli`) is enabled by default: shell, git,
 Nix tooling, vim, tmux, the standard POSIX tools and modern replacements.
-Everything else is opt-in, including GUI applications and the development
-tool bundles. GUI apps are host-local by design: NixOS x13 selects Home Manager
-modules, macOS uses Homebrew casks, and headless hosts install nothing.
-Development stacks are declared with `dotfiles.programs.development.stacks`.
+GUI packages are host-owned: write them in `hosts/<platform>/<host>/apps.nix`
+(`environment.systemPackages` on NixOS, Homebrew casks on macOS, nothing on
+headless hosts). The matching Home Manager modules only write config or run a
+service; native modules set `programs.<pname>.package = null` when the host owns
+the binary. Development stacks are declared with
+`dotfiles.programs.development.stacks`; the matching JetBrains IDE is written in
+`apps.nix` and an eval assertion keeps the two from drifting.
 Gaming is a NixOS feature (`dotfiles.gaming.enable`), not a Home Manager
 package bundle. Each host adds its own applications, system services and
 displays; package definitions stay next to their consumers. See
@@ -272,21 +276,31 @@ copy of the include tree during builds, even when the deployed links are live.
 Neovim is assembled from nvf and split by how often things change. Build-time
 configuration - plugins, LSP servers, formatters, parsers - lives in the shared
 kernel `modules/nvf/` (`nvf.nix`, `modules/`, `plugins.nix`, `langs.nix`,
-`runtime-layer.nix`), imported by the Home Manager wrapper
-`modules/home-manager/programs/cli/neovim.nix` and the standalone
-`nix run .#neovim` package, so neither can drift. Editor behavior - options,
-keymaps, autocmds, plugins, LSP, formatters and diagnostics - is declared in
-Nix and changes with a rebuild. The live tree is `modules/nvf/runtime/`: with
-Neovim selected in `liveApps`, edit `after/ftplugin`, `after/queries`, editor
-settings (`selene.toml`, `stylua.toml`, `.luarc.json`) and the personal snippet
-library under `runtime/snippets/` directly in the checkout. Every save is
+`runtime-layer.nix`). Two profiles share that kernel:
+
+- **`full`** adds LSP, conform, nvim-lint and the language modules. The
+  ThinkPad uses it; every other host uses `minimal`.
+- **`minimal`** keeps the editing experience (treesitter, blink-cmp, fzf-lua,
+  oil, quicker, mini.*, gitsigns, fugitive, Neogit) and drops the heavy
+  toolchains. Its only external binaries are `git`, `ripgrep`, `fd` and `fzf`,
+  which the wrapper carries in its closure.
+
+The Home Manager wrapper (`modules/home-manager/programs/cli/neovim.nix`) and
+the standalone packages share the same kernel. `nix run github:atalariq/dotfiles#neovim`
+is the portable minimal editor on any host that only has Nix;
+`nix run .#neovim-full` is the workstation profile. Editor behavior - options,
+keymaps, autocmds, plugins - is declared in Nix and changes with a rebuild. The
+live tree is `modules/nvf/runtime/`: with Neovim selected in `liveApps`, edit
+`after/ftplugin`, `after/queries`, editor settings (`selene.toml`,
+`stylua.toml`, `.luarc.json`) and the personal snippet library under
+`runtime/snippets/` directly in the checkout. In the full profile every save is
 formatted through conform with LSP fallback; `<leader>ltf` toggles it per buffer
 and `:FormatToggle` flips the global default. Markdown is read raw by default;
-`<leader>mr` toggles rendering and `<leader>mR` opens a rendered split. The
-plugin set is curated from LazyVim/NvChad/NotAShelf: nvim-tree + oil for files,
-lualine + bufferline, aerial + dropbar, review.nvim for agent review, and no
-noice/dashboard/snacks. Plugins, parsers and external language tools rebuild
-through a generation.
+`<leader>mr` toggles rendering and `<leader>mR` opens a rendered split. Git is
+native: gitsigns for hunks, `<leader>gg` Neogit, `<leader>gs` fugitive. The
+plugin set is curated from LazyVim/NvChad/NotAShelf: oil for files, mini.* for
+statusline/tabline, aerial, review.nvim for agent review, and no
+noice/dashboard/snacks.
 
 Freesm Launcher ships inside the NixOS gaming module
 (`dotfiles.gaming.enable`) on x86_64 Linux. Its official AppImage is
@@ -359,20 +373,19 @@ dotfiles.programs.agentic = {
   core.enable = true;        # the shared floor, installed by this module group
   opencode.enable = true;    # clients stay individual opt-in
   hermes.enable = true;
-  # Individual switches remain overridable:
-  tokscale.enable = false;
+  experimental.enable = true; # small trial bundle: luvus, openresearch, tuicr
 };
 ```
 
 `agentic.core.enable` installs the toolset every agent host should run: Beads Rust
-and Beads Viewer (queue and its graph-aware TUI), CodeGraph, Crit, RTK, and
-Tirith - terminal-only, no browser or display required, so headless hosts and
-future servers keep the same floor. The core is atomic by design; clients
-(Codex, Claude Code, OpenCode, Hermes, Antigravity) and the remaining helpers
-(agent-browser, git-ai, tokscale, workmux) are selected individually, and a
-host without a subscription for a client simply does not select it. Nothing
-here starts workers, indexes projects, installs shell rewrite hooks, or
-purchases provider access. git-ai remains a documented experiment.
+and Beads Viewer (queue and its graph-aware TUI), CodeGraph, Crit, RTK, Tirith
+and Tokscale - terminal-only, no browser or display required, so headless hosts
+and future servers keep the same floor. The core is atomic by design; clients
+(Codex, Claude Code, OpenCode, Hermes) and the remaining helper (agent-browser)
+are selected individually, and a host without a subscription for a client
+simply does not select it. Nothing here starts workers, indexes projects,
+installs shell rewrite hooks, or purchases provider access. The
+`experimental` bundle is deliberately small (luvus, openresearch, tuicr).
 
 Every device runs its own Hermes locally: the terminal interface only, with no
 gateway, no listening port and no cross-machine messaging. It manages that
@@ -402,7 +415,7 @@ OpenCode and Hermes, schema references, update checks off, co-author opt-outs,
 CodeGraph as the single MCP server). Permissions, sandbox paths, approval
 lists, extra MCP servers and UI preferences are owned by each tool, which
 rewrites its own profile on normal use. Add capability through the native
-commands (`codex mcp add`, `claude mcp add`, `agy mcp add`,
+commands (`codex mcp add`, `claude mcp add`,
 `opencode mcp add --global`) instead of growing the Nix seed.
 
 Agent CLIs and supporting helpers live together under
@@ -417,7 +430,6 @@ these modules generate.
 | `claude` | Native authentication; trusted project implementation and review |
 | `opencode2` | `/connect` to DeepSeek, then select the direct model; draft implementation |
 | `hermes` | Native provider setup or private `DEEPSEEK_API_KEY`; optional parallel coordinator |
-| `agy --effort high` | Google sign-in; draft implementation |
 
 DeepSeek is the fresh-profile default for OpenCode and Hermes. OpenRouter is an
 explicit alternative selected through the native provider settings. There is no
@@ -442,8 +454,8 @@ interactive ask list.
 
 #### Integration and coordination
 
-The helper bundle installs CodeGraph, agent-browser, crit, RTK, tirith,
-Tokscale and workmux. Fresh profiles seed two MCP servers: CodeGraph and
+The core installs CodeGraph, crit, RTK, tirith and Tokscale; agent-browser
+keeps its own opt-in module. Fresh profiles seed two MCP servers: CodeGraph and
 agent-browser (`agent-browser mcp`). Stable executable names survive package
 upgrades; existing profiles keep their own server lists until you update them.
 
@@ -454,7 +466,6 @@ crit install claude-code   # also: codex, opencode, github-copilot, hermes
 agent-browser mcp          # stdio server already seeded for the enabled clients
 rtk git status             # compact output for noisy commands
 tokscale clients           # where usage comes from; then `tokscale models`
-workmux add <name>         # worktree + tmux window per parallel task
 ```
 
 Per-agent crit setup is runtime state (not Nix-declared); the manual steps,
@@ -462,10 +473,9 @@ install order, and known `crit check` noise are documented in
 [docs/agent-setup.md](docs/agent-setup.md).
 
 Project indexing is a separate explicit action; use the CLI when a client has
-not loaded its MCP server. [Tokscale](modules/home-manager/programs/agentic/tokscale.README.md)
-runs on demand and unpriced models can appear with zero cost, which must be
-treated as unknown. None of these tools starts a background collector or
-intercepts all shell commands.
+not loaded its MCP server. Tokscale runs on demand and unpriced models can
+appear with zero cost, which must be treated as unknown. None of these tools
+starts a background collector or intercepts all shell commands.
 
 Use a single agent by default. For independent parallel tasks, follow the
 [native workflow](docs/agent-workflow.md): shared Beads claims, separate worktrees,
@@ -511,11 +521,10 @@ pass passwords through chat, agent stdin, command arguments, or askpass helpers.
 
 #### Optional experiments
 
-Beyond the core floor, agent-browser, git-ai, Tokscale and Workmux stay
-individual host choices. Installing a package alone does not prove agent
-integration. Enable an integration after its intended workflow has been verified.
-For git-ai, configure a nonempty repository allowlist and review its private
-configuration before enabling hooks; retain the module's upload restrictions.
+Beyond the core floor, agent-browser stays an individual host choice. Trial
+tools live in the small `experimental` bundle (luvus, openresearch, tuicr).
+Installing a package alone does not prove agent integration. Enable an
+integration after its intended workflow has been verified.
 
 ## Development
 
@@ -541,8 +550,10 @@ pins exact revisions, and updates never select a fallback automatically.
 
 The development shell includes `nh`, `nix-tree`, `deadnix`, and `statix`.
 `just lint` reports source findings without rewriting files. Television-enabled
-hosts include Nix search through `tv nix`; its indexes update independently of
-the flake and are discovery aids rather than the installed package inventory.
+hosts include Nix search through `tv nix-search-tv`; its indexes update
+independently of the flake and are discovery aids rather than the installed
+package inventory. Channel and keybinding layout are documented in
+[docs/keybindings.md](docs/keybindings.md).
 
 RTK is available explicitly on desktop hosts. Prefer concise native commands
 first; use RTK for repetitive output and recover original diagnostics before

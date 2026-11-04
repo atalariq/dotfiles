@@ -7,7 +7,7 @@ set -euo pipefail
 limit_bytes="${LARGE_FILE_LIMIT:-1048576}"
 
 # Paths that are deliberately allowed above the limit.
-allow_regex='^modules/home-manager/programs/gui/config/mpv/fonts/.*\.ttf$|^flake\.lock$'
+allow_regex='^flake\.lock$'
 
 fail=0
 while IFS= read -r -d '' entry; do

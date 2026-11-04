@@ -1,10 +1,10 @@
 # The `dotfiles.programs.agentic` group kernel: installs the core toolset
 # directly and imports every client/helper module from this directory.
 #
-# The six core tools below are the floor for any host running agents and are
-# atomic by design; extract one into its own module only if it ever needs a
-# separate switch. Client subscriptions and credential-bearing tools stay
-# individual opt-ins. README.md beside this file documents the namespace.
+# The core tools below are the floor for any host running agents and are atomic
+# by design; extract one into its own module only if it ever needs a separate
+# switch. Client subscriptions and credential-bearing tools stay individual
+# opt-ins. README.md beside this file documents the namespace.
 {
   config,
   inputs,
@@ -29,7 +29,7 @@ in
   });
 
   options.dotfiles.programs.agentic = {
-    core.enable = lib.mkEnableOption "the agentic core toolset (crit, rtk, tirith, Beads Rust/Viewer, CodeGraph)";
+    core.enable = lib.mkEnableOption "the agentic core toolset (crit, rtk, tirith, Beads Rust/Viewer, CodeGraph, Tokscale)";
     experimental.enable = lib.mkEnableOption "the experimental AI toolset for evaluation";
     beads-directory = lib.mkOption {
       type = lib.types.addCheck lib.types.str (lib.hasPrefix "/");
@@ -46,6 +46,7 @@ in
         agentPackages.codegraph
         agentPackages.crit
         agentPackages.rtk
+        agentPackages.tokscale
         pkgs.tirith
       ];
 
@@ -79,21 +80,12 @@ in
       };
     })
     (lib.mkIf cfg.experimental.enable {
+      # Deliberately small: only tools that are still on trial. Everything else
+      # is either core or has its own opt-in module.
       home.packages = [
-        agentPackages.tokscale
-        agentPackages.ccusage
-        agentPackages.aven
-        agentPackages.workmux
-        agentPackages.herdr
-        agentPackages.orca
         agentPackages.luvus
         agentPackages.openresearch
-        agentPackages.crit
         agentPackages.tuicr
-        agentPackages.agent-browser
-        agentPackages.git-ai
-        agentPackages.git-surgeon
-        agentPackages.toon
       ];
     })
   ];

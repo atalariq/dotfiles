@@ -24,11 +24,6 @@ crit install prompts        # shared finish/story prompt templates → ~/.crit/p
 crit install story-prompts  # story-generation template
 ```
 
-`agy` (Antigravity) has no native crit integration. The generic `prompts`
-install above covers it: point agy at `~/.crit/prompts/` templates when
-finishing a review, and drive the loop with plain `crit` CLI commands
-(`crit`, `crit comment`, `crit share`).
-
 Install order matters for one shared path (see below); `codex` is
 deliberately last because its skill variant carries Codex-specific wording
 (background tasks, plan mode, `--author 'Codex'`) that Codex actually needs.
@@ -66,7 +61,6 @@ Two findings are **expected noise, not breakage**:
 | claude-code | `~/.claude/skills/crit{,-cli,-story}/SKILL.md` |
 | gemini | `~/.gemini/skills/`, `~/.gemini/commands/crit*.toml`, `~/.gemini/policies/crit.toml` |
 | hermes | `~/.hermes/skills/crit{,-cli,-story}/SKILL.md` |
-| agy (manual) | `~/.crit/prompts/` templates + plain `crit` CLI |
 
 Do not delete `~/.agents/skills/crit/SKILL.md`: the OpenCode installer calls
 it "obsolete" for OpenCode (which moved to `commands/` + `crit-cli`), but

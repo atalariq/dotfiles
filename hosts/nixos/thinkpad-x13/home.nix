@@ -1,9 +1,15 @@
 { config, pkgs, ... }:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+in
 {
   imports = [
     ../../../modules/home-manager
   ];
   home = {
+    # CLI tools stay in the Home Manager profile; system packages live in
+    # apps.nix and are installed by default.nix.
+    packages = apps.cli;
     sessionVariables.DOTFILES_HOST = "thinkpad-x13";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
@@ -22,6 +28,7 @@
       "neovim"
       "fish"
       "kitty"
+      "television"
       "umbriel"
       "noctalia"
     ];
@@ -46,56 +53,45 @@
       noctalia.enable = true;
     };
     programs = {
-      development.stacks = [
-        "node"
-        "bun"
-        "python"
-        "go"
-        "rust"
-        "cc"
-        # gate-only (no PATH runtime): drives nvf languages + PhpStorm.
-        "php"
-        "vue"
-        "sql"
-      ];
+      # One list, two readers: apps.nix also feeds the system IDE assertion.
+      development.stacks = apps.stacks;
       cli = {
         enable = true;
         terminal-tools.enable = true;
         aria2.enable = true;
         atuin.enable = true;
         gh.enable = true;
-        glab.enable = true;
         mpd.enable = true;
-        neovim.enable = true;
+        neovim = {
+          enable = true;
+          profile = "full";
+        };
         television.enable = true;
         typst.enable = true;
         yazi.enable = true;
         yt-dlp.enable = true;
       };
+      # GUI applications are selected in apps.nix (system-owned). Home Manager
+      # only keeps the modules that own configuration or a service.
       gui = {
-        workstation.enable = true;
-        jellyfin.enable = true;
+        brave-origin.enable = true;
+        espanso.enable = true;
+        kitty.enable = true;
+        obs-studio.enable = true;
+        zotero.enable = true;
       };
       # Per-tool opt-in (no umbrella): codex/claude stay off until there is a
-      # subscription for them; git-ai stays off as a documented experiment.
+      # subscription for them.
       agentic = {
         core.enable = true;
         experimental.enable = true;
-        agy.enable = true;
         agent-browser.enable = true;
         hermes.enable = true;
         opencode.enable = true;
-        tokscale.enable = true;
-        workmux.enable = true;
       };
       development = {
-        android.enable = true;
         devenv.enable = true;
         direnv.enable = true;
-        # IDEs derive from development.stacks above: node/bun->webstorm,
-        # go->goland, rust->rustrover, php->phpstorm. python/cc intentionally
-        # have no mapping (Neovim covers them).
-        jetbrains.enable = true;
         mise.enable = true;
         podman.enable = true;
       };

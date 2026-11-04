@@ -32,6 +32,7 @@
           "opencode"
           "fish"
           "kitty"
+          "television"
           "umbriel"
           "noctalia"
         ]

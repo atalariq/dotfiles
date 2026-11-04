@@ -1,70 +1,54 @@
 # Program modules
 
-Four categories, one owner rule:
+Four categories, one ownership rule:
 
-| Category | Option prefix | Core |
+| Category | Option prefix | Owner |
 | --- | --- | --- |
-| `agentic` | `dotfiles.programs.agentic.*` | terminal-only agent floor |
-| `cli` | `dotfiles.programs.cli.*` | shell, git, Nix, vim, tmux, POSIX tools |
-| `gui` | `dotfiles.programs.gui.*` | none; GUI is host-local |
-| `development` | `dotfiles.programs.development.*` | `stacks` toolchain only |
+| `agentic` | `dotfiles.programs.agentic.*` | Home Manager (terminal tools) |
+| `cli` | `dotfiles.programs.cli.*` | Home Manager (config + packages) |
+| `gui` | `dotfiles.programs.gui.*` | **system** package; Home Manager config only |
+| `development` | `dotfiles.programs.development.*` | `stacks` toolchains (Home Manager) |
 
 ## Layout
 
 ```text
-<category>/default.nix       category core or host-local stub
-<category>/<pname>.nix       one opt-in package module
+<category>/default.nix       category kernel (imports config-bearing modules)
+<category>/<pname>.nix       a module that owns configuration or a service
 <category>/_*.nix            helper imported explicitly; never a package
 <category>/config/<pname>/   native configuration for <pname>
 ```
 
 `<category>/default.nix` imports every sibling module through
-`../_import-category.nix`; adding `<pname>.nix` exposes its option without
-editing a registry. The top-level `programs/default.nix` imports only
-categories.
+`../_import-category.nix`. A file in this tree must justify itself with
+configuration, a service, an assertion or a wrapper. Package-only entries do
+**not** get a module.
 
-## Option rules
+## Package ownership
 
-- Every package module exposes `dotfiles.programs.<category>.<pname>.enable`
-  (default `false`) and, for package-only modules, a `package` override.
-- Category `enable` gates **core only**. Explicit per-package switches remain
-  independent.
-- Native Home Manager modules keep their own `programs.<pname>.package`; do not
-  duplicate it.
-- GUI has no global `enable`: select Nix-managed apps on NixOS, Homebrew casks
-  on macOS, and nothing on headless hosts. `gui/workstation.nix` is only an
-  aggregate for the NixOS workstation.
-- Proprietary, account-bearing or state-bearing apps stay opt-in and carry an
-  `# opt-in:` header. Core must be free, headless-safe and credential-free.
+- **GUI packages** are installed by the host:
+  - NixOS: `hosts/nixos/<host>/apps.nix` → `environment.systemPackages`.
+  - macOS: `hosts/darwin/<host>/apps.nix` → `homebrew.casks`.
+  - Standalone Home Manager and headless hosts: no GUI packages.
+- GUI modules under `gui/` only write config (kitty, espanso), a service
+  (zotero), or a profile bridge (brave-origin, obs-studio). They must not call
+  `home.packages` for the application itself. Native modules use
+  `programs.<pname>.package = lib.mkForce null` when the host owns the binary.
+- **CLI packages** stay in Home Manager. The shared floor lives in
+  `cli/default.nix`; host-specific extras go in `apps.nix` `cli` (NixOS/macOS)
+  or `home.packages` (standalone).
+- Native Home Manager modules (`programs.fd`, `programs.git`, ...) install
+  their own package; do not duplicate it in `apps.nix`.
 
-## Add a package
+## Adding something
 
-```nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
-let
-  cfg = config.dotfiles.programs.cli.foo;
-in
-{
-  options.dotfiles.programs.cli.foo = {
-    enable = lib.mkEnableOption "foo";
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.foo;
-    };
-  };
+1. **Package only** — add the name to `hosts/.../apps.nix` (`gui` or `cli`) or
+   to `home.packages` on a standalone host. No new file.
+2. **Needs configuration/service** — add `programs/<category>/<pname>.nix`
+   with an `enable` option that defaults to `false`, then select it on the
+   host. Put native files under `programs/<category>/config/<pname>/`.
+3. **Shared by several hosts** — put it in `modules/packages/common.nix` (or
+   `ides.nix` for the stack→IDE data) and import it from the hosts that want
+   it.
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.package ];
-  };
-}
-```
-
-Create `cli/foo.nix`, add `dotfiles.programs.cli.foo.enable = true;` on the
-hosts that want it, and put native files under `cli/config/foo/` when needed.
-Removing the module removes the option; hosts still referencing it fail
-evaluation on purpose.
+Proprietary, account-bearing or state-bearing apps stay opt-in. Core bundles
+must be free, headless-safe and credential-free.

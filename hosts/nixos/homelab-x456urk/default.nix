@@ -10,7 +10,7 @@
     ./hardware.nix
     ./media.nix
     ./network.nix
-    ./apps.nix
+    ./services.nix
     ./bookorbit.nix
   ];
 

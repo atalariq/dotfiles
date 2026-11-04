@@ -1,10 +1,14 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+in
 {
   imports = [
     ../../../modules/home-manager
   ];
   home = {
     username = "praktikan";
+    packages = apps.cli;
     sessionVariables = {
       DOTFILES_HOST = "macmini-lab";
       TERMINAL = "kitty";
@@ -22,14 +26,12 @@
       "vim"
       "neovim"
       "fish"
+      "television"
     ];
     programs = {
       # Java/Kotlin are handled by Android Studio; nvf only needs Node/Python.
       development = {
-        stacks = [
-          "node"
-          "python"
-        ];
+        stacks = apps.stacks;
         mise.enable = true;
       };
       cli = {

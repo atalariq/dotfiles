@@ -31,9 +31,8 @@ worktree Beads command against the main queue, for example
 `br --db "$DOTFILES_BEADS_DIR/beads.db" show ISSUE`. Keep this override scoped to
 this repository, rather than setting `BEADS_DIR` globally for unrelated projects.
 
-Use a separate Git worktree for each implementation scope. Workmux may create it
-with `--headless --no-hooks --no-file-ops --no-pane-cmds`; plain `git worktree add`
-also works. Existing uncommitted changes need an explicitly recorded baseline:
+Use a separate Git worktree for each implementation scope. Plain
+`git worktree add` is the supported path. Existing uncommitted changes need an explicitly recorded baseline:
 apply the reviewed source diff and copy only named new source files. Do not copy
 credentials, runtime state, caches, or a second Beads database. Compare the worker's
 result against that inherited baseline, not only against HEAD.
@@ -49,8 +48,8 @@ documentation. Workers report conflicts instead of editing another scope.
 
 Allow at most **two external workers** at once; fewer is appropriate when tasks
 overlap or coordination costs outweigh concurrency. Codex and Claude are trusted
-implementers for this project. OpenCode, Hermes and Antigravity submit draft
-changes for trusted review. Trust covers the evaluated tool/model configuration;
+implementers for this project. OpenCode and Hermes submit draft changes for
+trusted review. Trust covers the evaluated tool/model configuration;
 changing a model or provider requires reassessment. Native
 subagents use their parent tool's account limits; they do not increase the Codex
 quota. Workers do not recursively launch more workers unless assigned to do so.
@@ -63,11 +62,11 @@ worktree as `workdir`, `background=true`, `notify_on_complete=true`, and
 `delegation.max_concurrent_children` only limits Hermes children, not external
 CLI processes.
 
-The native headless interfaces are `codex exec`, `opencode2 run --standalone`, and
-`agy --print`. Pass the task through stdin or a task file, use each CLI's JSON
+The native headless interfaces are `codex exec`, `opencode2 run --standalone`,
+and `claude -p`. Pass the task through stdin or a task file, use each CLI's JSON
 output, and record its native session/conversation ID for resume. Use the current
-installed CLI help for arguments. Give Codex and Antigravity scoped access to the
-main queue with `--add-dir "$DOTFILES_BEADS_DIR"`; OpenCode's generated policy
+installed CLI help for arguments. Give Codex scoped access to the main queue
+with `--add-dir "$DOTFILES_BEADS_DIR"`; OpenCode's generated policy
 includes that directory. If native project trust is required, trust only the
 assigned owner-authorized worktree, never the entire home directory. Worker HOME stays unchanged so the application
 can use its existing authentication; credentials never enter the prompt, command
@@ -111,7 +110,7 @@ before deciding it stopped. Never launch a duplicate simply because a new
 registry does not list the old job; the hard timeout still bounds that job.
 
 Hermes `delegate_task` starts another Hermes agent; it does not select an external
-Codex/OpenCode/Antigravity executable. `delegation.orchestrator_enabled` controls
+Codex/OpenCode executable. `delegation.orchestrator_enabled` controls
 whether those Hermes children can coordinate further; it does not disable the
 parent's terminal-based coordination. External worker approvals are not forwarded
 automatically to Hermes. Configure headless workers to stop and report protected

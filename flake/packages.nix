@@ -7,11 +7,23 @@
         inherit system;
         config.allowUnfree = true;
       };
-      editor = import ../modules/nvf/package.nix { inherit inputs pkgs; };
+      # Portable default: no LSP/formatter/linter toolchains, no Nerd Font
+      # requirement. Works on any host that only has Nix.
+      editor = import ../modules/nvf/package.nix {
+        inherit inputs pkgs;
+        profile = "minimal";
+        nerdFont = false;
+      };
+      editorFull = import ../modules/nvf/package.nix {
+        inherit inputs pkgs;
+        profile = "full";
+        nerdFont = true;
+      };
     in
     {
       packages = {
         neovim = editor;
+        neovim-full = editorFull;
         default = editor;
         # Pinned CLI for the bootstrap recipe before the first activation.
         home-manager = inputs.home-manager.packages.${system}.home-manager;

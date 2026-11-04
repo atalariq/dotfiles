@@ -1,0 +1,147 @@
+# Television configuration. Live-linked: edit this file and restart tv.
+#
+# Layer contract: this file only claims keys that reach the TUI. Kitty owns
+# Ctrl+Shift and Alt+Shift, Umbriel owns Super, and the shell owns Ctrl-R/Ctrl-T
+# outside tv, so the defaults below do not collide with a parent layer.
+
+tick_rate = 50
+default_channel = "files"
+history_size = 200
+global_history = false
+# Fuzzy matching tolerates one typo per four characters (max two).
+typo_resistance = true
+
+[ui]
+ui_scale = 100
+orientation = "landscape"
+theme = "television"
+
+[ui.input_bar]
+position = "top"
+prompt = ""
+border_type = "none"
+
+[ui.status_bar]
+hidden = false
+
+[ui.results_panel]
+border_type = "none"
+
+[ui.preview_panel]
+size = 50
+scrollbar = false
+border_type = "none"
+hidden = false
+
+[ui.help_panel]
+show_categories = true
+hidden = true
+
+[ui.remote_control]
+show_channel_descriptions = true
+sort_alphabetically = true
+
+[keybindings]
+# Application control
+esc = "quit"
+ctrl-c = "quit"
+
+# Navigation and selection
+down = "select_next_entry"
+ctrl-n = "select_next_entry"
+ctrl-j = "select_next_entry"
+up = "select_prev_entry"
+ctrl-p = "select_prev_entry"
+ctrl-k = "select_prev_entry"
+
+# History navigation
+ctrl-up = "select_prev_history"
+ctrl-down = "select_next_history"
+
+# Multi-selection
+tab = "toggle_selection"
+backtab = "toggle_selection_all"
+enter = "confirm_selection"
+
+# Preview panel control
+pagedown = "scroll_preview_half_page_down"
+pageup = "scroll_preview_half_page_up"
+ctrl-f = "cycle_previews"
+
+# Data operations
+ctrl-y = "copy_entry_to_clipboard"
+ctrl-r = "reload_source"
+ctrl-s = "cycle_sources"
+
+# UI features
+ctrl-t = "toggle_remote_control"
+ctrl-x = "toggle_action_picker"
+ctrl-o = "toggle_preview"
+ctrl-h = "toggle_help"
+ctrl-l = "toggle_layout"
+
+# F2-F5 are the only global function-key actions. Channel files must not
+# override them; channel-specific actions use Alt+letter instead.
+f2 = "toggle_preview"
+f3 = "toggle_layout"
+f4 = "cycle_sources"
+f5 = "reload_source"
+f12 = "toggle_status_bar"
+
+# Input field actions
+backspace = "delete_prev_char"
+ctrl-w = "delete_prev_word"
+ctrl-u = "delete_line"
+delete = "delete_next_char"
+left = "go_to_prev_char"
+right = "go_to_next_char"
+home = "go_to_input_start"
+ctrl-a = "go_to_input_start"
+end = "go_to_input_end"
+ctrl-e = "go_to_input_end"
+
+[shell_integration]
+fallback_channel = "files"
+
+[shell_integration.channel_triggers]
+"alias" = ["alias", "unalias"]
+"env" = ["export", "unset"]
+"dirs" = ["cd", "ls", "rmdir", "z"]
+"files" = [
+  "cat",
+  "less",
+  "head",
+  "tail",
+  "vim",
+  "nano",
+  "bat",
+  "cp",
+  "mv",
+  "rm",
+  "touch",
+  "chmod",
+  "chown",
+  "ln",
+  "tar",
+  "zip",
+  "unzip",
+  "gzip",
+  "gunzip",
+  "xz",
+]
+"git-diff" = ["git add", "git restore"]
+"git-branch" = [
+  "git checkout",
+  "git switch",
+  "git branch",
+  "git merge",
+  "git rebase",
+  "git pull",
+  "git push",
+]
+"git-log" = ["git log", "git show"]
+"git-repos" = ["nvim", "code", "hx", "git clone"]
+
+[shell_integration.keybindings]
+"smart_autocomplete" = "ctrl-t"
+"command_history" = "ctrl-r"

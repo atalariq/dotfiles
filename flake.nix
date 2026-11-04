@@ -1,6 +1,26 @@
 {
   description = "Atalariq's NixOS and Home Manager configuration";
 
+  # Cross-platform caches only. NixOS and nix-darwin also regenerate
+  # /etc/nix/nix.conf from modules/nix-cache.nix (which adds the Linux-only
+  # Noctalia/Umbriel caches). This block closes the bootstrap gap: a fresh host
+  # can substitute before the first activation has applied that module.
+  #
+  # Nix honours flake nixConfig for trusted users; other hosts must pass
+  # --accept-flake-config (the Justfile bootstrap/apply recipes do).
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
+      "https://cache.numtide.com"
+    ];
+    extra-trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+rkXd32PYzeVMqw="
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    ];
+  };
+
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
 

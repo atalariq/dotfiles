@@ -1,9 +1,10 @@
-# GUI applications are host-local. This category is a library of opt-in
-# modules, not a cross-host bundle: NixOS x13 uses Home Manager packages and
-# config, macOS uses Homebrew casks, and headless hosts install nothing.
+# GUI applications are host-owned: environment.systemPackages on NixOS,
+# Homebrew casks on macOS, nothing on headless hosts. This category contains
+# only the modules that own configuration, a service or a profile bridge; it
+# never installs the application package itself.
 #
-# There is deliberately no dotfiles.programs.gui.enable. Select apps
-# individually, or use gui/workstation.nix as a convenience aggregate.
+# There is deliberately no dotfiles.programs.gui.enable: select the modules a
+# host needs, and put the package in that host's apps.nix.
 { lib, ... }:
 {
   imports = import ../_import-category.nix {

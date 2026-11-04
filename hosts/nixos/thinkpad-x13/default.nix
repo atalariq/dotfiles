@@ -1,9 +1,26 @@
-{ pkgs, ... }:
+{
+  lib,
+  pkgs,
+  ...
+}:
+let
+  apps = import ./apps.nix { inherit pkgs; };
+  ides = import ../../../modules/packages/ides.nix { inherit pkgs lib; };
+in
 {
   imports = [
     ../../../modules/nixos
     ./hardware-configuration.nix
     ./per-device.nix
+  ];
+
+  # System owns GUIs. The IDE list is still written by hand in apps.nix, but a
+  # declared stack without its editor is a mistake worth failing eval for.
+  assertions = [
+    {
+      assertion = lib.all (pkg: builtins.elem pkg apps.gui) (ides.expected apps.stacks);
+      message = "hosts/nixos/thinkpad-x13/apps.nix: a declared stack is missing its JetBrains IDE in `gui`.";
+    }
   ];
   networking.hostName = "thinkpad-x13";
   networking.networkmanager.enable = true;
@@ -91,7 +108,7 @@
   #     url = "http://homelab-x456urk:8080/main";
   #     publicKey = "main:...";
   #   };
-  environment.systemPackages = [
+  environment.systemPackages = apps.gui ++ [
     pkgs.attic-client
     pkgs.tailscale
   ];

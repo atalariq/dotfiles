@@ -2,6 +2,11 @@
 # build plan with nix-output-monitor and prints the closure diff itself.
 # Each recipe keeps the native command it wraps as a comment for reference.
 
+# A fresh host must accept the flake's nixConfig (binary caches) before the
+# first activation has written /etc/nix/nix.conf. Trust is explicit: this
+# project's flake.nix only sets extra substituters and their public keys.
+export NIX_CONFIG := "accept-flake-config = true"
+
 default:
     @just --list
 
@@ -15,13 +20,35 @@ portal-check:
     systemctl --user --no-pager status \
       pipewire.service wireplumber.service \
       xdg-desktop-portal.service xdg-desktop-portal-umbriel.service \
-      xdg-desktop-portal-termfilechooser.service 2>&1 || true
+      xdg-desktop-portal-termfilechooser.service \
+      nautilus-prewarm.service 2>&1 || true
+    printf '\n-- FileManager1 owner --\n'
+    busctl --user list 2>/dev/null | grep -E 'FileManager1|portal\\.Desktop' || true
+    printf '\n-- ShowItems timeouts this boot --\n'
+    journalctl --user -b --no-pager 2>/dev/null | grep -c 'Failed to call ShowItems' || true
     printf '\n-- portal preferences --\n'
     cat "$HOME/.config/xdg-desktop-portal/umbriel-portals.conf" 2>/dev/null || true
     printf '\n-- file chooser backend --\n'
     busctl --user list 2>/dev/null | grep -E 'termfilechooser|portal\.Desktop' || true
     printf '\n-- PipeWire crashes this boot --\n'
     coredumpctl list pipewire --since "$(uptime -s)" --no-pager 2>/dev/null || true
+
+# Read-only: how fast FileManager1 is acquired after D-Bus activation, plus the
+# number of portal ShowItems timeouts this boot. A real ShowItems call opens a
+# window, so it stays a manual acceptance test (target: under 2 s).
+portal-measure:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    printf 'owner before: '
+    busctl --user list 2>/dev/null | awk '$1=="org.freedesktop.FileManager1" {print $2}' || true
+    start=$(date +%s%N)
+    timeout 45 busctl --user call org.freedesktop.FileManager1 \
+      /org/freedesktop/FileManager1 org.freedesktop.DBus.Peer Ping >/dev/null 2>&1
+    rc=$?
+    end=$(date +%s%N)
+    printf 'activation+ping: %d ms (rc=%d)\n' "$(( (end-start)/1000000 ))" "$rc"
+    printf 'ShowItems timeouts this boot: %s\n' \
+      "$(journalctl --user -b --no-pager 2>/dev/null | grep -c 'Failed to call ShowItems' || true)"
 
 # List what a build would compile locally instead of substituting.
 audit-build:

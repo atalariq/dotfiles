@@ -10,6 +10,10 @@
   config = lib.mkIf config.dotfiles.programs.gui.kitty.enable {
     programs.kitty = {
       enable = true;
+      # The binary belongs to the host (system package on NixOS, Homebrew cask
+      # on macOS). Home Manager keeps only the generated config and shell
+      # integration.
+      package = lib.mkForce null;
       settings = {
         "shell" = lib.mkIf config.programs.fish.enable (lib.getExe config.programs.fish.package);
       };
