@@ -17,6 +17,17 @@
     home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
       pkgs.obs-cmd
     ];
+    # Keep OBS resident in the tray so obs-cmd can toggle recording. XDG
+    # autostart is compositor-independent and uses the wrapped package path.
+    xdg.configFile."autostart/obs.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=OBS Studio
+      Comment=Start OBS in the tray so obs-cmd can toggle recording
+      Exec=${config.programs.obs-studio.finalPackage}/bin/obs --minimize-to-tray
+      Terminal=false
+      StartupNotify=false
+    '';
     # Runtime profiles are writable; seed manually from these optional templates.
     xdg.configFile."dotfiles/templates/obs" = {
       source = ./config/obs-studio;

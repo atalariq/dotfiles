@@ -31,11 +31,13 @@ in
         kitty.enable = lib.mkDefault true;
         libva-utils.enable = lib.mkDefault true;
         localsend.enable = lib.mkDefault true;
+        miro.enable = lib.mkDefault true;
         mpv.enable = lib.mkDefault true;
         nautilus.enable = lib.mkDefault true;
         nicotine-plus.enable = lib.mkDefault true;
         obs-studio.enable = lib.mkDefault true;
         obsidian.enable = lib.mkDefault true;
+        oculante.enable = lib.mkDefault true;
         readest.enable = lib.mkDefault true;
         scrcpy.enable = lib.mkDefault true;
         slack.enable = lib.mkDefault true;

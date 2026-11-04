@@ -26,7 +26,10 @@ in
       services.libinput.enable = true;
       # Noctalia's polkit agent needs the daemon running system-wide.
       security.polkit.enable = true;
-      xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      xdg.portal.extraPortals = [
+        pkgs.xdg-desktop-portal-gtk
+        pkgs.xdg-desktop-portal-termfilechooser
+      ];
     })
     (lib.mkIf config.dotfiles.desktop.greeter.enable {
       services.displayManager.noctalia-greeter = {
@@ -75,6 +78,20 @@ in
         enable = true;
         alsa.enable = true;
         pulse.enable = true;
+        # libpipewire-module-x11-bell dereferences a dead Xwayland display
+        # after a lazy restart and crashes the whole daemon. That leaves
+        # xdg-desktop-portal holding a dead PipeWire connection, which breaks
+        # OBS screen capture until the portal is restarted.
+        extraConfig.pipewire."99-disable-x11-bell" = {
+          "context.properties"."module.x11.bell" = false;
+        };
+      };
+      # Keep portal sessions consistent if PipeWire is restarted for any
+      # other reason.
+      systemd.user.services.xdg-desktop-portal = {
+        overrideStrategy = "asDropinIfExists";
+        partOf = [ "pipewire.service" ];
+        after = [ "pipewire.service" ];
       };
     })
     (lib.mkIf config.dotfiles.desktop.bluetooth.enable {

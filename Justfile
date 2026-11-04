@@ -8,6 +8,21 @@ default:
 check:
     nix flake check --no-update-lock-file --no-write-lock-file
 
+# Read-only snapshot of PipeWire, portal and file-picker health.
+portal-check:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    systemctl --user --no-pager status \
+      pipewire.service wireplumber.service \
+      xdg-desktop-portal.service xdg-desktop-portal-umbriel.service \
+      xdg-desktop-portal-termfilechooser.service 2>&1 || true
+    printf '\n-- portal preferences --\n'
+    cat "$HOME/.config/xdg-desktop-portal/umbriel-portals.conf" 2>/dev/null || true
+    printf '\n-- file chooser backend --\n'
+    busctl --user list 2>/dev/null | grep -E 'termfilechooser|portal\.Desktop' || true
+    printf '\n-- PipeWire crashes this boot --\n'
+    coredumpctl list pipewire --since "$(uptime -s)" --no-pager 2>/dev/null || true
+
 # List what a build would compile locally instead of substituting.
 audit-build:
     @nix build .#nixosConfigurations.thinkpad-x13.config.system.build.toplevel --no-link --dry-run --accept-flake-config 2>&1 | sed -n -e 's/^these \([0-9]*\) derivations will be built:/\1 derivations will be built locally:/p' -e 's|^  /nix/store/[a-z0-9]*-\(.*\)\.drv$|  \1|p'

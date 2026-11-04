@@ -22,6 +22,7 @@
       gui = true;
     };
     desktop = {
+      defaults.enable = true;
       umbriel = {
         enable = true;
         settings.output.eDP-1 = {
@@ -64,6 +65,7 @@
         yt-dlp.enable = true;
       };
       gui = {
+        bitwarden.enable = true;
         workstation.enable = true;
         jellyfin.enable = true;
       };

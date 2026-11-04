@@ -75,16 +75,16 @@ in
         org.freedesktop.impl.portal.Secret=gnome-keyring
         org.freedesktop.impl.portal.ScreenCast=umbriel
         org.freedesktop.impl.portal.Screenshot=umbriel
-        org.freedesktop.impl.portal.FileChooser=gtk
+        org.freedesktop.impl.portal.FileChooser=termfilechooser
       '';
     };
     # The flake module leaves settings null so the packaged config is used; the
     # generated body above still owns autostart and host outputs.
     dotfiles.desktop.umbriel.settings = {
+      # OBS autostart is owned by programs/gui/obs-studio.nix so it stays
+      # independent of the compositor.
       general.autostart = [
         "systemctl --user start noctalia.service"
-        # OBS stays resident in the tray so obs-cmd can toggle recording.
-        "obs --minimize-to-tray"
       ];
     };
   };
