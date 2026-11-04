@@ -3,3 +3,4 @@
 
 [general]
 mod_key = "Super"
+focus_on_activate = true
