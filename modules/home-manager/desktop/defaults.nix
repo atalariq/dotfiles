@@ -82,6 +82,7 @@ in
         "x-scheme-handler/discord" = "discord.desktop";
         "x-scheme-handler/slack" = "slack.desktop";
         "x-scheme-handler/obsidian" = "md.obsidian.Obsidian.desktop";
+        "x-scheme-handler/zotero" = "zotero.desktop";
       };
     };
 

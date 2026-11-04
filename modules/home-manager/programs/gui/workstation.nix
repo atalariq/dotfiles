@@ -43,6 +43,7 @@ in
         slack.enable = lib.mkDefault true;
         wdisplays.enable = lib.mkDefault true;
         wl-mirror.enable = lib.mkDefault true;
+        zotero.enable = lib.mkDefault true;
       };
       cli.ffmpeg.enable = lib.mkDefault true;
     };
