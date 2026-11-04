@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   imports = [
     ../../../modules/home-manager
@@ -7,6 +7,13 @@
     sessionVariables.DOTFILES_HOST = "thinkpad-x13";
     homeDirectory = "/home/atalariq";
     stateVersion = "26.05";
+    # Bitwarden sets PR_SET_DUMPABLE, which makes the Secret portal reject
+    # /proc/<pid>/root. Use the native Secret Service path instead so the
+    # biometric key can be stored and the system-auth option can appear.
+    file.".local/bin/bitwarden".source = pkgs.writeShellScript "bitwarden-no-portal" ''
+      export GTK_USE_PORTAL=0
+      exec /run/current-system/sw/bin/bitwarden "$@"
+    '';
   };
   dotfiles = {
     deployment.liveApps = [
@@ -65,7 +72,6 @@
         yt-dlp.enable = true;
       };
       gui = {
-        bitwarden.enable = true;
         workstation.enable = true;
         jellyfin.enable = true;
       };

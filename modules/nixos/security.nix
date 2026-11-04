@@ -24,7 +24,11 @@
       # Polkit reads system policy paths, not the Home Manager profile.
       environment.systemPackages = [
         pkgs.bitwarden-desktop
-        pkgs.bitwarden-cli
+        pkgs.rbw
+        # rbw spawns `pinentry` from PATH; the gpg-agent pinentry setting
+        # alone does not expose it. This package provides pinentry,
+        # pinentry-curses, pinentry-gnome3, and pinentry-tty.
+        pkgs.pinentry-gnome3
       ];
       security.pam.services = {
         polkit-1.fprintAuth = true;
