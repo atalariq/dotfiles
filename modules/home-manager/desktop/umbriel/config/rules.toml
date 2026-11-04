@@ -21,6 +21,35 @@ default_floating = true
 [window_rule.match]
 app_id = "^(termfilechooser|files|org[.]gnome[.]Nautilus|pavucontrol|org[.]pulseaudio[.]pavucontrol|blueman-manager|org[.]blueman[.]Manager|nm-connection-editor|pinentry.*|.*PolicyKit.*|dev[.]noctalia[.]Noctalia|dev[.]noctalia[.]UmbrielSharePicker)$"
 
+# Portal file choosers: keep them floating above the requesting window. A
+# pinned window is not sticky across workspaces in 0.1.0; pinned only keeps it
+# above normal windows on its output. Detach attached portal dialogs so these
+# placement rules can take effect.
+[[window_rule]]
+default_floating = true
+default_pinned = true
+default_focused = true
+attach_to_parent = false
+
+[window_rule.default_floating_size_px]
+height = 760
+width = 1100
+
+[window_rule.match]
+app_id = "^(xdg-desktop-portal.*|org[.]freedesktop[.]impl[.]portal[.].*)$"
+
+[[window_rule]]
+default_floating = true
+default_pinned = true
+default_focused = true
+
+[window_rule.default_floating_size_px]
+height = 760
+width = 1100
+
+[window_rule.match]
+title = "^termfilechooser$"
+
 # PIP: floating, pinned above windows, bottom-right, never steals focus.
 [[window_rule]]
 default_floating = true
@@ -78,3 +107,25 @@ background_render = true
 
 [window_rule.match]
 app_id = "^obs$"
+
+# Reference viewers: floating and pinned, top-right. They do not take focus
+# unless the user clicks them.
+[[window_rule]]
+default_floating = true
+default_pinned = true
+default_focused = false
+
+[window_rule.default_floating_size_px]
+height = 760
+width = 1000
+
+[window_rule.default_position]
+anchor = "top_right"
+x = 32
+y = 32
+
+[window_rule.match]
+app_id = [
+  "^(miro|miro-pdf)$",
+  "^[Zz]otero$",
+]
