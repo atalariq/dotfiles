@@ -293,7 +293,28 @@ in
       setupOpts.nerd_font = nerdFont;
     };
     binds.whichKey.enable = true;
-    formatter.conform-nvim.enable = true;
+    formatter.conform-nvim = {
+      enable = true;
+      # nvf's presets predate the current CLI flags: nixfmt now needs an
+      # explicit stdin marker, and tombi renamed --stdin-filepath to
+      # --stdin-filename. Force the corrected argument lists so conform stops
+      # writing formatter errors to ~/.local/state/nvf/conform.log.
+      setupOpts.formatters = {
+        nixfmt.args = lib.mkForce (
+          lib.generators.mkLuaInline ''
+            function(self, ctx)
+              return { "--indent=" .. ctx.shiftwidth, "-" }
+            end
+          ''
+        );
+        tombi.args = lib.mkForce [
+          "format"
+          "--stdin-filename"
+          "$FILENAME"
+          "-"
+        ];
+      };
+    };
     diagnostics.nvim-lint = {
       enable = true;
       linters_by_ft = {
