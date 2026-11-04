@@ -9,10 +9,11 @@
     (lib.mkIf config.dotfiles.security.ssh-server.enable { services.openssh.enable = true; })
 
     (lib.mkIf config.dotfiles.security.authentication.enable {
-      # Keep OpenSSH and GnuPG separate: forwarding keeps its inherited socket,
-      # while GPG handles signing/decryption through the graphical pinentry.
-      programs.ssh.startAgent = true;
-      services.gnome.gcr-ssh-agent.enable = false;
+      # Use GCR's keyring-backed SSH agent so keys persist across logins and
+      # unlock with the login keyring. GnuPG stays separate for
+      # signing/decryption through the graphical pinentry.
+      programs.ssh.startAgent = false;
+      services.gnome.gcr-ssh-agent.enable = true;
       programs.gnupg.agent = {
         enable = true;
         enableSSHSupport = false;
