@@ -3,22 +3,10 @@
 # Writable settings.toml remains application-owned and overlays these defaults.
 [include]
 autoload = false
-files = [ "bar.toml", "control_center.toml", "hooks.toml", "idle.toml", "lockscreen.toml", "osd.toml", "plugins.toml", "shell.toml" ]
-
-[audio]
-enable_overdrive = true
-
-[battery]
-warning_threshold = 20
-
-[bluetooth]
-connect_when_enabled = true
+files = ["bar.toml", "control_center.toml", "hooks.toml", "idle.toml", "lockscreen.toml", "osd.toml", "plugins.toml", "shell.toml"]
 
 [desktop_widgets]
 enabled = false
-
-[location]
-auto_locate = true
 
 [nightlight]
 enabled = true

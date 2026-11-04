@@ -9,18 +9,8 @@ font_family = "Fira Code"
 margin_ends = 0
 radius = 0
 widget_spacing = 12
-start = ["workspaces", "umbriel-companion", "media"]
-center = []
-end = [
-  "tray",
-  "bluetooth",
-  "battery",
-  "network",
-  "control-center",
-  "shelf",
-  "clock",
-  "notifications"
-]
+start = ["workspaces", "umbriel-companion", "media", "now-playing"]
+end = ["tray", "shelf", "battery", "network", "control-center", "clock", "notifications"]
 
 [bar.main.dead_zone.actions]
 left = "none"
@@ -45,10 +35,19 @@ show_label = false
 [widget.tray]
 drawer_columns = 1
 match_adjacent_spacing = true
-scale = 0.8
+scale = 0.9
 
 [widget.shelf]
 type = "alok-debnath/shelf:shelf"
 
 [widget.umbriel-companion]
 type = "noctalia/umbriel-companion:bar"
+
+[widget.now-playing]
+enable_scroll = false
+hide_album_art = true
+hide_artist = true
+hide_when_no_media = true
+max_length = 800
+show_lyric_line = true
+type = "tranzem/media-lyrics:now-playing"
