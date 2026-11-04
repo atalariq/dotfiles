@@ -7,6 +7,7 @@
 let
   cfg = config.dotfiles.desktop.defaults;
   home = config.home.homeDirectory;
+  brave = config.dotfiles.programs.gui.brave-origin.package;
 in
 {
   options.dotfiles.desktop.defaults.enable =
@@ -33,6 +34,10 @@ in
       {
         assertion = config.dotfiles.programs.gui.oculante.enable;
         message = "The default image viewer is Oculante; enable dotfiles.programs.gui.oculante.";
+      }
+      {
+        assertion = config.dotfiles.programs.gui.brave-origin.enable;
+        message = "The Chrome compatibility shims and default browser point at Brave Origin; enable dotfiles.programs.gui.brave-origin.";
       }
     ];
 
@@ -102,12 +107,37 @@ in
 
     home.sessionVariables = {
       BROWSER = "brave-origin";
+      DEFAULT_BROWSER = "brave-origin";
       TERMINAL = "kitty";
       # Send GTK and Qt file dialogs through the portal. Qt5 keeps qt5ct for
       # theming; Qt6 falls through to xdgdesktopportal for file dialogs.
       GTK_USE_PORTAL = "1";
       QT_QPA_PLATFORMTHEME = lib.mkForce "qt5ct;xdgdesktopportal";
+
+      # Tools that only look for a Chrome executable get Brave Origin. Real
+      # Chrome remains available through its absolute store path and desktop
+      # entry; these variables only redirect PATH-based detection.
+      CHROME_PATH = "${brave}/bin/brave-origin";
+      CHROME_BIN = "${brave}/bin/brave-origin";
+      PUPPETEER_EXECUTABLE_PATH = "${brave}/bin/brave-origin";
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = "${brave}/bin/brave-origin";
     };
+
+    home.file = lib.listToAttrs (
+      map
+        (name: {
+          name = ".local/bin/${name}";
+          value.source = pkgs.writeShellScript "brave-${name}-shim" ''
+            exec ${brave}/bin/brave-origin "$@"
+          '';
+        })
+        [
+          "google-chrome"
+          "google-chrome-stable"
+          "chromium"
+          "chromium-browser"
+        ]
+    );
 
     # The packaged nvim.desktop has Terminal=true. Launch it through kitty so
     # launchers that do not implement Terminal=true still get a terminal.

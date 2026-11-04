@@ -31,6 +31,19 @@ in
         if [[ ! -e $browser_dir || -L $browser_dir ]]; then
           run ln -sfn -- $brave_dir $browser_dir
         fi
+
+        # Chrome-only helpers sometimes install their native-messaging
+        # manifest only in Chrome's profile. Mirror missing manifests so the
+        # same extension can find its host in Brave Origin. Existing Brave
+        # manifests always win.
+        chrome_dir="${config.xdg.configHome}/google-chrome/NativeMessagingHosts"
+        if [[ -d $chrome_dir ]]; then
+          for manifest in "$chrome_dir"/*.json; do
+            [[ -e $manifest ]] || continue
+            target="$brave_dir/NativeMessagingHosts/$(basename "$manifest")"
+            [[ -e $target ]] || run ln -s -- "$manifest" "$target"
+          done
+        fi
       ''
     );
   };
