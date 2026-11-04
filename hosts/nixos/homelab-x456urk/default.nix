@@ -78,7 +78,7 @@
     };
   };
 
-  # Colmena uses `sudo -H --` non-interactively. The only human user needs
+  # deploy-rs activates over SSH non-interactively. The only human user needs
   # passwordless privilege escalation; SSH remains key-only.
   security.sudo.wheelNeedsPassword = false;
 

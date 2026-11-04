@@ -19,8 +19,8 @@
         inherit (pkgs) disko nixos-anywhere;
       }
       // pkgs.lib.optionalAttrs (system == "x86_64-linux") {
-        # Keep the CLI from the same flake input as colmenaHive.
-        colmena = inputs.colmena.packages.${system}.default;
+        # Keep the CLI from the same flake input as the deploy output.
+        deploy-rs = inputs.deploy-rs.packages.${system}.default;
       };
 
       formatter = pkgs.nixfmt;
@@ -46,7 +46,7 @@
             nixd
           ])
           ++ pkgs.lib.optionals (system == "x86_64-linux") [
-            inputs.colmena.packages.${system}.default
+            inputs.deploy-rs.packages.${system}.default
           ];
       };
     };

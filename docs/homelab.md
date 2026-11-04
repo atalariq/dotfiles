@@ -171,30 +171,33 @@ direct cable between the ThinkPad (USB Ethernet adapter) and the homelab's
   Then set `dotfiles.system.binary-cache.client` on the ThinkPad with the URL
   `http://homelab-x456urk:8080/main` and that public key, and rebuild.
 
-## Deploying with Colmena
+## Deploying with deploy-rs
 
-Colmena deploys the NixOS hosts over SSH. It is deliberately not used for
-Darwin or standalone Home Manager; those keep `darwin-rebuild`/`nh home
-switch`.
+deploy-rs deploys both NixOS and nix-darwin hosts over SSH. The local ThinkPad
+keeps the native `nh os switch`/`nixos-rebuild` recipes because its SSH server
+is intentionally disabled.
 
-- `nix develop` provides the Colmena CLI from the same flake input as the
-  `colmenaHive` output.
-- `just colmena-build` builds the `@server` nodes without touching a target.
+- `nix develop` provides the deploy-rs CLI from the flake input.
+- `just deploy-plan-homelab-x456urk` builds and runs `--dry-activate`.
 - `just deploy-homelab-x456urk` switches the homelab over SSH.
-- `just deploy-thinkpad-x13` uses `apply-local` on the laptop; sudo may prompt
-  for the owner's fingerprint.
-- `just colmena-plan` runs the target's `dry-activate` goal.
+- `just deploy-homelab-x456urk-reboot` deploys with `--boot`, then reboots.
+- `just deploy-macpro-m4` and `just deploy-macmini-lab` deploy nix-darwin.
+- `just apply-thinkpad-x13` remains the local laptop activation path.
 
-The homelab node uses `deployment.targetHost = "homelab-x456urk"` and
-`deployment.targetUser = "atalariq"`; resolve that name through Tailscale
-MagicDNS/Headscale, or change it in `flake/hosts.nix`. Colmena escalates with
-`sudo -H --`, so the homelab sets `security.sudo.wheelNeedsPassword = false`
-for the only human user; SSH remains key-only.
+The homelab node uses `hostname = "homelab-x456urk"` and `sshUser =
+"atalariq"`; resolve that name through Tailscale MagicDNS/Headscale, or change
+it in `flake/hosts.nix`. The homelab sets `security.sudo.wheelNeedsPassword =
+false` for the only human user, so deploy-rs can activate non-interactively.
 
-Colmena replaces unknown profiles and can roll back a failed activation, but it
-does not auto-roll back a configuration that fails to boot. Keep a previous
-generation in the boot menu and use `nixos-rebuild --rollback` over SSH if a
-boot regression appears.
+Darwin nodes use `sshUser = "atalariq"`/`"praktikan"`, `remoteBuild = true`
+(the deploy runs from the ThinkPad), and `interactiveSudo = true` because the
+Macs prompt for the administrator password. Enable Remote Login on each Mac.
+`macmini-lab` is an SSH alias for the lab machine; point it at the lab's
+address or change the hostname in `flake/hosts.nix`.
+
+deploy-rs provides magic rollback for failed activations. It does not roll back
+a configuration that fails to boot; keep a previous generation in the boot menu
+and use the host's rollback command over SSH if a boot regression appears.
 
 ## Network, secrets, and service endpoints
 

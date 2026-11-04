@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, ... }:
 {
   imports = [ ../nix-cache.nix ];
   nix.enable = lib.mkDefault true;
@@ -8,10 +8,14 @@
       "flakes"
     ];
     # macOS has no wheel group; name the administrative user explicitly.
-    trusted-users = [
-      "root"
-      "atalariq"
-    ];
+    trusted-users = lib.mkForce (
+      lib.unique (
+        [ "root" ]
+        ++ lib.optional (
+          config.system.primaryUser != null && config.system.primaryUser != ""
+        ) config.system.primaryUser
+      )
+    );
   };
   programs.fish.enable = lib.mkDefault true;
   security.pam.services.sudo_local = {

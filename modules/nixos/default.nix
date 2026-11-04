@@ -122,7 +122,7 @@
         };
       };
       # Nixpkgs, including allowUnfree, is created in flake/hosts.nix. Keeping
-      # nixpkgs.config empty lets Colmena's meta.nixpkgs set nixpkgs.pkgs.
+      # nixpkgs.config empty uses that pre-imported pkgs instance.
       programs.fish.enable = true;
       # Translate system shell fragments at build time instead of spawning Bash
       # through foreign-env on every Fish startup.

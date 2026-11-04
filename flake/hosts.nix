@@ -4,14 +4,21 @@
 { inputs, ... }:
 let
   lib = inputs.nixpkgs.lib;
-  # Unfree is decided where pkgs is created. Colmena's meta.nixpkgs sets
-  # nixpkgs.pkgs, and NixOS rejects a non-empty nixpkgs.config alongside it,
-  # so both entry points share this pre-imported instance.
+  # Unfree is decided where pkgs is created. NixOS entry points share this
+  # pre-imported instance so system and Home Manager see one policy.
   pkgsFor =
     system:
     import inputs.nixpkgs {
       inherit system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+        # Zotero 10 still embeds Firefox ESR 140, which nixpkgs marks EOL.
+        # Keep the exact pin local to the one consumer; remove when Zotero
+        # updates its Gecko version.
+        permittedInsecurePackages = [
+          "firefox-esr-140-bin-unwrapped-140.17.0esr"
+        ];
+      };
     };
   mkHome =
     host:
@@ -20,18 +27,18 @@ let
       extraSpecialArgs = { inherit inputs; };
       modules = [ host ];
     };
-  withHome = user: {
+  withHome = username: user: {
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;
       extraSpecialArgs = { inherit inputs; };
-      users.atalariq = import user;
+      users.${username} = import user;
     };
   };
   nixosModulesFor = host: user: [
     host
     inputs.home-manager.nixosModules.home-manager
-    (withHome user)
+    (withHome "atalariq" user)
   ];
   mkNixosHost =
     host: user:
@@ -40,6 +47,40 @@ let
       specialArgs = { inherit inputs; };
       modules = nixosModulesFor host user;
     };
+  deploy = {
+    nodes = {
+      # ThinkPad stays local: its SSH server is intentionally disabled.
+      homelab-x456urk = {
+        hostname = "homelab-x456urk";
+        sshUser = "atalariq";
+        profiles.system = {
+          user = "root";
+          path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.homelab-x456urk;
+        };
+      };
+      macpro-m4 = {
+        hostname = "macpro-m4";
+        sshUser = "atalariq";
+        interactiveSudo = true;
+        remoteBuild = true;
+        profiles.system = {
+          user = "root";
+          path = inputs.deploy-rs.lib.aarch64-darwin.activate.darwin inputs.self.darwinConfigurations.macpro-m4;
+        };
+      };
+      macmini-lab = {
+        # Use an SSH alias or resolvable address; the lab owns the hostname.
+        hostname = "macmini-lab";
+        sshUser = "praktikan";
+        interactiveSudo = true;
+        remoteBuild = true;
+        profiles.system = {
+          user = "root";
+          path = inputs.deploy-rs.lib.aarch64-darwin.activate.darwin inputs.self.darwinConfigurations.macmini-lab;
+        };
+      };
+    };
+  };
 in
 {
   flake = {
@@ -58,7 +99,22 @@ in
         {
           nixpkgs.config.allowUnfree = true;
         }
-        (withHome ../hosts/darwin/macpro-m4/home.nix)
+        (withHome "atalariq" ../hosts/darwin/macpro-m4/home.nix)
+      ];
+    };
+
+    # Campus lab Mac mini. GUI apps are Homebrew-owned; Nix supplies only
+    # CLI/TUI tooling. The hostname stays under macOS/lab control.
+    darwinConfigurations.macmini-lab = inputs.nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+      specialArgs = { inherit inputs; };
+      modules = [
+        ../hosts/darwin/macmini-lab
+        inputs.home-manager.darwinModules.home-manager
+        {
+          nixpkgs.config.allowUnfree = true;
+        }
+        (withHome "praktikan" ../hosts/darwin/macmini-lab/home.nix)
       ];
     };
 
@@ -67,29 +123,22 @@ in
       wsl-lab = mkHome ../hosts/wsl/lab;
     };
 
-    # NixOS-only deployment. Darwin and standalone Home Manager keep their
-    # native recipes. Nodes reuse the exact module lists above so the hive
-    # cannot drift from nixosConfigurations.
-    colmenaHive = inputs.colmena.lib.makeHive {
-      meta = {
-        nixpkgs = pkgsFor "x86_64-linux";
-        specialArgs = { inherit inputs; };
-      };
-      thinkpad-x13 = {
-        imports = nixosModulesFor ../hosts/nixos/thinkpad-x13 ../hosts/nixos/thinkpad-x13/home.nix;
-        deployment = {
-          # Local activation only: apply-local with sudo, not SSH.
-          targetHost = null;
-          allowLocalDeployment = true;
-          tags = [ "desktop" ];
+    # SSH deployment for the homelab and Macs. The local ThinkPad keeps the
+    # nh/nixos-rebuild activation recipes in the Justfile.
+    inherit deploy;
+    # deployChecks builds each profile's activation path. Keep the Linux check
+    # limited to the Linux node so a ThinkPad flake check does not try to build
+    # aarch64-darwin's Homebrew activation on x86_64-linux.
+    checks = {
+      x86_64-linux = inputs.deploy-rs.lib.x86_64-linux.deployChecks {
+        nodes = {
+          homelab-x456urk = deploy.nodes.homelab-x456urk;
         };
       };
-      homelab-x456urk = {
-        imports = nixosModulesFor ../hosts/nixos/homelab-x456urk ../hosts/nixos/homelab-x456urk/home.nix;
-        deployment = {
-          targetHost = "homelab-x456urk";
-          targetUser = "atalariq";
-          tags = [ "server" ];
+      aarch64-darwin = inputs.deploy-rs.lib.aarch64-darwin.deployChecks {
+        nodes = {
+          macpro-m4 = deploy.nodes.macpro-m4;
+          macmini-lab = deploy.nodes.macmini-lab;
         };
       };
     };

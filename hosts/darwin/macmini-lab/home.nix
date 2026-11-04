@@ -1,0 +1,50 @@
+{ lib, ... }:
+{
+  imports = [
+    ../../../modules/home-manager
+  ];
+  home = {
+    username = "praktikan";
+    sessionVariables = {
+      DOTFILES_HOST = "macmini-lab";
+      TERMINAL = "kitty";
+    };
+    homeDirectory = "/Users/praktikan";
+    stateVersion = "26.05";
+  };
+  programs = {
+    zsh.enable = true;
+    # Homebrew owns the kitty binary; Home Manager still writes kitty.conf.
+    kitty.package = lib.mkForce null;
+  };
+  dotfiles = {
+    deployment.liveApps = [
+      "vim"
+      "neovim"
+      "fish"
+    ];
+    programs = {
+      # Java/Kotlin are handled by Android Studio; nvf only needs Node/Python.
+      development = {
+        stacks = [
+          "node"
+          "python"
+        ];
+        mise.enable = true;
+      };
+      cli = {
+        enable = true;
+        terminal-tools.enable = true;
+        neovim.enable = true;
+        television.enable = true;
+        typst.enable = true;
+        yazi.enable = true;
+      };
+      gui.kitty.enable = true;
+    };
+    appearance = {
+      enable = true;
+      gui = true;
+    };
+  };
+}

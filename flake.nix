@@ -15,10 +15,11 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # NixOS-only remote deployment. The hive shares host modules with
-    # nixosConfigurations; it never replaces local activation recipes.
-    colmena = {
-      url = "github:nix-community/colmena";
+    # SSH deployment for NixOS and nix-darwin. The flake's deploy output
+    # reuses the same host configurations; local ThinkPad activation stays
+    # local because its SSH server is intentionally disabled.
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {

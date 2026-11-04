@@ -164,27 +164,31 @@ build-homelab-x456urk:
     nh os build . -H homelab-x456urk
     # native: nix build .#nixosConfigurations.homelab-x456urk.config.system.build.toplevel --no-link
 
-# ── Colmena (NixOS-only deployment) ────────────────────────────────────────
+# ── deploy-rs (NixOS and nix-darwin over SSH) ──────────────────────────────
 
-# Build the server nodes without copying closures to a target.
-colmena-build:
-    colmena apply build --on @server
-
-# Owner-only: show what Colmena would activate on the homelab.
-colmena-plan:
-    colmena apply dry-activate --on homelab-x456urk
+# Owner-only: show what deploy-rs would activate on the homelab.
+deploy-plan-homelab-x456urk:
+    deploy --dry-activate .#homelab-x456urk
 
 # Owner-only: deploy the homelab server over SSH and switch.
 deploy-homelab-x456urk:
-    colmena apply --on homelab-x456urk
+    deploy .#homelab-x456urk
 
-# Owner-only: deploy and reboot the homelab server.
+# Owner-only: deploy to the bootloader, then reboot the homelab server.
 deploy-homelab-x456urk-reboot:
-    colmena apply --reboot --on homelab-x456urk
+    deploy --boot .#homelab-x456urk
+    ssh homelab-x456urk 'sudo systemctl reboot'
 
-# Owner-only: activate the local ThinkPad through Colmena; sudo may prompt.
-deploy-thinkpad-x13:
-    colmena apply-local --sudo --node thinkpad-x13
+# Owner-only: deploy the personal Mac. Remote Login must be enabled.
+deploy-macpro-m4:
+    deploy .#macpro-m4
+
+# Owner-only: deploy the lab Mac mini. Add an SSH alias named macmini-lab.
+deploy-macmini-lab:
+    deploy .#macmini-lab
+
+# The ThinkPad stays local because its SSH server is disabled.
+# Use apply-thinkpad-x13 for local activation.
 
 # Owner-only, destructive: formats and mounts both homelab disks. Run this
 # from the target installer, then create secrets and run nixos-install as

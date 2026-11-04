@@ -23,8 +23,5 @@
       "flutter"
       "android-studio"
     ];
-    brews = [
-      "dart"
-    ];
   };
 }
