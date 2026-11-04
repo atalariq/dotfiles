@@ -21,6 +21,7 @@
       "vim"
       "neovim"
       "fish"
+      "kitty"
       "umbriel"
       "noctalia"
     ];

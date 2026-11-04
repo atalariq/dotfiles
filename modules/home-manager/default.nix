@@ -31,6 +31,7 @@
           "hermes"
           "opencode"
           "fish"
+          "kitty"
           "umbriel"
           "noctalia"
         ]
