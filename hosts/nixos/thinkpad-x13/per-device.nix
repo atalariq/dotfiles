@@ -37,6 +37,14 @@
     "/dev/disk/by-uuid/2a5e6488-3f57-4a04-ba0f-0d6582bf5975";
   boot.kernelModules = [ "uvcvideo" ];
 
+  # The X13 Gen 2a carries an Elan trackpoint that only exposes sensitivity,
+  # press_to_select, rate, resolution, and resetafter; the IBM-era knobs
+  # (speed, inertia, drift_time, thresh) do not exist here, so the generic
+  # hardware.trackpoint module would udev-write missing attributes.
+  # Owner tested 160 against the firmware default 128 and prefers 128, so the
+  # kernel side stays untouched. Pointer feel is tuned per device in Umbriel
+  # (modules/home-manager/desktop/umbriel/config/input.toml).
+
   hardware.enableRedistributableFirmware = true;
   hardware.graphics = {
     enable = true;

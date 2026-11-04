@@ -18,7 +18,16 @@ disable_while_typing = true
 natural_scroll = true
 tap = true
 
-# [input.pointer]
-# accel_profile = "adaptive"
-# accel_speed = 0.2
-# scroll_factor = 1.0
+# [input.pointer] is not a key in 0.1.0; the classes are keyboard, touchpad,
+# mouse, tablet, and touch. A pointing stick has no tap fingers, so Umbriel
+# classifies it as mouse input and this rule replaces only the keys it sets.
+#
+# Flat keeps gain constant, which suits a small cap better than adaptive.
+# While the middle button is held, motion scrolls; a quick click without motion
+# still reaches the client, so primary-selection paste survives.
+[[input.device]]
+name = "TPPS/2 Elan TrackPoint"
+accel_profile = "flat"
+sensitivity = 0.0
+scroll_button = "MouseMiddle"
+scroll_button_lock = false
