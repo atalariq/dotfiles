@@ -18,31 +18,23 @@
       pd.enable = true;
       settings = {
         TLP_AUTO_SWITCH = 2;
-        TLP_PROFILE_AC = "BAL";
-        TLP_PROFILE_BAT = "SAV";
+        # TLP 1.9+ suffixes designate profiles, not the current power source:
+        # _ON_AC is the performance profile, _ON_BAT balanced, _ON_SAV
+        # power-saver. Assign PRF on AC and BAL on battery so the machine runs
+        # at full performance while charging and balanced on battery.
+        TLP_PROFILE_AC = "PRF";
+        TLP_PROFILE_BAT = "BAL";
         CPU_SCALING_GOVERNOR_ON_AC = "powersave";
         CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
         CPU_SCALING_GOVERNOR_ON_SAV = "powersave";
-        # Since TLP 1.9, suffixes designate profiles: AC=performance,
-        # BAT=balanced, SAV=power-saver, independent of the current power source.
-        # Verified against tlp 1.10.2 func.d/10-tlp-func-cpu: profile
-        # PRF/BAL/SAV selects the _ON_AC/_ON_BAT/_ON_SAV value, so a profile
-        # chosen by hand or left over from an unplug applies _ON_AC on battery
-        # too. That is what pinned this Ryzen 7 PRO 5850U to EPP=performance
-        # plus platform_profile=performance while on battery (owner complaint:
-        # "gampang panas"; observed last_pwr="0 1" on 2026-10-31).
-        #
-        # Thermal-first: every profile bucket now caps at balanced, so no
-        # selection - manual, stale, or assigned - can run the machine hot.
-        # Power-saver stays the coolest and boost policy is untouched.
-        CPU_ENERGY_PERF_POLICY_ON_AC = "balance_performance";
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_performance";
+        CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
         CPU_ENERGY_PERF_POLICY_ON_SAV = "power";
         CPU_BOOST_ON_AC = 1;
         CPU_BOOST_ON_BAT = 1;
         CPU_BOOST_ON_SAV = 0;
         # X13 Gen 2a firmware advertises all three through platform_profile.
-        PLATFORM_PROFILE_ON_AC = "balanced";
+        PLATFORM_PROFILE_ON_AC = "performance";
         PLATFORM_PROFILE_ON_BAT = "balanced";
         PLATFORM_PROFILE_ON_SAV = "low-power";
         USB_EXCLUDE_AUDIO = 1;
