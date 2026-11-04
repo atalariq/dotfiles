@@ -43,6 +43,12 @@
           unixAuth = true;
         };
       };
+
+      # The error:
+      # - Failed sending zygote boot message: Broken pipe (32)
+      # - write: Broken pipe (32)
+      # in Chromium-based browsers, Electron apps, or IDEs (like Brave and Android Studio)
+      security.chromiumSuidSandbox.enable = true;
     })
     (lib.mkIf config.dotfiles.security.secrets.enable {
       # Declarations belong to the consuming service; enabling support alone
