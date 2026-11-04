@@ -78,6 +78,10 @@
     };
   };
 
+  # Colmena uses `sudo -H --` non-interactively. The only human user needs
+  # passwordless privilege escalation; SSH remains key-only.
+  security.sudo.wheelNeedsPassword = false;
+
   users.users.atalariq = {
     isNormalUser = true;
     uid = 1000;

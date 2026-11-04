@@ -171,6 +171,31 @@ direct cable between the ThinkPad (USB Ethernet adapter) and the homelab's
   Then set `dotfiles.system.binary-cache.client` on the ThinkPad with the URL
   `http://homelab-x456urk:8080/main` and that public key, and rebuild.
 
+## Deploying with Colmena
+
+Colmena deploys the NixOS hosts over SSH. It is deliberately not used for
+Darwin or standalone Home Manager; those keep `darwin-rebuild`/`nh home
+switch`.
+
+- `nix develop` provides the Colmena CLI from the same flake input as the
+  `colmenaHive` output.
+- `just colmena-build` builds the `@server` nodes without touching a target.
+- `just deploy-homelab-x456urk` switches the homelab over SSH.
+- `just deploy-thinkpad-x13` uses `apply-local` on the laptop; sudo may prompt
+  for the owner's fingerprint.
+- `just colmena-plan` runs the target's `dry-activate` goal.
+
+The homelab node uses `deployment.targetHost = "homelab-x456urk"` and
+`deployment.targetUser = "atalariq"`; resolve that name through Tailscale
+MagicDNS/Headscale, or change it in `flake/hosts.nix`. Colmena escalates with
+`sudo -H --`, so the homelab sets `security.sudo.wheelNeedsPassword = false`
+for the only human user; SSH remains key-only.
+
+Colmena replaces unknown profiles and can roll back a failed activation, but it
+does not auto-roll back a configuration that fails to boot. Keep a previous
+generation in the boot menu and use `nixos-rebuild --rollback` over SSH if a
+boot regression appears.
+
 ## Network, secrets, and service endpoints
 
 The host uses NetworkManager for Ethernet, Wi-Fi, and phone USB tethering. The

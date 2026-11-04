@@ -164,6 +164,28 @@ build-homelab-x456urk:
     nh os build . -H homelab-x456urk
     # native: nix build .#nixosConfigurations.homelab-x456urk.config.system.build.toplevel --no-link
 
+# ── Colmena (NixOS-only deployment) ────────────────────────────────────────
+
+# Build the server nodes without copying closures to a target.
+colmena-build:
+    colmena apply build --on @server
+
+# Owner-only: show what Colmena would activate on the homelab.
+colmena-plan:
+    colmena apply dry-activate --on homelab-x456urk
+
+# Owner-only: deploy the homelab server over SSH and switch.
+deploy-homelab-x456urk:
+    colmena apply --on homelab-x456urk
+
+# Owner-only: deploy and reboot the homelab server.
+deploy-homelab-x456urk-reboot:
+    colmena apply --reboot --on homelab-x456urk
+
+# Owner-only: activate the local ThinkPad through Colmena; sudo may prompt.
+deploy-thinkpad-x13:
+    colmena apply-local --sudo --node thinkpad-x13
+
 # Owner-only, destructive: formats and mounts both homelab disks. Run this
 # from the target installer, then create secrets and run nixos-install as
 # documented in docs/homelab.md.
