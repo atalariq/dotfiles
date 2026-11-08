@@ -10,6 +10,7 @@ margin_ends = 0
 radius = 0
 widget_spacing = 12
 start = ["workspaces", "umbriel-companion", "media", "now-playing"]
+center = []
 end = ["tray", "shelf", "battery", "network", "control-center", "clock", "notifications"]
 
 [bar.main.dead_zone.actions]
