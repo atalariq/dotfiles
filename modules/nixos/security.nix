@@ -4,6 +4,15 @@
   pkgs,
   ...
 }:
+let
+  # pam_fprintd defaults to timeout=30, and PAM is serial: a typed password is
+  # not checked until the fingerprint module gives up. Keep the fallback short
+  # wherever PAM-level fingerprint auth is still wanted.
+  fprintdSettings = {
+    timeout = 5;
+    "max-tries" = 1;
+  };
+in
 {
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.security.ssh-server.enable { services.openssh.enable = true; })
@@ -32,20 +41,32 @@
         pkgs.pinentry-gnome3
       ];
       security.pam.services = {
-        polkit-1.fprintAuth = true;
-        greetd = {
+        polkit-1 = {
           fprintAuth = true;
-          unixAuth = true;
-          enableGnomeKeyring = true;
+          rules.auth.fprintd.settings = fprintdSettings;
+        };
+        greetd = {
+          # The greetd module uses useDefaultRules = false and writes its own
+          # auth stack (substack login), so fprintAuth/unixAuth here are inert.
+          # Add the fingerprint rule explicitly, ahead of the login substack.
+          rules.auth.fprintd = {
+            control = "sufficient";
+            modulePath = "${config.services.fprintd.package}/lib/security/pam_fprintd.so";
+            settings = fprintdSettings;
+            order = config.security.pam.services.greetd.rules.auth.login.order - 100;
+          };
         };
         login = {
-          fprintAuth = true;
+          # Noctalia's lockscreen verifies fingerprints natively through
+          # fprintd, so a PAM pam_fprintd rule here only delays typed passwords.
+          fprintAuth = false;
           unixAuth = true;
           enableGnomeKeyring = true;
         };
         sudo = {
           fprintAuth = true;
           unixAuth = true;
+          rules.auth.fprintd.settings = fprintdSettings;
         };
       };
     })
