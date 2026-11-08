@@ -7,7 +7,10 @@
 { pkgs }:
 {
   # Every host that runs the shared CLI layer.
-  cli = with pkgs; [ wget ];
+  cli = with pkgs; [
+    wget
+    croc
+  ];
 
   # Hosts that talk to GitLab as well as GitHub.
   forge = with pkgs; [ glab ];
