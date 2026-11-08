@@ -80,14 +80,15 @@ in
         obs-studio.enable = true;
         zotero.enable = true;
       };
-      # Per-tool opt-in (no umbrella): codex/claude stay off until there is a
-      # subscription for them.
+      # Per-tool opt-in (no umbrella): claude stays off until there is a
+      # subscription for it.
       agentic = {
         core.enable = true;
         experimental.enable = true;
         agent-browser.enable = true;
         hermes.enable = true;
         opencode.enable = true;
+        codex.enable = true;
       };
       development = {
         devenv.enable = true;
