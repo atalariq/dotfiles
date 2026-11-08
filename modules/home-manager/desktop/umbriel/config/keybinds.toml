@@ -1,4 +1,3 @@
-
 # Window focus and movement, column movement, layout and scratchpad controls.
 
 [keybinds]
@@ -37,6 +36,7 @@
 "Mod+M" = { action = "window-toggle-maximize-to-edges", repeat = false }
 "Mod+O" = { action = "overview-toggle", repeat = false }
 "Mod+X" = "window-cycle-primary-extent"
+"Mod+Shift+X" = "window-cycle-primary-extent-back"
 "Mod+Minus" = { action = "scratchpad-toggle terminal", repeat = false }
 "Mod+Grave" = { action = "scratchpad-toggle terminal", repeat = false }
 "Mod+Shift+Minus" = { action = "window-move-to-scratchpad terminal", repeat = false }
@@ -55,10 +55,8 @@
 "Mod+Tab" = { action = "window-focus-last", repeat = false }
 
 # Column consume/expel (Umbriel example-config keys).
-"Mod+Comma" = { action = "window-consume-left", repeat = false }
-"Mod+Period" = { action = "window-consume-right", repeat = false }
-"Mod+Ctrl+Comma" = { action = "window-consume-from-left", repeat = false }
-"Mod+Ctrl+Period" = { action = "window-consume-from-right", repeat = false }
+"Mod+Comma" = { action = "window-consume-or-expel-left", repeat = false }
+"Mod+Period" = { action = "window-consume-or-expel-right", repeat = false }
 
 # Discoverability and multi-output. (Mod+/ is a bad chord in 0.1.0 — Slash.)
 "Mod+Slash" = { action = "cheatsheet-toggle", repeat = false }
@@ -133,10 +131,10 @@
 
 # Workspace selection and moving windows between workspaces.
 # Previous/next workspace.
-"Mod+BracketLeft" = "workspace-previous"
 "Mod+P" = "workspace-previous"
-"Mod+BracketRight" = "workspace-next"
+"Mod+Shift+P" = "window-move-to-workspace-previous"
 "Mod+N" = "workspace-next"
+"Mod+Shift+N" = "window-move-to-workspace-next"
 
 # Screenshots and recording, plus media/volume and brightness keys. Noctalia owns
 # capture; OBS toggles through its local obs-websocket endpoint.
@@ -176,7 +174,7 @@
 # System actions.
 "Ctrl+Mod+Alt+R" = { action = "spawn obs-cmd recording toggle", repeat = false }
 "Ctrl+Mod+Alt+C" = { action = "spawn noctalia msg panel-toggle clipboard", repeat = false }
-"Ctrl+Mod+Alt+E" = { action = "spawn kitty -e espanso edit", repeat = false }
+# "Ctrl+Mod+Alt+E" = { action = "spawn kitty -e espanso edit", repeat = false }
 "Ctrl+Mod+Alt+Space" = { action = "spawn noctalia msg panel-toggle launcher", repeat = false }
 "Ctrl+Mod+Alt+Q" = { action = "window-close", repeat = false }
 
