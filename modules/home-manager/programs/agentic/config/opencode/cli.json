@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "keybinds": {
+    "input.line.home": "home,ctrl+a",
+    "input.line.end": "end,ctrl+e",
+    "input.buffer.home": "ctrl+home",
+    "input.buffer.end": "ctrl+end",
+    "input.newline": "shift+return,ctrl+j",
+    "prompt.editor": "ctrl+g",
+    "prompt.stash": "ctrl+s",
+    "prompt.history.previous": "up",
+    "prompt.history.next": "down"
+  },
+  "plugins": [
+    {
+      "package": "@leohenon/opencode-vim-plugin",
+      "options": {
+        "enabled": true,
+        "vim_initial_mode": "normal",
+        "vim_enter_submit": true,
+        "vim_insert_after_submit": true
+      }
+    }
+  ]
+}

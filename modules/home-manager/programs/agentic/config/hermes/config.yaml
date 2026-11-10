@@ -3,3 +3,6 @@ model:
   base_url: https://api.deepseek.com/v1
   default: deepseek-flash
   api_key: ${DEEPSEEK_API_KEY}
+
+display:
+  vim_mode: true

@@ -3,3 +3,10 @@
 # native and stay writable; this file is seeded once when no profile exists.
 approval_policy = "on-request"
 web_search = "cached"
+tui.vim_mode_default = true
+
+[tui.keymap.global]
+open_external_editor = "ctrl-g"
+
+[tui.keymap.composer]
+insert_newline = ["shift-enter", "ctrl-j"]

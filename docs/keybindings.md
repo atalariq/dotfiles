@@ -75,7 +75,16 @@ fighting.
 - `Ctrl+H/J/K/L` window moves · `Ctrl+S` save (normal and insert)
 - `jk`/`kj` leave insert mode
 
+### Agent TUIs
+
+- Shared map and vim mode: [agent-keybindings.md](agent-keybindings.md)
+- `Enter` submit, `Ctrl+J` newline, `Ctrl+G` editor, `Ctrl+S` stash,
+  `Ctrl+D` exit; `Esc` cancels.
+
 ### tmux (`Ctrl+b`)
 
 - `Ctrl+b c` new window · `Ctrl+b h/j/k/l` select pane
 - `Ctrl+b |` / `Ctrl+b -` split · `Ctrl+b z` zoom · `Ctrl+b r` reload
+- `Ctrl+b o` sessionx (sessions/windows) · `Ctrl+b f` floax (scratch pane)
+- `Ctrl+b F` tmux-fzf menu · `Ctrl+b y` / `Y` copy selection / whole line
+- `Ctrl+b C-s` save session · `Ctrl+b C-r` restore session

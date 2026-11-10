@@ -32,6 +32,11 @@ let
       target = "${config.xdg.configHome}/opencode/opencode.jsonc";
     }
     {
+      enable = programs.opencode.enable;
+      template = "opencode-cli.json";
+      target = "${config.xdg.configHome}/opencode/cli.json";
+    }
+    {
       enable = programs.hermes.enable;
       template = "hermes.yaml";
       target = "${config.home.homeDirectory}/.hermes/config.yaml";
