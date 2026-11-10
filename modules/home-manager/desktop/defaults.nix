@@ -33,9 +33,9 @@ in
       }
     ];
 
-    # Exact keys take precedence over the text/* and image/* globs. Office
-    # documents intentionally have no native default: use Google Docs/Office
-    # 365 in the browser, or author in Typst.
+    # Exact keys take precedence over the text/* and image/* globs. PDFs open
+    # in zathura; zaread converts Office/ODF documents and hands them to the
+    # same viewer. Readest keeps the ebook formats.
     xdg.mimeApps = {
       enable = true;
       defaultApplications = {
@@ -50,7 +50,20 @@ in
         "application/x-yaml" = "nvim-kitty.desktop";
         "application/toml" = "nvim-kitty.desktop";
         "application/x-typst" = "nvim-kitty.desktop";
-        "application/pdf" = "miro-pdf.desktop";
+        "application/pdf" = "org.pwmt.zathura.desktop";
+        # Office/ODF documents are converted to PDF by zaread, then opened in
+        # zathura. Readest keeps the ebook formats.
+        "application/msword" = "zaread.desktop";
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = "zaread.desktop";
+        "application/vnd.ms-excel" = "zaread.desktop";
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = "zaread.desktop";
+        "application/vnd.ms-powerpoint" = "zaread.desktop";
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation" = "zaread.desktop";
+        "application/vnd.oasis.opendocument.text" = "zaread.desktop";
+        "application/vnd.oasis.opendocument.spreadsheet" = "zaread.desktop";
+        "application/vnd.oasis.opendocument.presentation" = "zaread.desktop";
+        "text/rtf" = "zaread.desktop";
+        "text/csv" = "zaread.desktop";
         "application/epub+zip" = "readest.desktop";
         "application/x-mobipocket-ebook" = "readest.desktop";
         "application/vnd.amazon.ebook" = "readest.desktop";
@@ -148,23 +161,6 @@ in
         StartupNotify=false
       '';
     };
-
-    # Miro is CLI-first and ships no desktop entry. The package is owned by the
-    # host, but the desktop entry stays here so the MIME default keeps working
-    # on every host that installs it.
-    xdg.dataFile."applications/miro-pdf.desktop".text = ''
-      [Desktop Entry]
-      Type=Application
-      Version=1.0
-      Name=Miro
-      Comment=Native PDF viewer with auto-reload
-      Exec=${pkgs.miro}/bin/miro-pdf %F
-      Icon=application-pdf
-      Terminal=false
-      Categories=Office;Viewer;
-      MimeType=application/pdf;application/x-pdf;text/pdf;text/x-pdf;
-      StartupNotify=false
-    '';
 
     # termfilechooser reads this before its default ranger config. The yazi
     # wrapper launches the configured terminal (kitty by default).
