@@ -44,7 +44,10 @@
     quickgui
 
     # Creative and productivity.
-    anki
+    # anki 26.09.4 fails to build offline in the current nixpkgs rev (its
+    # hatchling/tomlkit build deps are not in the vendored cache); the binary
+    # release is cached and one patch behind.
+    anki-bin
     audacity
     blender
     (discord.override {
