@@ -108,6 +108,7 @@ in
   #     url = "http://homelab-x456urk:8080/main";
   #     publicKey = "main:...";
   #   };
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
   environment.systemPackages = apps.gui ++ [
     pkgs.attic-client
     pkgs.tailscale
