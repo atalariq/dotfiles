@@ -20,6 +20,7 @@ local function toggle_render()
   local ok, rm = pcall(render_markdown)
   if ok then
     rm.buf_toggle()
+    vim.opt_local.wrap = not vim.opt_local.wrap
   end
 end
 
@@ -44,8 +45,10 @@ local function toggle_preview()
   end
   local had_preview = preview_open()
   rm.preview()
+  vim.opt_local.wrap = true
   if had_preview then
     rm.buf_disable()
+    vim.opt_local.wrap = false
   end
 end
 
