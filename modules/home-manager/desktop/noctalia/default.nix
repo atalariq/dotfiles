@@ -30,11 +30,12 @@ let
     # native includes and validates the complete effective configuration.
     ${lib.getExe cfg.package} config validate "$out"
   '';
-  # Plugin helpers (Shelf's GTK4 drop window, future plugin subprocesses) run
-  # as children of noctalia, so the runtime lives on the service, not the
-  # profile: one aggregated lib set + one python env, extended here when a new
-  # plugin needs more. pango.out is explicit: the default output's
-  # girepository is empty, and PangoCairo lives in out.
+  # Shelf's GTK4 helper owns its runtime. Noctalia itself must not inject GTK4
+  # into the service: children such as Slack, Discord and other GTK3/Electron
+  # apps would inherit it and abort at GTK init.
+  #
+  # pango.out is explicit: the default output's girepository is empty, and
+  # PangoCairo lives in out.
   pluginLibs = with pkgs; [
     gtk4
     gtk4-layer-shell
@@ -47,26 +48,40 @@ let
   ];
   giTypelibPath = lib.makeSearchPath "lib/girepository-1.0" pluginLibs;
   giLibPath = lib.makeLibraryPath pluginLibs;
-  pythonPlugins = pkgs.python3.withPackages (ps: [
+  shelfPythonEnv = pkgs.python3.withPackages (ps: [
     ps.pygobject3
     ps.pycairo
   ]);
-  noctaliaWrapped =
-    pkgs.runCommand "noctalia-plugin-env" { nativeBuildInputs = [ pkgs.makeWrapper ]; }
+  # The helper re-execs itself with gtk4-layer-shell when it can find the
+  # library. Give it the Nix paths once, then let its own cleanup drop
+  # LD_PRELOAD before it launches anything else.
+  shelfPython =
+    pkgs.runCommand "noctalia-shelf-python" { nativeBuildInputs = [ pkgs.makeWrapper ]; }
       ''
         mkdir -p $out/bin
-        makeWrapper ${cfg.package}/bin/noctalia $out/bin/noctalia \
+        makeWrapper ${shelfPythonEnv}/bin/python3 $out/bin/shelf-python \
           --set-default GI_TYPELIB_PATH ${giTypelibPath} \
           --set-default LD_LIBRARY_PATH ${giLibPath} \
           --set-default LD_PRELOAD ${pkgs.gtk4-layer-shell}/lib/libgtk4-layer-shell.so.0 \
-          --set-default SHELF_LAYER_SHELL_TRIED 1 \
-          --prefix PATH : ${
-            lib.makeBinPath [
-              pythonPlugins
-              pkgs.glib
-            ]
-          }
+          --set-default SHELF_ORIG_LD_PRELOAD "" \
+          --set-default SHELF_LAYER_SHELL_TRIED 1
       '';
+  # Pin the Shelf plugin locally so the plugin code is reproducible. Noctalia's
+  # built-in local data source takes precedence over the app-managed copy.
+  shelfPlugin = pkgs.stdenvNoCC.mkDerivation {
+    pname = "noctalia-plugin-shelf";
+    version = "1.2.3";
+    src = pkgs.fetchFromGitHub {
+      owner = "noctalia-dev";
+      repo = "community-plugins";
+      rev = "bbf33787769a5c93ba02a8d17bd5faac43c4f9ba";
+      hash = "sha256-5QSlm5+mBhJO/61a19iO7ZZIG3F3g5fmXgAi33JPcpE=";
+    };
+    installPhase = ''
+      mkdir -p $out
+      cp -R shelf/. $out/
+    '';
+  };
 in
 {
   imports = [ inputs.noctalia.homeModules.default ];
@@ -97,21 +112,21 @@ in
       # Link the pure native tree as one directory; runtime state stays outside.
       "noctalia/native".source = dotfilesLib.sourceFor "noctalia" ./config;
     };
+    xdg.dataFile = {
+      # Local plugins outrank the app-managed materialized copy.
+      "noctalia/plugins/alok-debnath/shelf".source = shelfPlugin;
+    };
+    # Stable path used by plugins.toml. The symlink target changes on rebuild,
+    # while the configured path stays host-independent.
+    home.file.".local/bin/shelf-python".source = "${shelfPython}/bin/shelf-python";
     # Preserve restarts when generated settings change, as well as the upstream
     # palette/root triggers. Native live edits use Noctalia's own file watcher.
     systemd.user.services.noctalia.Unit.X-Restart-Triggers = [ "${generated}" ];
 
-    # ExecStart ships as a one-element list upstream; replace it wholesale so
-    # helpers inherit GI_TYPELIB_PATH/LD_LIBRARY_PATH/LD_PRELOAD plus a PATH
-    # python3 (pygobject3 + pycairo) and gdbus from the service environment.
-    systemd.user.services.noctalia.Service.ExecStart = lib.mkForce [
-      "${noctaliaWrapped}/bin/noctalia"
-    ];
-
-    # Packages dependencies for core function and plugins. GTK/python
-    # runtimes live on the service wrapper above; only PATH-level helpers
-    # that plugins shell out to stay here.
+    # Packages dependencies for core function and plugins. Shelf's Python/GTK4
+    # runtime lives in shelf-python above; gdbus is the plugin IPC helper.
     home.packages = with pkgs; [
+      glib
       xdg-utils
       wl-clipboard
     ];

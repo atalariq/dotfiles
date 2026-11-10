@@ -4,9 +4,9 @@
 [shell]
 external_ip_enabled = true
 font_family = "Inter"
-# Noctalia's direct spawn path intermittently fails for Electron/IDE apps.
-# Issue 2519's workaround launches them in a transient scope instead.
-launch_apps_custom_command = "systemd-run --user --scope --collect -- $CMD"
+# No launch wrapper is needed: plugin-specific GTK4 runtime lives in
+# shelf-python, so the service and every launched app inherit a clean
+# environment. Do not add launch_apps_custom_command here.
 screen_time_enabled = true
 settings_show_advanced = false
 

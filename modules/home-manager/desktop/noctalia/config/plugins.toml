@@ -7,3 +7,6 @@ auto_update = "none"
 close_after_drag = true
 remove_after_drag = true
 shortcut = ""
+# Nix-provided interpreter with GTK4/PyGObject. Keeps Noctalia's service
+# environment free of GTK4 LD_PRELOAD and LD_LIBRARY_PATH.
+python = "~/.local/bin/shelf-python"
