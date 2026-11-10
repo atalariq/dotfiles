@@ -51,6 +51,7 @@
     security.secrets.enable = true;
     system.binary-cache.server = {
       enable = true;
+      port = 8081;
       environmentFile = config.sops.secrets.attic_env.path;
     };
   };

@@ -181,8 +181,61 @@ is intentionally disabled.
 - `just deploy-plan-homelab-x456urk` builds and runs `--dry-activate`.
 - `just deploy-homelab-x456urk` switches the homelab over SSH.
 - `just deploy-homelab-x456urk-reboot` deploys with `--boot`, then reboots.
+- `just deploy-plan-macpro-m4` / `just deploy-plan-macmini-lab` run the Darwin dry-run.
 - `just deploy-macpro-m4` and `just deploy-macmini-lab` deploy nix-darwin.
 - `just apply-thinkpad-x13` remains the local laptop activation path.
+
+### One-time bootstrap before deploy-rs
+
+deploy-rs needs non-interactive privilege escalation. A host that still has
+password-required sudo (or no sops service yet) cannot be switched by
+`deploy`; bootstrap it once with an owner-entered password, then deploy.
+
+Homelab from the ThinkPad. Run this as the normal user, not with local
+`sudo`: local root does not read the user's `~/.ssh/config`, so an
+`homelab-ts` alias would fail to resolve. `--elevate=sudo` handles the
+remote privilege step.
+
+```sh
+nixos-rebuild switch --flake path:$PWD#homelab-x456urk \
+  --target-host atalariq@homelab-x456urk --elevate=sudo
+
+# Or, if the user SSH config has the alias:
+nixos-rebuild switch --flake path:$PWD#homelab-x456urk \
+  --target-host homelab-ts --elevate=sudo
+
+ssh homelab-ts 'sudo -n true'   # must succeed before deploy
+```
+
+Then:
+
+```sh
+just deploy-plan-homelab-x456urk
+just deploy-homelab-x456urk
+```
+
+For a manual fallback when deploy-rs is unavailable:
+
+```sh
+nix build .#nixosConfigurations.homelab-x456urk.config.system.build.toplevel
+nix copy --to ssh://homelab-ts ./result
+ssh -t homelab-ts 'sudo $(readlink -f /nix/var/nix/profiles/system)/bin/switch-to-configuration switch'
+```
+
+For the Macs, enable Remote Login, add an SSH alias (`macpro-m4` or
+`macmini-lab`) in `~/.ssh/config`, and make sure the administrator can approve
+sudo. `deploy-rs` uses `interactiveSudo = true` for both Darwin nodes.
+Manual fallback:
+
+```sh
+nix build .#darwinConfigurations.macmini-lab.system
+ssh macmini-lab 'sudo /nix/store/.../darwin-rebuild switch --flake ...'
+```
+
+Use `deploy --dry-activate .#<host>` first; it evaluates and builds the
+activation path without switching. If activation fails, deploy-rs performs its
+magic rollback, but a configuration that fails to boot still needs a manual
+generation rollback.
 
 The homelab node uses `hostname = "homelab-x456urk"` and `sshUser =
 "atalariq"`; resolve that name through Tailscale MagicDNS/Headscale, or change

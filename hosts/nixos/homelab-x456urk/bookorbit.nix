@@ -37,8 +37,19 @@
     };
   };
 
+  systemd.services."podman-bookorbit-postgres" = {
+    after = [ "sops-install-secrets.service" ];
+    requires = [ "sops-install-secrets.service" ];
+  };
+
   systemd.services."podman-bookorbit-app" = {
-    after = [ "data.mount" ];
-    requires = [ "data.mount" ];
+    after = [
+      "data.mount"
+      "sops-install-secrets.service"
+    ];
+    requires = [
+      "data.mount"
+      "sops-install-secrets.service"
+    ];
   };
 }

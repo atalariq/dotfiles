@@ -19,12 +19,4 @@
   # after the machine is on wired/Headscale access.
   boot.extraModprobeConfig = "options ath9k ps_enable=0";
 
-  users.motd = ''
-    homelab-x456urk
-    - Wi-Fi:      nmtui
-    - Tailnet:    sudo tailscale status
-    - Jellyfin:   http://<ip>:8096
-    - Navidrome:  http://<ip>:4533
-    - BookOrbit:  http://<ip>:3000
-  '';
 }

@@ -19,6 +19,7 @@
     inputs.impermanence.nixosModules.impermanence
     ./desktop.nix
     ./security.nix
+    ./service-catalog.nix
     ./development.nix
     ./hardware.nix
     ./impermanence.nix

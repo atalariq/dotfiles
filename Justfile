@@ -153,7 +153,8 @@ secrets-check FILE:
     fi
     printf 'ok: %s\n' "$file"
 
-# nh has no update subcommand; keep native.
+# nh has no update subcommand; keep native. Brave is temporarily supplied by
+# the community flake until nixos-unstable includes the upstream re-add.
 update *inputs:
     nix flake update {{ inputs }}
 
@@ -205,6 +206,13 @@ deploy-homelab-x456urk:
 deploy-homelab-x456urk-reboot:
     deploy --boot .#homelab-x456urk
     ssh homelab-x456urk 'sudo systemctl reboot'
+
+# Owner-only: show what deploy-rs would activate on the Macs.
+deploy-plan-macpro-m4:
+    deploy --dry-activate .#macpro-m4
+
+deploy-plan-macmini-lab:
+    deploy --dry-activate .#macmini-lab
 
 # Owner-only: deploy the personal Mac. Remote Login must be enabled.
 deploy-macpro-m4:

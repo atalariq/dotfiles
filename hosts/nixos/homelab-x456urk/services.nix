@@ -35,12 +35,16 @@
     settings = {
       Address = "0.0.0.0";
       Port = 4533;
-      MusicFolder = "/data/media/music/library";
+      MusicFolder = "/data/media/music";
     };
   };
 
   services.sonarr.enable = true;
-  services.radarr.enable = true;
+  services.radarr = {
+    enable = true;
+    # Keep Radarr's native data directly under the persisted state directory.
+    dataDir = "/var/lib/radarr";
+  };
   services.prowlarr.enable = true;
   services.bazarr.enable = true;
 
@@ -95,7 +99,12 @@
   # after local-fs and fixes ownership before the services start.
   systemd.tmpfiles.rules = [
     "d /var/lib/actual 0700 actual actual -"
+    "d /var/lib/actual/server-files 0700 actual actual -"
+    "d /var/lib/actual/user-files 0700 actual actual -"
     "d /var/lib/atticd 0700 atticd atticd -"
+    "d /var/lib/bookorbit 0755 root root -"
+    "d /var/lib/bookorbit/postgres 0700 999 999 -"
+    "d /var/lib/bookorbit/app 0755 1000 996 -"
     "d /var/lib/bazarr 0700 bazarr bazarr -"
     "d /var/lib/memos 0750 memos memos -"
     "d /var/lib/navidrome 0700 navidrome navidrome -"
@@ -136,6 +145,7 @@
     radarr = {
       after = [ "data.mount" ];
       requires = [ "data.mount" ];
+      serviceConfig.StateDirectory = "radarr";
     };
     bazarr = {
       after = [ "data.mount" ];
@@ -146,4 +156,68 @@
       requires = [ "data.mount" ];
     };
   };
+
+  # Rendered into the SSH MOTD and `homelab-status`.
+  dotfiles.services.endpoints = [
+    {
+      name = "Jellyfin";
+      port = 8096;
+      note = "Movies & Series (LAN/tailnet)";
+    }
+    {
+      name = "Navidrome";
+      port = 4533;
+      note = "Music";
+    }
+    {
+      name = "BookOrbit";
+      port = 3000;
+      note = "Books";
+    }
+    {
+      name = "Actual";
+      port = 5006;
+      note = "Finance";
+    }
+    {
+      name = "Memos";
+      port = 5230;
+      note = "Notes";
+    }
+    {
+      name = "Vikunja";
+      port = 3456;
+      note = "Tasks";
+    }
+    {
+      name = "Sonarr";
+      port = 8989;
+      note = "TV";
+    }
+    {
+      name = "Radarr";
+      port = 7878;
+      note = "Movies";
+    }
+    {
+      name = "Prowlarr";
+      port = 9696;
+      note = "Indexers";
+    }
+    {
+      name = "Bazarr";
+      port = 6767;
+      note = "Subtitles";
+    }
+    {
+      name = "qBittorrent";
+      port = 8080;
+      note = "Downloads";
+    }
+    {
+      name = "Attic";
+      port = 8081;
+      note = "Nix cache (tailnet only)";
+    }
+  ];
 }
