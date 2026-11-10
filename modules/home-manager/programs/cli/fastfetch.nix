@@ -1,40 +1,47 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }:
-let
-  cfg = config.dotfiles.programs.cli.fastfetch;
-in
 {
-  options.dotfiles.programs.cli.fastfetch = {
-    enable = lib.mkEnableOption "fastfetch";
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.fastfetch;
-    };
-  };
+  options.dotfiles.programs.cli.fastfetch.enable = lib.mkEnableOption "fastfetch";
 
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.dotfiles.programs.cli.fastfetch.enable {
     programs.fastfetch = {
       enable = true;
-      inherit (cfg) package;
       settings = {
         "logo" = {
           "type" = "small";
+          "padding" = {
+            "top" = 1;
+            "left" = 2;
+            "right" = 2;
+          };
         };
-        "display" = { };
+        "display" = {
+          "separator" = "  ";
+          "key" = {
+            "width" = 10;
+          };
+        };
         "modules" = [
           "os"
+          "host"
           "kernel"
           "uptime"
+          "packages"
+          "shell"
+          "display"
+          "de"
+          "wm"
           "terminal"
           "cpu"
           "gpu"
           "memory"
           "disk"
           "battery"
+          "break"
+          "colors"
         ];
       };
     };

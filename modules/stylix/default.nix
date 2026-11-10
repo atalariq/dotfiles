@@ -185,13 +185,45 @@ in
           };
         };
       })
+      (lib.mkIf config.dotfiles.programs.gui.ghostty.enable {
+        # Ghostty loads this theme from the live config's `theme = stylix`.
+        xdg.configFile."ghostty/themes/stylix".text = ''
+          background = ${c.base00}
+          foreground = ${c.base05}
+          cursor-color = ${c.base05}
+          selection-background = ${c.base02}
+          selection-foreground = ${c.base05}
+          palette = 0=${c.base00}
+          palette = 1=${c.base08}
+          palette = 2=${c.base0B}
+          palette = 3=${c.base0A}
+          palette = 4=${c.base0D}
+          palette = 5=${c.base0E}
+          palette = 6=${c.base0C}
+          palette = 7=${c.base05}
+          palette = 8=${c.base03}
+          palette = 9=${c.base08}
+          palette = 10=${c.base0B}
+          palette = 11=${c.base0A}
+          palette = 12=${c.base0D}
+          palette = 13=${c.base0E}
+          palette = 14=${c.base0C}
+          palette = 15=${c.base07}
+        '';
+      })
       (lib.mkIf config.dotfiles.programs.cli.tmux.enable {
+        # tmux.conf owns layout and formats; these variables are the shared
+        # palette contract with Stylix.
         xdg.configFile."tmux/theme.conf".text = ''
-          set -g status-style "bg=${c.base00},fg=${c.base05}"
-          set -g pane-border-style "fg=${c.base03}"
-          set -g pane-active-border-style "fg=${c.base0B}"
-          set -g message-style "bg=${c.base01},fg=${c.base05}"
-          setw -g window-status-current-style "bg=${c.base02},fg=${c.base0B},bold"
+          set -g @thm_bg "${c.base00}"
+          set -g @thm_fg "${c.base05}"
+          set -g @thm_muted "${c.base03}"
+          set -g @thm_surface "${c.base01}"
+          set -g @thm_surface_alt "${c.base02}"
+          set -g @thm_accent "${c.base0B}"
+          set -g @thm_accent_alt "${c.base0D}"
+          set -g @thm_alert "${c.base08}"
+          set -g @thm_warn "${c.base0A}"
         '';
       })
       (lib.mkIf config.dotfiles.desktop.umbriel.enable {
