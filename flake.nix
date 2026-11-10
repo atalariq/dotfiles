@@ -24,9 +24,14 @@
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
 
-    # One nixpkgs for every host. Unstable is the default so desktop packages and
-    # the system closure share a single evaluation graph.
+    # One nixpkgs for every host. Brave is temporarily supplied by the
+    # community flake below because nixos-unstable still predates the
+    # 2026-11-07 re-add of brave/brave-origin.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    brave = {
+      url = "git+https://codeberg.org/buckley310/brave-browser-nix?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -52,6 +57,16 @@
     umbriel.url = "github:noctalia-dev/umbriel/cachix";
     nvf = {
       url = "github:NotAShelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Experimental Navidrome clients for the ThinkPad. Ratune has a native
+    # Home Manager module; NaviBeat is a community AppImage wrapper (unfree).
+    ratune = {
+      url = "github:acmagn/ratune";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    navibeat = {
+      url = "github:dmnc98/navibeat-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {

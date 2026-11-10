@@ -189,11 +189,13 @@ not get a module. Package config lives beside it in
 
 The CLI core (`dotfiles.programs.cli`) is enabled by default: shell, git,
 Nix tooling, vim, tmux, the standard POSIX tools and modern replacements.
-GUI packages are host-owned: write them in `hosts/<platform>/<host>/apps.nix`
-(`environment.systemPackages` on NixOS, Homebrew casks on macOS, nothing on
-headless hosts). The matching Home Manager modules only write config or run a
-service; native modules set `programs.<pname>.package = null` when the host owns
-the binary. Development stacks are declared with
+Shared CLI packages are listed in `modules/packages/cli.nix`; host-only tools
+go in `hosts/<platform>/<host>/apps.nix` under `cli`. GUI packages are
+host-owned: write them in `apps.nix` (`environment.systemPackages` on NixOS,
+Homebrew casks on macOS, nothing on headless hosts). The matching Home Manager
+modules only write config or run a service; native modules set
+`programs.<pname>.package = null` when the host owns the binary. Development
+stacks are declared with
 `dotfiles.programs.development.stacks`; the matching JetBrains IDE is written in
 `apps.nix` and an eval assertion keeps the two from drifting.
 Gaming is a NixOS feature (`dotfiles.gaming.enable`), not a Home Manager
@@ -207,12 +209,17 @@ Override shared scalar defaults in the host's Home Manager module:
 ```nix
 dotfiles.programs.cli.shell.fish.enable = false;
 programs.git.settings.user.email = "you@example.com";
-home.packages = [ pkgs.wget ]; # Adds to the shared package list.
-# home.packages = lib.mkForce [ pkgs.git ]; # Replaces the entire package list.
+# Add a shared CLI tool in modules/packages/cli.nix.
+# Add a host-only tool in hosts/<platform>/<host>/apps.nix under `cli`.
 ```
 
 Include `pkgs` and `lib` in the module arguments when using them. Keep each host's
 `stateVersion` independent of package updates.
+
+Agent TUI keybindings and vim mode are documented in
+[agent-keybindings.md](docs/agent-keybindings.md). The experimental Navidrome
+clients on the ThinkPad are documented in
+[navidrome-clients.md](docs/navidrome-clients.md).
 
 ### Themes and native files
 
@@ -547,6 +554,11 @@ Nixpkgs follows `nixos-unstable`; Home Manager, nix-darwin, and Stylix follow
 their master branches because no 26.11 release branch exists yet - switch them
 back to `release-26.11` and `nix-darwin-26.11` when those appear. The lockfile
 pins exact revisions, and updates never select a fallback automatically.
+
+**Brave comes from the community `brave-browser-nix` flake** until
+`nixos-unstable` catches up with the upstream `brave`/`brave-origin` re-add.
+The input is pinned in `flake.lock`; remove it and return to the nixpkgs
+packages once the branch contains the re-add.
 
 The development shell includes `nh`, `nix-tree`, `deadnix`, and `statix`.
 `just lint` reports source findings without rewriting files. Television-enabled

@@ -38,6 +38,7 @@ let
   };
   nixosModulesFor = host: user: [
     host
+    inputs.brave.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
     (withHome "atalariq" user)
   ];
