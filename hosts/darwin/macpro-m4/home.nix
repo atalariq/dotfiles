@@ -17,6 +17,7 @@ in
     zsh.enable = true;
   };
   dotfiles = {
+    deployment.liveApps = [ "tmux" ];
     programs = {
       development.stacks = apps.stacks;
       cli = {

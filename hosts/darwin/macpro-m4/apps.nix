@@ -1,8 +1,5 @@
 # GUI apps are Homebrew casks on macOS. Home Manager keeps config only.
 { pkgs }:
-let
-  common = import ../../../modules/packages/common.nix { inherit pkgs; };
-in
 {
   stacks = [
     "java"
@@ -25,5 +22,5 @@ in
     "vlc"
   ];
 
-  cli = common.cli ++ common.forge;
+  cli = with pkgs; [ glab ];
 }

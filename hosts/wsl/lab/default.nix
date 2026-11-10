@@ -10,6 +10,9 @@ in
     stateVersion = "26.05";
     packages = apps.cli;
   };
-  dotfiles.programs.development.stacks = apps.stacks;
+  dotfiles = {
+    deployment.liveApps = [ "tmux" ];
+    programs.development.stacks = apps.stacks;
+  };
   targets.genericLinux.enable = true;
 }

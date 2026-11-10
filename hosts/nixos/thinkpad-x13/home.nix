@@ -20,6 +20,30 @@ in
       export GTK_USE_PORTAL=0
       exec /run/current-system/sw/bin/bitwarden "$@"
     '';
+    # Launch the wrapper from autostart and the application menu, not the
+    # store binary. The portal path rejects /proc/<pid>/root and hides the
+    # system-authentication (biometric) option.
+    file.".config/autostart/bitwarden.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Bitwarden
+      Comment=Bitwarden startup script
+      Exec=${config.home.homeDirectory}/.local/bin/bitwarden --autostart
+      StartupNotify=false
+      Terminal=false
+    '';
+    file.".local/share/applications/bitwarden.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Bitwarden
+      Comment=Password manager
+      Exec=${config.home.homeDirectory}/.local/bin/bitwarden %U
+      Icon=bitwarden
+      Terminal=false
+      Categories=Utility;Security;
+      MimeType=x-scheme-handler/bitwarden;
+      StartupNotify=true
+    '';
   };
   dotfiles = {
     deployment.liveApps = [
@@ -27,7 +51,9 @@ in
       "vim"
       "neovim"
       "fish"
+      "ghostty"
       "kitty"
+      "tmux"
       "television"
       "umbriel"
       "noctalia"
@@ -57,11 +83,17 @@ in
       development.stacks = apps.stacks;
       cli = {
         enable = true;
-        terminal-tools.enable = true;
         aria2.enable = true;
         atuin.enable = true;
+        btop.enable = true;
+        fastfetch.enable = true;
         gh.enable = true;
         mpd.enable = true;
+        navidrome-clients = {
+          enable = true;
+          ratune.enable = true;
+          navibeat.enable = true;
+        };
         neovim = {
           enable = true;
           profile = "full";
@@ -76,6 +108,7 @@ in
       gui = {
         brave-origin.enable = true;
         espanso.enable = true;
+        ghostty.enable = true;
         kitty.enable = true;
         obs-studio.enable = true;
         zotero.enable = true;

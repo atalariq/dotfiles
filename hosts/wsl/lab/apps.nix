@@ -1,12 +1,9 @@
 # Standalone Home Manager host (WSL): CLI only, no GUI packages.
-{ pkgs }:
-let
-  common = import ../../../modules/packages/common.nix { inherit pkgs; };
-in
-{
+_: {
   stacks = [
     "node"
     "python"
   ];
-  cli = common.cli;
+  # Shared CLI floor comes from modules/packages/cli.nix.
+  cli = [ ];
 }

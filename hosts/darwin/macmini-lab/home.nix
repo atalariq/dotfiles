@@ -26,6 +26,7 @@ in
       "vim"
       "neovim"
       "fish"
+      "tmux"
       "television"
     ];
     programs = {
@@ -36,7 +37,8 @@ in
       };
       cli = {
         enable = true;
-        terminal-tools.enable = true;
+        btop.enable = true;
+        fastfetch.enable = true;
         neovim.enable = true;
         television.enable = true;
         typst.enable = true;

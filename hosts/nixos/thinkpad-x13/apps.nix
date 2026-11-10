@@ -6,9 +6,6 @@
 # stack has its JetBrains IDE here, Home Manager uses it for PATH toolchains
 # and nvf's language modules.
 { pkgs }:
-let
-  common = import ../../../modules/packages/common.nix { inherit pkgs; };
-in
 {
   stacks = [
     "node"
@@ -27,9 +24,9 @@ in
     brave-origin
     google-chrome
     kitty
+    ghostty
     nautilus
     file-roller
-    miro
     vlc
     oculante
     readest
@@ -40,15 +37,24 @@ in
     scrcpy
     jellyfin-desktop
     zotero
+    zathura
+    sioyek
+    (pkgs.callPackage ../../../modules/packages/zaread.nix { })
+    quickemu
+    quickgui
 
     # Creative and productivity.
     anki
     audacity
     blender
-    discord
+    (discord.override {
+      withOpenASAR = true;
+      withVencord = true;
+    })
     figma-linux
     gimp
     inkscape
+    libreoffice
     kdePackages.kdenlive
     slack
     wdisplays
@@ -65,12 +71,10 @@ in
     android-studio
   ];
 
-  cli =
-    common.cli
-    ++ common.forge
-    ++ (with pkgs; [
-      android-tools
-      ffmpeg
-      obs-cmd
-    ]);
+  cli = with pkgs; [
+    glab
+    android-tools
+    ffmpeg
+    obs-cmd
+  ];
 }

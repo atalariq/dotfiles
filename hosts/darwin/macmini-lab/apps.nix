@@ -1,9 +1,5 @@
 # Lab Mac mini: GUI apps are Homebrew casks, Nix supplies CLI/TUI only.
-{ pkgs }:
-let
-  common = import ../../../modules/packages/common.nix { inherit pkgs; };
-in
-{
+_: {
   stacks = [
     "node"
     "python"
@@ -23,5 +19,6 @@ in
     "localsend"
   ];
 
-  cli = common.cli;
+  # Shared CLI floor comes from modules/packages/cli.nix.
+  cli = [ ];
 }
