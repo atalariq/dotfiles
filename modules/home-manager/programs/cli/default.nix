@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  packages = import ../../../packages/cli.nix { inherit pkgs lib; };
+in
 {
   imports = import ../_import-category.nix {
     inherit lib;
@@ -13,13 +16,13 @@
   options.dotfiles.programs.cli.enable = lib.mkOption {
     type = lib.types.bool;
     default = true;
-    description = "the core CLI/TUI package bundle: standard POSIX tools, modern replacements and base ops";
+    description = "the shared CLI configuration: fd, ripgrep, fzf, bat and zoxide plus the common package floor";
   };
 
-  # Standard POSIX/system tools plus their modern replacements (eza=ls, fd=find,
-  # ripgrep=grep, bat=cat, trash-cli=rm, fzf, zoxide) and the base ops tools.
-  # This is the "sunnah muakkad" set: enabled by default on every host. The
-  # per-package modules in this directory stay independent of this switch.
+  # The shared package floor lives in modules/packages/cli.nix. This module owns
+  # the Home Manager settings for the tools that need configuration; host-only
+  # packages stay in that host's apps.nix. The per-package modules in this
+  # directory stay independent of this switch.
   config = lib.mkIf config.dotfiles.programs.cli.enable {
     programs.fd = {
       enable = true;
@@ -70,35 +73,6 @@
     programs.bat.enable = true;
     programs.zoxide.enable = true;
 
-    home.packages =
-      with pkgs;
-      [
-        coreutils
-        findutils
-        gnugrep
-        gnused
-        diffutils
-        wget
-        gnutar
-        unzip
-        zip
-        less
-        eza
-        trash-cli
-        just
-        jq
-        curl
-        rsync
-      ]
-      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-        psmisc
-        xdg-utils
-        libsecret
-        adwaita-icon-theme
-        wl-clipboard
-      ]
-      ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-        pngpaste
-      ];
+    home.packages = packages;
   };
 }
