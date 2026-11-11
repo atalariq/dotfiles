@@ -59,7 +59,9 @@
   # after local-fs and fixes ownership before the services start.
   systemd.tmpfiles.rules = [
     "d /data/media/downloads/incoming 2775 aria2 media -"
+    "z /data/media/downloads/incoming 2775 aria2 media -"
     "d /data/media/downloads/music-incoming 2775 atalariq media -"
+    "z /data/media/downloads/music-incoming 2775 atalariq media -"
     "d /var/lib/atticd 0700 atticd atticd -"
     "d /var/lib/bazarr 0700 bazarr bazarr -"
     "d /var/lib/navidrome 0700 navidrome navidrome -"
