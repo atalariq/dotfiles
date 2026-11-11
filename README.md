@@ -219,7 +219,9 @@ Include `pkgs` and `lib` in the module arguments when using them. Keep each host
 Agent TUI keybindings and vim mode are documented in
 [agent-keybindings.md](docs/agent-keybindings.md). The experimental Navidrome
 clients on the ThinkPad are documented in
-[navidrome-clients.md](docs/navidrome-clients.md).
+[navidrome-clients.md](docs/navidrome-clients.md). The rest of the
+self-hosted client setup lives in
+[self-hosted-clients.md](docs/self-hosted-clients.md).
 
 ### Themes and native files
 
