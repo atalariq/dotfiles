@@ -6,7 +6,7 @@ runtime stacks that should not live on the host.
 
 ## Layer 1: Nix fallback
 
-`hosts/nixos/thinkpad-x13/home.nix` and `hosts/darwin/macpro-m4/home.nix` enable
+`hosts/nixos/thinkpad-x13/home.nix` and `hosts/darwin/macmini-lab/home.nix` enable
 the `dotfiles.programs.development.stacks` toolchain (Node, Bun, Python, Go, Rust, C/C++, JVM,
 Dart, plus the gate-only PHP/Vue/Svelte/SQL) through native Nix packages. The
 gate-only values install no PATH runtime - they select nvf language servers and

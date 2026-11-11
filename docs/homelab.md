@@ -181,8 +181,7 @@ is intentionally disabled.
 - `just deploy-plan-homelab-x456urk` builds and runs `--dry-activate`.
 - `just deploy-homelab-x456urk` switches the homelab over SSH.
 - `just deploy-homelab-x456urk-reboot` deploys with `--boot`, then reboots.
-- `just deploy-plan-macpro-m4` / `just deploy-plan-macmini-lab` run the Darwin dry-run.
-- `just deploy-macpro-m4` and `just deploy-macmini-lab` deploy nix-darwin.
+- `deploy --dry-activate .#macmini-lab` and `deploy .#macmini-lab` handle the Mac mini.
 - `just apply-thinkpad-x13` remains the local laptop activation path.
 
 ### One-time bootstrap before deploy-rs
@@ -222,9 +221,9 @@ nix copy --to ssh://homelab-ts ./result
 ssh -t homelab-ts 'sudo $(readlink -f /nix/var/nix/profiles/system)/bin/switch-to-configuration switch'
 ```
 
-For the Macs, enable Remote Login, add an SSH alias (`macpro-m4` or
-`macmini-lab`) in `~/.ssh/config`, and make sure the administrator can approve
-sudo. `deploy-rs` uses `interactiveSudo = true` for both Darwin nodes.
+For the Mac mini, enable Remote Login, add an SSH alias (`macmini-lab`) in
+`~/.ssh/config`, and make sure the administrator can approve sudo. `deploy-rs`
+uses `interactiveSudo = true` for that node.
 Manual fallback:
 
 ```sh
@@ -242,11 +241,11 @@ The homelab node uses `hostname = "homelab-x456urk"` and `sshUser =
 it in `flake/hosts.nix`. The homelab sets `security.sudo.wheelNeedsPassword =
 false` for the only human user, so deploy-rs can activate non-interactively.
 
-Darwin nodes use `sshUser = "atalariq"`/`"praktikan"`, `remoteBuild = true`
-(the deploy runs from the ThinkPad), and `interactiveSudo = true` because the
-Macs prompt for the administrator password. Enable Remote Login on each Mac.
-`macmini-lab` is an SSH alias for the lab machine; point it at the lab's
-address or change the hostname in `flake/hosts.nix`.
+The Darwin node uses `sshUser = "praktikan"`, `remoteBuild = true` (the deploy
+runs from the ThinkPad), and `interactiveSudo = true` because the Mac prompts
+for the administrator password. Enable Remote Login on it. `macmini-lab` is an
+SSH alias for the lab machine; point it at the lab's address or change the
+hostname in `flake/hosts.nix`.
 
 deploy-rs provides magic rollback for failed activations. It does not roll back
 a configuration that fails to boot; keep a previous generation in the boot menu
@@ -291,17 +290,15 @@ Enabled services and endpoints:
 |---|---:|---|
 | Jellyfin | 8096/tcp | LAN + tailnet |
 | Navidrome | 4533/tcp | LAN + tailnet |
+| Seerr | 5055/tcp | LAN + tailnet |
 | Sonarr / Radarr / Prowlarr / Bazarr / qBittorrent | app defaults | tailnet only |
-| Actual Budget | 5006/tcp | tailnet only |
-| Vikunja | 3456/tcp | tailnet only |
-| Memos | 5230/tcp | tailnet only |
-| BookOrbit | 3000/tcp | tailnet only |
+| aria2 RPC | 6800/tcp | tailnet only |
+| Attic | 8081/tcp | tailnet only |
 
-BookOrbit runs as the official app container plus a pgvector PostgreSQL
-sidecar. App data and Postgres live under `/var/lib/bookorbit` (persisted),
-while the library is `/data/media/books` on the XFS disk. The official image is
-intentionally not exposed on the LAN; use the tailnet or an authenticated
-reverse proxy.
+aria2 runs on the homelab with `--rpc-listen-all`, but its port is only opened
+on `tailscale0` and the RPC secret comes from sops. Point Aria2 Explorer at
+`http://homelab-x456urk:6800/jsonrpc` and downloads land in
+`/data/media/downloads/incoming` without a detour through the laptop.
 
 ## Media restore and Jellyfin
 

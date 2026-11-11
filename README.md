@@ -24,13 +24,11 @@ that install them.
 | Configuration | Platform | Manages |
 | --- | --- | --- |
 | `thinkpad-x13` | NixOS · x86_64 | System and Home Manager; Wayland desktop |
-| `homelab-x456urk` | NixOS · x86_64 | System and Home Manager; headless, volatile root ([homelab](docs/homelab.md)) |
-| `macpro-m4` | macOS · Apple Silicon | nix-darwin and Home Manager |
-| `linux-lab` | Linux · x86_64 | Standalone Home Manager; command-line environment |
-| `wsl-lab` | Ubuntu WSL2 · x86_64 | Standalone Home Manager; command-line environment |
+| `homelab-x456urk` | NixOS · x86_64 | System and Home Manager; headless media server and Nix cache ([homelab](docs/homelab.md)) |
+| `macmini-lab` | macOS · Apple Silicon | nix-darwin and Home Manager; campus lab machine |
 
-The Linux and WSL lab configurations manage the user environment, not the host OS.
-Darwin builds require a Mac or a Darwin builder.
+The Mac mini needs a Darwin builder for local builds. Everything else is
+managed from the ThinkPad.
 
 ## Setup
 
@@ -64,14 +62,12 @@ Build the configuration for the target machine:
 
 ```sh
 just build-thinkpad-x13
-just build-macpro-m4
-just build-linux-lab
-just build-wsl-lab
+just build-homelab-x456urk
 ```
 
 Each command builds one host through `nh`. Builds do not activate a
 configuration. On an existing managed system, inspect the system closure changes
-with `just diff-thinkpad-x13` or `just diff-macpro-m4`.
+with `just diff-thinkpad-x13`.
 
 After reviewing the configuration and backing up conflicting files, run the
 matching `just apply-<host>` recipe on its target machine, or
@@ -81,8 +77,10 @@ command behind each recipe. Home Manager activation can replace managed files
 and restart user services.
 
 Generation cleanup and store maintenance are grouped at the end of the Justfile:
-`just gc` keeps 14 days and the newest five generations, `just gc-all` removes
-every old generation, and `just optimise` hard-links duplicate store paths.
+`just gc` keeps 14 days and the newest five generations, and `just optimise`
+hard-links duplicate store paths. `just homelab-direct` brings up a wired link
+between the ThinkPad and the homelab, and `just cache-push` sends a closure to
+the homelab's Attic cache.
 
 ### Binary caches
 
@@ -91,31 +89,17 @@ The Noctalia, Umbriel and numtide caches are declared once in
 nix-darwin modules, so `/etc/nix/nix.conf` is regenerated from the same list.
 `trusted-users` is platform-specific and stays in each platform module.
 
-Standalone Home Manager hosts (`linux-lab`, `wsl-lab`) have no system module, so
-nothing in this repository writes their `/etc/nix/nix.conf`. Add the cache once by
-hand on those machines, otherwise the first build compiles everything:
-
-```nix
-# /etc/nix/nix.conf
-trusted-users = atalariq
-extra-substituters = https://cache.numtide.com
-extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
-```
-
-The flake deliberately has no `nixConfig`: Nix refuses to import into it (it must
-be a literal attrset) and ignores the settings for untrusted users anyway.
-
 ### macOS bootstrap
 
 Install Homebrew at its Apple Silicon prefix, `/opt/homebrew`, before activation.
 For the first nix-darwin activation:
 
 ```sh
-nix build .#darwinConfigurations.macpro-m4.system --no-link
-sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake .#macpro-m4
+nix build .#darwinConfigurations.macmini-lab.system --no-link
+sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake .#macmini-lab
 ```
 
-Subsequent activations can use `just apply-macpro-m4`. If the Nix daemon is managed
+If the Nix daemon is managed
 by a separate installer, set `nix.enable = false` in the host configuration before
 activation. Home Manager uses its built-in application integration; macOS may
 request App Management permission for the terminal.
@@ -124,12 +108,6 @@ CLI tools and Kitty come from Nix. The host also declares GUI applications
 through Homebrew. Activation leaves unlisted Homebrew packages installed and does
 not auto-update or upgrade them. Homebrew cask versions and application updaters
 are outside the Nix lockfile.
-
-### Linux and WSL
-
-Install Nix in the existing distribution before applying `linux-lab` or `wsl-lab`.
-User services such as sops-nix require systemd support; enable it in WSL when
-using those services. The configuration does not provision Windows or a WSL distro.
 
 ### Fresh NixOS install (homelab)
 
@@ -145,7 +123,7 @@ version, for a target already booted from the NixOS installer:
    just secrets-check secrets/homelab-x456urk/secrets.sops.yaml
    ```
 
-   Fill the Wi-Fi, Headscale, Attic, R2/restic, and BookOrbit values described in
+   Fill the Wi-Fi, Headscale and Attic values described in
    [Secrets](#secrets). A placeholder `CHANGE_ME` is rejected by
    `homelab-bootstrap`.
 

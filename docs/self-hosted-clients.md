@@ -1,76 +1,62 @@
-# Self-hosted clients
+# Media workflow and clients
 
-The homelab serves the library; the ThinkPad, phone and e-reader consume it.
-This page records which client is used for which service, and the parts that
-are configured by hand because they are writable runtime state.
+The homelab is a media server and a Nix playground; the clients below are the
+ones that touch it. Anything that is not media was removed on purpose.
 
-## Services and clients
+## Where files go
 
-| Service | Where it runs | Client | Notes |
-|---|---|---|---|
-| Navidrome | homelab `:4533` | Ratune, NaviBeat | see [navidrome-clients.md](navidrome-clients.md) |
-| Jellyfin | homelab `:8096` | browser + VLC | download, then play locally |
-| BookOrbit | homelab `:3000` | web + KOReader | EPUB/PDF library |
-| Memos | homelab `:5230` | web + `memo` | shell helper in `fish/functions` |
-| Paperless | homelab `:8010` | web | OCR archive for course documents |
-| ntfy | homelab `:2586` | phone app | topic per script or host |
-| Stirling PDF | homelab `:8082` | web | merge, split, OCR, convert |
-| Seerr | homelab `:5055` | web | requests for Sonarr/Radarr |
+| Path | Holds |
+|---|---|
+| `/data/media/downloads/incoming` | aria2 output, waiting for import |
+| `/data/media/downloads/music-incoming` | music waiting for `beet import` |
+| `/data/media/movies`, `/data/media/series` | Sonarr/Radarr libraries |
+| `/data/media/music` | Navidrome library, tagged by beets |
 
-Everything except Jellyfin and Navidrome is reached over the tailnet or the
-LAN; nothing is exposed to the internet.
+Kept on one filesystem so imports and hardlinks never cross a device.
 
-## Jellyfin: download, then VLC
+## Adding a movie or episode
 
-The Jellyfin desktop application was removed. It is a Chromium shell that
-argues with Wayland, and the file it plays is already available from the web
-UI. The working flow is:
+aria2 runs on the homelab, not the ThinkPad:
 
-1. Open Jellyfin in the browser and download the episode or film.
-2. Play the downloaded file in VLC, which handles hardware decoding and every
-   container the server has.
+1. Point the Aria2 Explorer extension at
+   `http://homelab-x456urk:6800/jsonrpc` with the RPC secret.
+2. Send the download; it lands in `/data/media/downloads/incoming`.
+3. In Sonarr/Radarr, open **Wanted -> Manual Import**, select the folder, and
+   confirm the match. They rename, move and tell Jellyfin.
 
-This keeps the client list short and removes a large Electron bundle from the
-system closure.
+No manual metadata step: Sonarr/Radarr query TheTVDB/TMDB during import. If a
+release is still downloading on the laptop, `just media-push <path>` copies it
+into the same folder over the direct link or tailnet.
 
-## KOReader
+`Prowlarr` only automates indexers that expose an API. Direct-download pages
+have no such API, so they always go through aria2 + Manual Import. Torrent
+indexers wired through Prowlarr can be fully automatic via qBittorrent.
 
-KOReader opens the BookOrbit library from the local folder. It is the same
-reader used on e-ink, which means highlights, dictionary lookup and progress
-carry over conceptually even though the sync itself is manual.
-
-## Syncthing
-
-Syncthing is enabled as a Home Manager service, but the device list and
-folders are deliberately left to the web UI (`127.0.0.1:8384`). Declaring
-them in Nix would overwrite the runtime config every time a phone is paired.
-The device identity lives under `~/.local/state/syncthing` and is not in Git.
-
-Pair the ThinkPad with the phone and share the course folder. No cloud relay
-is used; on the same LAN the transfer is direct.
-
-## memo
-
-`memo` posts to the Memos API:
+## Adding music
 
 ```sh
-memo remember to renew the library loan
-echo "longer note" | memo
+ssh homelab-ts
+beet import /data/media/downloads/music-incoming
 ```
 
-The access token is read from `MEMOS_TOKEN`, or from
-`~/.config/memos/token` (not in Git). Create one in Memos under
-**Settings -> Access tokens**. `MEMOS_URL` overrides the default
-`http://homelab-x456urk:5230`.
+beets matches the release, writes tags and moves the files into
+`/data/media/music/<albumartist>/<album>/`. Navidrome rescans on its own.
 
-## Paperless
+## Clients
 
-The admin user is created once, manually, because the password must not live
-in the Nix store:
+| Service | Client | Notes |
+|---|---|---|
+| Jellyfin | browser + VLC | download, then play locally; no desktop app |
+| Navidrome | Ratune, NaviBeat | see [navidrome-clients.md](navidrome-clients.md) |
+| Seerr | web | requests for Sonarr/Radarr; enter API keys once |
+| BookOrbit | removed | local EPUB/PDF files open in KOReader instead |
 
-```sh
-ssh homelab-ts 'sudo paperless-manage createsuperuser'
-```
+Syncthing is still enabled on the ThinkPad for course files; its device list
+stays in the web UI at `127.0.0.1:8384` rather than in Nix.
 
-Drop course scans into `/var/lib/paperless/consume` on the homelab, or upload
-them in the web UI. OCR runs for English and Indonesian.
+## Attic
+
+The homelab also serves a private Nix cache. The ThinkPad substitutes from it
+and pushes closures with `just cache-push`. The token lives in
+`~/.config/attic/config.toml`, outside Git; `attic cache info main` prints the
+public key recorded in the host configuration.

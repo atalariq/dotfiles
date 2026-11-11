@@ -69,7 +69,9 @@ passwords stay in Bitwarden Cloud; Passbolt is for shared/family vaults.
 
 ## Backups
 
-Restic to Cloudflare R2 is the only backup target:
+Restic to Cloudflare R2 is the only backup target, and it belongs to this VPS.
+The homelab does not run restic: its media is replaceable and its service state
+is small enough to recreate, so the backup budget goes here instead.
 
 - Use a bucket/application token scoped to the backup prefix.
 - Enable object versioning and a lifecycle policy.
