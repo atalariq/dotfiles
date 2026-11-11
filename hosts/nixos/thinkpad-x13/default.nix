@@ -101,13 +101,14 @@ in
   services.tailscale.enable = true;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
 
-  # Attic CLI for pushing store paths. Substituter URL and the cache public key
-  # are filled in after `attic cache create main` on the homelab:
-  #   dotfiles.system.binary-cache.client = {
-  #     enable = true;
-  #     url = "http://homelab-x456urk:8080/main";
-  #     publicKey = "main:...";
-  #   };
+  # Attic CLI for pushing store paths. The homelab runs the cache; the key is
+  # the one printed by `attic cache info main`. The login token lives in
+  # ~/.config/attic/config.toml, outside Git.
+  dotfiles.system.binary-cache.client = {
+    enable = true;
+    url = "http://homelab-x456urk:8081/main";
+    publicKey = "main:rh30NNK+vpx2mCdvvAYptT/VYfqHMiKRxt4vmHdLIIA=";
+  };
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   environment.systemPackages = apps.gui ++ [
     pkgs.attic-client
