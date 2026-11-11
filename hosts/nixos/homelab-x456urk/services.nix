@@ -2,7 +2,9 @@
 # and write the XFS disk as the shared `media` group; the *arr stack and
 # qBittorrent use the same `/data` tree so hardlink/atomic move stays possible.
 {
+  config,
   lib,
+  pkgs,
   ...
 }:
 {
@@ -24,12 +26,6 @@
     isSystemUser = true;
     group = "prowlarr";
   };
-  users.groups.vikunja = { };
-  users.users.vikunja = {
-    isSystemUser = true;
-    group = "vikunja";
-  };
-
   services.navidrome = {
     enable = true;
     settings = {
@@ -59,54 +55,11 @@
     };
   };
 
-  users.groups.actual = { };
-  users.users.actual = {
-    isSystemUser = true;
-    group = "actual";
-  };
-
-  services.actual = {
-    enable = true;
-    user = "actual";
-    group = "actual";
-    settings = {
-      hostname = "0.0.0.0";
-      port = 5006;
-      dataDir = "/var/lib/actual";
-    };
-  };
-
-  services.memos = {
-    enable = true;
-    settings = {
-      MEMOS_ADDR = "0.0.0.0";
-      MEMOS_PORT = "5230";
-      MEMOS_DATA = "/var/lib/memos";
-      MEMOS_DRIVER = "sqlite";
-      MEMOS_INSTANCE_URL = "http://homelab-x456urk:5230";
-    };
-  };
-
-  services.vikunja = {
-    enable = true;
-    frontendScheme = "http";
-    frontendHostname = "homelab-x456urk";
-    address = "0.0.0.0";
-    port = 3456;
-  };
-
   # The persistent directories are bind-mounted from /persist. tmpfiles runs
   # after local-fs and fixes ownership before the services start.
   systemd.tmpfiles.rules = [
-    "d /var/lib/actual 0700 actual actual -"
-    "d /var/lib/actual/server-files 0700 actual actual -"
-    "d /var/lib/actual/user-files 0700 actual actual -"
     "d /var/lib/atticd 0700 atticd atticd -"
-    "d /var/lib/bookorbit 0755 root root -"
-    "d /var/lib/bookorbit/postgres 0700 999 999 -"
-    "d /var/lib/bookorbit/app 0755 1000 996 -"
     "d /var/lib/bazarr 0700 bazarr bazarr -"
-    "d /var/lib/memos 0750 memos memos -"
     "d /var/lib/navidrome 0700 navidrome navidrome -"
     "d /var/lib/prowlarr 0700 prowlarr prowlarr -"
     "d /var/lib/qBittorrent 0755 qbittorrent qbittorrent -"
@@ -114,7 +67,6 @@
     "d /var/lib/qBittorrent/qBittorrent/config 0755 qbittorrent qbittorrent -"
     "d /var/lib/radarr 0700 radarr radarr -"
     "d /var/lib/sonarr 0700 sonarr sonarr -"
-    "d /var/lib/vikunja 0700 vikunja vikunja -"
   ];
 
   systemd.services = {
@@ -127,11 +79,6 @@
       DynamicUser = lib.mkForce false;
       User = "prowlarr";
       Group = "prowlarr";
-    };
-    vikunja.serviceConfig = {
-      DynamicUser = lib.mkForce false;
-      User = "vikunja";
-      Group = "vikunja";
     };
 
     navidrome = {
@@ -157,34 +104,10 @@
     };
   };
 
-  # Document archive, push notifications, PDF tooling and request management.
-  # None of these touch the media disk: their state is small and lives with
-  # the other service databases on the persistence root.
-  services.paperless = {
-    enable = true;
-    address = "0.0.0.0";
-    port = 8010;
-    settings = {
-      PAPERLESS_OCR_LANGUAGE = "eng+ind";
-      PAPERLESS_OCR_MODE = "skip";
-      PAPERLESS_TIME_ZONE = "Asia/Jakarta";
-      PAPERLESS_CONSUMER_RECURSIVE = true;
-      PAPERLESS_EMPTY_TRASH_DELAY = 30;
-    };
-  };
-
-  services.ntfy-sh = {
-    enable = true;
-    settings = {
-      listen-http = ":2586";
-      base-url = "http://homelab-x456urk:2586";
-      cache-file = "/var/lib/ntfy-sh/cache.db";
-      behind-proxy = true;
-    };
-  };
-
   # Seerr is the requests front-end for the *arr stack; it needs the Jellyfin
-  # and Sonarr/Radarr API keys, which are entered once in its UI.
+  # and Sonarr/Radarr API keys, which are entered once in its UI. It stays
+  # DynamicUser, so its state lives under /var/lib/private and must not be
+  # bind-mounted from /persist.
   services.seerr = {
     enable = true;
     port = 5055;
@@ -192,14 +115,36 @@
     openFirewall = false;
   };
 
+  # Downloads land on the media disk directly, so a 10 GB release never has to
+  # cross the Wi-Fi link twice. Sonarr/Radarr pick the finished files up with
+  # Manual Import; this only provides the downloader.
+  users.users.aria2 = {
+    isSystemUser = true;
+    group = "media";
+    home = "/var/lib/aria2";
+  };
+  systemd.services.aria2 = {
+    description = "aria2 RPC downloader";
+    after = [ "data.mount" ];
+    requires = [ "data.mount" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      User = "aria2";
+      EnvironmentFile = [ config.sops.secrets.aria2_env.path ];
+      Group = "media";
+      StateDirectory = "aria2";
+      WorkingDirectory = "/data/media/downloads/incoming";
+      ExecStart = "${pkgs.aria2}/bin/aria2c --conf-path=/dev/null --enable-rpc --rpc-listen-all --rpc-allow-origin-all --rpc-secret=${"$"}{ARIA2_RPC_SECRET} --dir=/data/media/downloads/incoming --continue=true --max-concurrent-downloads=5 --file-allocation=none";
+      Restart = "on-failure";
+    };
+  };
+
+  environment.systemPackages = [ pkgs.beets ];
+
   # Phones on the LAN reach the same services the tailnet does; the rest of
-  # the firewall stays closed.
-  networking.firewall.allowedTCPPorts = [
-    2586
-    5055
-    8010
-    8082
-  ];
+  # the firewall stays closed. aria2's RPC is tailnet-only.
+  networking.firewall.allowedTCPPorts = [ 5055 ];
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 6800 ];
 
   # Rendered into the SSH MOTD and `homelab-status`.
   dotfiles.services.endpoints = [
@@ -212,26 +157,6 @@
       name = "Navidrome";
       port = 4533;
       note = "Music";
-    }
-    {
-      name = "BookOrbit";
-      port = 3000;
-      note = "Books";
-    }
-    {
-      name = "Actual";
-      port = 5006;
-      note = "Finance";
-    }
-    {
-      name = "Memos";
-      port = 5230;
-      note = "Notes";
-    }
-    {
-      name = "Vikunja";
-      port = 3456;
-      note = "Tasks";
     }
     {
       name = "Sonarr";
@@ -259,29 +184,19 @@
       note = "Downloads";
     }
     {
-      name = "Attic";
-      port = 8081;
-      note = "Nix cache (tailnet only)";
-    }
-    {
-      name = "Paperless";
-      port = 8010;
-      note = "Documents";
-    }
-    {
-      name = "ntfy";
-      port = 2586;
-      note = "Push notifications";
-    }
-    {
-      name = "Stirling PDF";
-      port = 8082;
-      note = "PDF tools";
-    }
-    {
       name = "Seerr";
       port = 5055;
       note = "Media requests";
+    }
+    {
+      name = "aria2 RPC";
+      port = 6800;
+      note = "Direct downloads (tailnet only)";
+    }
+    {
+      name = "Attic";
+      port = 8081;
+      note = "Nix cache (tailnet only)";
     }
   ];
 }

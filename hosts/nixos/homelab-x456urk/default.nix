@@ -11,8 +11,6 @@
     ./media.nix
     ./network.nix
     ./services.nix
-    ./bookorbit.nix
-    ./stirling.nix
   ];
 
   networking.hostName = "homelab-x456urk";
@@ -30,24 +28,17 @@
         "/etc/NetworkManager/system-connections"
         "/home"
         "/var/cache/jellyfin"
-        "/var/lib/actual"
+        "/var/lib/aria2"
         "/var/lib/atticd"
         "/var/lib/bazarr"
-        "/var/lib/bookorbit"
         "/var/lib/jellyfin"
-        "/var/lib/memos"
         "/var/lib/navidrome"
-        "/var/lib/ntfy-sh"
-        "/var/lib/paperless"
         "/var/lib/prowlarr"
         "/var/lib/qBittorrent"
         "/var/lib/radarr"
-        "/var/lib/seerr"
         "/var/lib/sonarr"
         "/var/lib/sops-nix"
-        "/var/lib/stirling-pdf"
         "/var/lib/tailscale"
-        "/var/lib/vikunja"
         "/var/lib/NetworkManager"
       ];
     };
@@ -64,10 +55,9 @@
   sops = {
     defaultSopsFile = ../../../secrets/homelab-x456urk/secrets.sops.yaml;
     secrets = {
+      aria2_env = { };
       attic_env = { };
-      bookorbit_env = { };
       headscale_authkey = { };
-      restic_env = { };
       wifi_psk = { };
       wifi_ssid = { };
     };

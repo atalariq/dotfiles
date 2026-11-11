@@ -3,8 +3,8 @@
 # the old spinning disk. The service is ordered after `data.mount` so it never
 # starts with an empty library when the HDD is missing.
 {
-  # Pin the GID the host already allocated; BookOrbit receives the same value
-  # from `config.users.groups.media.gid` below.
+  # Pin the GID the host already allocated; the containers and the media
+  # services share it.
   users.groups.media = {
     gid = 996;
   };
