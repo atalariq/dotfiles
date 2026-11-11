@@ -30,6 +30,7 @@
     vlc
     oculante
     readest
+    koreader
     obs-studio
     obsidian
     nicotine-plus
