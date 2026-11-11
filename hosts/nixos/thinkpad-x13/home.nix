@@ -45,6 +45,10 @@ in
       StartupNotify=true
     '';
   };
+  # Syncthing keeps its config, device identity and folder list in the native
+  # writable location; the module supplies the service, not a declarative
+  # device list that would fight the UI every time I pair a phone.
+  services.syncthing.enable = true;
   dotfiles = {
     deployment.liveApps = [
       "espanso"
