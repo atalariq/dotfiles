@@ -100,26 +100,57 @@ deploy-homelab-x456urk-reboot:
 homelab-direct:
     #!/usr/bin/env bash
     set -euo pipefail
-    iface=enp2s0f0
-    remote_if=enp2s0
-    if [ "$(cat /sys/class/net/$iface/carrier 2>/dev/null || echo 0)" != 1 ]; then
-      printf 'no carrier on %s: plug the cable first\n' "$iface" >&2
+
+    wired_iface() {
+      for dev in $(nmcli -t -f DEVICE,TYPE device status | awk -F: '$2=="ethernet"{print $1}'); do
+        if [ "$(cat "/sys/class/net/$dev/carrier" 2>/dev/null || echo 0)" = 1 ]; then
+          printf '%s' "$dev"
+          return 0
+        fi
+      done
+      return 1
+    }
+
+    iface="$(wired_iface || true)"
+    if [ -z "$iface" ]; then
+      printf 'no wired interface with carrier: plug the cable first\n' >&2
       exit 1
     fi
-    if ! nmcli -t -f NAME connection show | grep -qx homelab-direct; then
+
+    if nmcli -t -f NAME connection show | grep -qx homelab-direct; then
+      sudo nmcli connection modify homelab-direct connection.interface-name "$iface" \
+        ipv4.method manual ipv4.addresses 10.42.0.1/24 ipv4.never-default yes ipv6.method disabled
+    else
       sudo nmcli connection add type ethernet ifname "$iface" con-name homelab-direct \
         ipv4.method manual ipv4.addresses 10.42.0.1/24 ipv4.never-default yes ipv6.method disabled
     fi
     sudo nmcli connection up homelab-direct >/dev/null
-    ssh -o BatchMode=yes homelab-ts "
-      if ! sudo nmcli -t -f NAME connection show | grep -qx homelab-direct; then
-        sudo nmcli connection add type ethernet ifname $remote_if con-name homelab-direct \
+
+    ssh -o BatchMode=yes homelab-ts '
+      set -e
+      iface=""
+      for dev in $(nmcli -t -f DEVICE,TYPE device status | awk -F: "\$2==\"ethernet\"{print \$1}"); do
+        if [ "$(cat "/sys/class/net/$dev/carrier" 2>/dev/null || echo 0)" = 1 ]; then
+          iface="$dev"
+          break
+        fi
+      done
+      if [ -z "$iface" ]; then
+        echo "homelab: no wired interface with carrier" >&2
+        exit 1
+      fi
+      if sudo nmcli -t -f NAME connection show | grep -qx homelab-direct; then
+        sudo nmcli connection modify homelab-direct connection.interface-name "$iface" \
+          ipv4.method manual ipv4.addresses 10.42.0.2/24 ipv4.never-default yes ipv6.method disabled
+      else
+        sudo nmcli connection add type ethernet ifname "$iface" con-name homelab-direct \
           ipv4.method manual ipv4.addresses 10.42.0.2/24 ipv4.never-default yes ipv6.method disabled
       fi
       sudo nmcli connection up homelab-direct >/dev/null
-    "
-    ping -c1 -W2 10.42.0.2 >/dev/null
-    printf 'up: 10.42.0.1 <-> 10.42.0.2\n'
+    '
+
+    ping -c2 -W2 10.42.0.2 >/dev/null
+    printf 'up: %s 10.42.0.1 <-> 10.42.0.2\n' "$iface"
     printf 'deploy: nixos-rebuild switch --flake .#homelab-x456urk \\\n'
     printf '  --target-host atalariq@10.42.0.2 --elevate=sudo\n'
 
@@ -130,6 +161,21 @@ homelab-direct-off:
     ssh -o BatchMode=yes homelab-ts 'sudo nmcli connection down homelab-direct >/dev/null 2>&1 || true'
     printf 'direct link down\n'
 
+# Read-only: show both ends of the direct link and whether they see each other.
+homelab-direct-status:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    printf 'laptop:\n'
+    ip -br addr show 2>/dev/null | grep -E '^(en|eth)' || true
+    printf 'route: '
+    ip route get 10.42.0.2 2>/dev/null | head -1 || true
+    ping -c2 -W2 10.42.0.2 2>&1 | tail -2
+    printf '\nhomelab:\n'
+    ssh -o BatchMode=yes -o ConnectTimeout=5 homelab-ts '
+      ip -br addr show 2>/dev/null | grep -E "^(en|eth)" || true
+      ping -c2 -W2 10.42.0.1 2>&1 | tail -2
+    ' || true
+
 # ── Media and cache ────────────────────────────────────────────────────────
 
 # Copy a finished download into the import folder on the homelab.
@@ -137,7 +183,22 @@ media-push PATH:
     #!/usr/bin/env bash
     set -euo pipefail
     test -e "{{ PATH }}" || { printf 'not found: %s\n' "{{ PATH }}" >&2; exit 1; }
-    rsync -a --info=progress2 "{{ PATH }}" homelab-ts:/data/media/downloads/incoming/
+    host=homelab-ts
+    ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
+    rsync -a --info=progress2 "{{ PATH }}" "$host:/data/media/downloads/incoming/"
+
+# Copy an album or track into the beets import folder.
+music-push PATH:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    test -e "{{ PATH }}" || { printf 'not found: %s\n' "{{ PATH }}" >&2; exit 1; }
+    host=homelab-ts
+    ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
+    rsync -a --info=progress2 "{{ PATH }}" "$host:/data/media/downloads/music-incoming/"
+
+# Tag and move everything waiting in the beets import folder.
+music-import:
+    ssh homelab-ts 'beet import -q /data/media/downloads/music-incoming'
 
 # Push a store path (or the running system) to the Attic cache.
 cache-push *PATHS:
