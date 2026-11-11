@@ -54,7 +54,15 @@
   services.fstrim.enable = true;
   zramSwap = {
     enable = true;
-    memoryPercent = 25;
+    # A quarter of 14 GiB is not enough once Android Studio and a browser are
+    # both resident; the kernel starts evicting to the disk swap and every
+    # wakeup, audio included, waits behind it.
+    memoryPercent = 50;
+  };
+  # zram reads random pages, so the default readahead cluster just wastes
+  # decompression work.
+  boot.kernel.sysctl = {
+    "vm.page-cluster" = 0;
   };
   environment.systemPackages = with pkgs; [
     usbutils
