@@ -72,6 +72,10 @@
 
     # Android (studio is GUI; the platform tools are CLI).
     android-studio
+
+    # IDEs to Try
+    vscode
+    zed-editor
   ];
 
   cli = with pkgs; [
