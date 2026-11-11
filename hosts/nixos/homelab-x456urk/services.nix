@@ -157,6 +157,50 @@
     };
   };
 
+  # Document archive, push notifications, PDF tooling and request management.
+  # None of these touch the media disk: their state is small and lives with
+  # the other service databases on the persistence root.
+  services.paperless = {
+    enable = true;
+    address = "0.0.0.0";
+    port = 8010;
+    settings = {
+      PAPERLESS_OCR_LANGUAGE = "eng+ind";
+      PAPERLESS_OCR_MODE = "skip";
+      PAPERLESS_TIME_ZONE = "Asia/Jakarta";
+      PAPERLESS_CONSUMER_RECURSIVE = true;
+      PAPERLESS_EMPTY_TRASH_DELAY = 30;
+    };
+  };
+
+  services.ntfy-sh = {
+    enable = true;
+    settings = {
+      listen-http = ":2586";
+      base-url = "http://homelab-x456urk:2586";
+      cache-file = "/var/lib/ntfy-sh/cache.db";
+      behind-proxy = true;
+    };
+  };
+
+  # Seerr is the requests front-end for the *arr stack; it needs the Jellyfin
+  # and Sonarr/Radarr API keys, which are entered once in its UI.
+  services.seerr = {
+    enable = true;
+    port = 5055;
+    stateRevision = 1;
+    openFirewall = false;
+  };
+
+  # Phones on the LAN reach the same services the tailnet does; the rest of
+  # the firewall stays closed.
+  networking.firewall.allowedTCPPorts = [
+    2586
+    5055
+    8010
+    8082
+  ];
+
   # Rendered into the SSH MOTD and `homelab-status`.
   dotfiles.services.endpoints = [
     {
@@ -218,6 +262,26 @@
       name = "Attic";
       port = 8081;
       note = "Nix cache (tailnet only)";
+    }
+    {
+      name = "Paperless";
+      port = 8010;
+      note = "Documents";
+    }
+    {
+      name = "ntfy";
+      port = 2586;
+      note = "Push notifications";
+    }
+    {
+      name = "Stirling PDF";
+      port = 8082;
+      note = "PDF tools";
+    }
+    {
+      name = "Seerr";
+      port = 5055;
+      note = "Media requests";
     }
   ];
 }

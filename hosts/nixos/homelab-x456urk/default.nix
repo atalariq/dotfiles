@@ -12,6 +12,7 @@
     ./network.nix
     ./services.nix
     ./bookorbit.nix
+    ./stirling.nix
   ];
 
   networking.hostName = "homelab-x456urk";
@@ -36,11 +37,15 @@
         "/var/lib/jellyfin"
         "/var/lib/memos"
         "/var/lib/navidrome"
+        "/var/lib/ntfy-sh"
+        "/var/lib/paperless"
         "/var/lib/prowlarr"
         "/var/lib/qBittorrent"
         "/var/lib/radarr"
+        "/var/lib/seerr"
         "/var/lib/sonarr"
         "/var/lib/sops-nix"
+        "/var/lib/stirling-pdf"
         "/var/lib/tailscale"
         "/var/lib/vikunja"
         "/var/lib/NetworkManager"
