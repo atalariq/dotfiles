@@ -42,6 +42,9 @@ let
     Access: ssh homelab-ts (Tailscale) / ssh homelab-lan (LAN)
     Details: homelab-status
   '';
+  # users.motd is consumed by pam_motd at login, not written to /etc/motd in
+  # current NixOS, so homelab-status prints the same text from the store.
+  motdFile = pkgs.writeText "motd" motd;
 in
 {
   options.dotfiles.services.endpoints = lib.mkOption {
@@ -54,7 +57,7 @@ in
     users.motd = motd;
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "homelab-status" ''
-        cat /etc/motd
+        cat ${motdFile}
         echo
         echo "Failed units:"
         ${pkgs.systemd}/bin/systemctl --failed --no-pager
