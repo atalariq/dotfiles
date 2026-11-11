@@ -58,8 +58,8 @@
   # The persistent directories are bind-mounted from /persist. tmpfiles runs
   # after local-fs and fixes ownership before the services start.
   systemd.tmpfiles.rules = [
-    "d /data/media/downloads/incoming 0775 aria2 media -"
-    "d /data/media/downloads/music-incoming 0775 atalariq media -"
+    "d /data/media/downloads/incoming 2775 aria2 media -"
+    "d /data/media/downloads/music-incoming 2775 atalariq media -"
     "d /var/lib/atticd 0700 atticd atticd -"
     "d /var/lib/bazarr 0700 bazarr bazarr -"
     "d /var/lib/navidrome 0700 navidrome navidrome -"
@@ -134,6 +134,7 @@
       User = "aria2";
       EnvironmentFile = [ config.sops.secrets.aria2_env.path ];
       Group = "media";
+      UMask = "0002";
       StateDirectory = "aria2";
       WorkingDirectory = "/data/media/downloads/incoming";
       ExecStart = "${pkgs.aria2}/bin/aria2c --enable-rpc --rpc-listen-all --rpc-allow-origin-all --rpc-secret=${"$"}{ARIA2_RPC_SECRET} --dir=/data/media/downloads/incoming --continue=true --max-concurrent-downloads=5 --file-allocation=none";

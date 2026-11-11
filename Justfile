@@ -185,7 +185,7 @@ media-push PATH:
     test -e "{{ PATH }}" || { printf 'not found: %s\n' "{{ PATH }}" >&2; exit 1; }
     host=homelab-ts
     ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
-    rsync -a --info=progress2 "{{ PATH }}" "$host:/data/media/downloads/incoming/"
+    rsync -a --info=progress2 --chmod=D2775,F664 "{{ PATH }}" "$host:/data/media/downloads/incoming/"
 
 # Copy an album or track into the beets import folder.
 music-push PATH:
@@ -194,11 +194,17 @@ music-push PATH:
     test -e "{{ PATH }}" || { printf 'not found: %s\n' "{{ PATH }}" >&2; exit 1; }
     host=homelab-ts
     ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
-    rsync -a --info=progress2 "{{ PATH }}" "$host:/data/media/downloads/music-incoming/"
+    rsync -a --info=progress2 --chmod=D2775,F664 "{{ PATH }}" "$host:/data/media/downloads/music-incoming/"
 
-# Tag and move everything waiting in the beets import folder.
+# Tag and move everything waiting in the beets import folder. Beets keeps the
+# source mode on move, so the library is made group-readable afterwards.
 music-import:
-    ssh homelab-ts 'beet import -q /data/media/downloads/music-incoming'
+    #!/usr/bin/env bash
+    set -euo pipefail
+    host=homelab-ts
+    ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
+    ssh "$host" 'beet import -q /data/media/downloads/music-incoming'
+    ssh "$host" 'chgrp -R media /data/media/music && chmod -R g+rX /data/media/music'
 
 # Push a store path (or the running system) to the Attic cache.
 cache-push *PATHS:
