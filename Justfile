@@ -143,10 +143,11 @@ media-push PATH:
 cache-push *PATHS:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [ "$#" -eq 0 ]; then
-      set -- "$(readlink -f /run/current-system)"
+    if [ -z "{{ PATHS }}" ]; then
+      attic push main "$(readlink -f /run/current-system)"
+    else
+      attic push main {{ PATHS }}
     fi
-    attic push main "$@"
 
 # ── Inputs ─────────────────────────────────────────────────────────────────
 
