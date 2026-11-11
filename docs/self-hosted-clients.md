@@ -42,6 +42,10 @@ beet import /data/media/downloads/music-incoming
 beets matches the release, writes tags and moves the files into
 `/data/media/music/<albumartist>/<album>/`. Navidrome rescans on its own.
 
+If a quiet import skips an album it has seen before, beets still records the
+path as imported. Re-run with `-I` (ignore the import cache) and
+`-A` (keep the tags already in the files) when the release will not match.
+
 ## Clients
 
 | Service | Client | Notes |
