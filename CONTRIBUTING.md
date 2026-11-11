@@ -48,8 +48,10 @@ Refs: dotfiles-<id>
   `hosts`, `flake`, `docs`, `beads`, `audio`, `secrets`, or a narrower module
   name when it is unambiguous.
 - **subject**: imperative, no trailing period, at most 72 characters.
-- **body**: wrap near 72 columns. Explain the problem, the chosen approach, and
-  any behavior the reviewer should verify.
+- **body**: wrap near 72 columns. Tell the story of the change - what was wrong,
+  what you tried first, and why the patch ended up shaped this way. First person
+  is fine. See [docs/commit-style.md](docs/commit-style.md) for the full
+  convention and examples.
 - **footer**: `Refs: <bead-id>` when the change belongs to an issue. Add
   `Co-authored-by:` only when the co-author materially wrote the change; record
   routine agent sessions in Beads instead.
