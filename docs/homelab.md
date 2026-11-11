@@ -293,6 +293,7 @@ Enabled services and endpoints:
 | Seerr | 5055/tcp | LAN + tailnet |
 | Sonarr / Radarr / Prowlarr / Bazarr / qBittorrent | app defaults | tailnet only |
 | aria2 RPC | 6800/tcp | tailnet only |
+| Gatus | 9000/tcp | LAN + tailnet |
 | Attic | 8081/tcp | tailnet only |
 
 aria2 runs on the homelab with `--rpc-listen-all`, but its port is only opened

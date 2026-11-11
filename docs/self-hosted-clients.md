@@ -28,6 +28,10 @@ No manual metadata step: Sonarr/Radarr query TheTVDB/TMDB during import. If a
 release is still downloading on the laptop, `just media-push <path>` copies it
 into the same folder over the direct link or tailnet.
 
+Files land as `atalariq:media 0664` regardless of how they were downloaded:
+setgid directories decide the group, and the recipes set the mode. Nothing
+needs a manual chmod before Jellyfin or Navidrome can read it.
+
 `Prowlarr` only automates indexers that expose an API. Direct-download pages
 have no such API, so they always go through aria2 + Manual Import. Torrent
 indexers wired through Prowlarr can be fully automatic via qBittorrent.
@@ -53,6 +57,7 @@ path as imported. Re-run with `-I` (ignore the import cache) and
 | Jellyfin | browser + VLC | download, then play locally; no desktop app |
 | Navidrome | Ratune, NaviBeat | see [navidrome-clients.md](navidrome-clients.md) |
 | Seerr | web | requests for Sonarr/Radarr; enter API keys once |
+| Gatus | web | status page at `:9000`, checks every service health endpoint |
 | BookOrbit | removed | local EPUB/PDF files open in KOReader instead |
 
 Syncthing is still enabled on the ThinkPad for course files; its device list
