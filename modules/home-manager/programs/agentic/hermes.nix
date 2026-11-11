@@ -20,8 +20,7 @@ let
         # Dotfiles
 
         Repository: `~/.dotfiles` - a Nix flake covering NixOS (thinkpad-x13),
-        nix-darwin (macpro-m4) and two standalone Home Manager hosts
-        (linux-lab, wsl-lab).
+        nix-darwin (macmini-lab) only; the Linux hosts are NixOS.
 
         ## Layout
 

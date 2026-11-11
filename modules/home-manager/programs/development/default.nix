@@ -65,7 +65,7 @@ let
       pkgs.bear
       pkgs.ccache
     ];
-    # JVM/Dart CLI tools: Linux store only. On macpro the SDK layer is
+    # JVM/Dart CLI tools: Linux store only. On the Mac mini the SDK layer is
     # Homebrew (flutter/dart/android-studio); nvf's languages and the IDE
     # derivation add their own tooling independently.
     java = lib.optionals isLinux [ pkgs.jdk21 ];

@@ -20,13 +20,6 @@ let
         ];
       };
     };
-  mkHome =
-    host:
-    inputs.home-manager.lib.homeManagerConfiguration {
-      pkgs = pkgsFor "x86_64-linux";
-      extraSpecialArgs = { inherit inputs; };
-      modules = [ host ];
-    };
   withHome = username: user: {
     home-manager = {
       useGlobalPkgs = true;
@@ -60,16 +53,6 @@ let
           path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos inputs.self.nixosConfigurations.homelab-x456urk;
         };
       };
-      macpro-m4 = {
-        hostname = "macpro-m4";
-        sshUser = "atalariq";
-        interactiveSudo = true;
-        remoteBuild = true;
-        profiles.system = {
-          user = "root";
-          path = inputs.deploy-rs.lib.aarch64-darwin.activate.darwin inputs.self.darwinConfigurations.macpro-m4;
-        };
-      };
       macmini-lab = {
         # Use an SSH alias or resolvable address; the lab owns the hostname.
         hostname = "macmini-lab";
@@ -92,19 +75,6 @@ in
     # No desktop modules: the host owns a volatile root and a persistence list.
     nixosConfigurations.homelab-x456urk = mkNixosHost ../hosts/nixos/homelab-x456urk ../hosts/nixos/homelab-x456urk/home.nix;
 
-    darwinConfigurations.macpro-m4 = inputs.nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      specialArgs = { inherit inputs; };
-      modules = [
-        ../hosts/darwin/macpro-m4
-        inputs.home-manager.darwinModules.home-manager
-        {
-          nixpkgs.config.allowUnfree = true;
-        }
-        (withHome "atalariq" ../hosts/darwin/macpro-m4/home.nix)
-      ];
-    };
-
     # Campus lab Mac mini. GUI apps are Homebrew-owned; Nix supplies only
     # CLI/TUI tooling. The hostname stays under macOS/lab control.
     darwinConfigurations.macmini-lab = inputs.nix-darwin.lib.darwinSystem {
@@ -120,17 +90,12 @@ in
       ];
     };
 
-    homeConfigurations = {
-      linux-lab = mkHome ../hosts/linux/lab;
-      wsl-lab = mkHome ../hosts/wsl/lab;
-    };
-
     # SSH deployment for the homelab and Macs. The local ThinkPad keeps the
     # nh/nixos-rebuild activation recipes in the Justfile.
     inherit deploy;
-    # deployChecks builds each profile's activation path. Keep the Linux check
-    # limited to the Linux node so a ThinkPad flake check does not try to build
-    # aarch64-darwin's Homebrew activation on x86_64-linux.
+    # deployChecks builds each profile's activation path. The Linux check stays
+    # limited to the homelab node so a ThinkPad check does not try to build the
+    # Mac mini's Homebrew activation on x86_64-linux.
     checks = {
       x86_64-linux = inputs.deploy-rs.lib.x86_64-linux.deployChecks {
         nodes = {
@@ -139,7 +104,6 @@ in
       };
       aarch64-darwin = inputs.deploy-rs.lib.aarch64-darwin.deployChecks {
         nodes = {
-          macpro-m4 = deploy.nodes.macpro-m4;
           macmini-lab = deploy.nodes.macmini-lab;
         };
       };
