@@ -35,7 +35,6 @@
     nicotine-plus
     localsend
     scrcpy
-    jellyfin-desktop
     zotero
     zathura
     sioyek
