@@ -117,6 +117,78 @@
     openFirewall = false;
   };
 
+  # One status page for the whole host. Gatus is a single Go binary and is
+  # DynamicUser, so its state stays under /var/lib/private and needs no
+  # persistence entry.
+  services.gatus = {
+    enable = true;
+    openFirewall = true;
+    settings = {
+      web.port = 9000;
+      endpoints =
+        map
+          (e: {
+            inherit (e) name url;
+            interval = "1m";
+            conditions = [
+              (if e.strict then "[STATUS] == 200" else "[STATUS] < 500")
+            ];
+          })
+          [
+            {
+              name = "Jellyfin";
+              url = "http://127.0.0.1:8096/health";
+              strict = true;
+            }
+            {
+              name = "Navidrome";
+              url = "http://127.0.0.1:4533/ping";
+              strict = true;
+            }
+            {
+              name = "Sonarr";
+              url = "http://127.0.0.1:8989/ping";
+              strict = true;
+            }
+            {
+              name = "Radarr";
+              url = "http://127.0.0.1:7878/ping";
+              strict = true;
+            }
+            {
+              name = "Prowlarr";
+              url = "http://127.0.0.1:9696/ping";
+              strict = true;
+            }
+            {
+              name = "Bazarr";
+              url = "http://127.0.0.1:6767/";
+              strict = false;
+            }
+            {
+              name = "qBittorrent";
+              url = "http://127.0.0.1:8080/";
+              strict = false;
+            }
+            {
+              name = "Seerr";
+              url = "http://127.0.0.1:5055/api/v1/status";
+              strict = true;
+            }
+            {
+              name = "Attic";
+              url = "http://127.0.0.1:8081/";
+              strict = false;
+            }
+            {
+              name = "aria2 RPC";
+              url = "http://127.0.0.1:6800/jsonrpc";
+              strict = false;
+            }
+          ];
+    };
+  };
+
   # Downloads land on the media disk directly, so a 10 GB release never has to
   # cross the Wi-Fi link twice. Sonarr/Radarr pick the finished files up with
   # Manual Import; this only provides the downloader.
@@ -200,6 +272,11 @@
       name = "Attic";
       port = 8081;
       note = "Nix cache (tailnet only)";
+    }
+    {
+      name = "Gatus";
+      port = 9000;
+      note = "Service dashboard";
     }
   ];
 }
