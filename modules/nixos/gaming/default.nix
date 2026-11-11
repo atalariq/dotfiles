@@ -4,13 +4,10 @@
   pkgs,
   ...
 }:
-let
-  # Low-latency graph settings, formerly supplied by nix-gaming's
-  # pipewireLowLatency module. Audio ownership (services.pipewire, rtkit) stays
-  # with dotfiles.desktop.audio; this only adds configuration when it is on.
-  quantumRate = "64/48000";
-in
 {
+  # Audio ownership (services.pipewire, rtkit) stays with
+  # dotfiles.desktop.audio; the block below only adds configuration when it
+  # is on. Buffer sizes live next to the values that set them.
   config = lib.mkMerge [
     (lib.mkIf config.dotfiles.gaming.enable {
       hardware.graphics.enable = lib.mkDefault true;
@@ -88,9 +85,18 @@ in
       ];
     })
     (lib.mkIf (config.dotfiles.gaming.enable && config.dotfiles.desktop.audio.enable) {
+      # This used to force 64-sample buffers on every client. That is fine on
+      # an idle machine and miserable on a busy one: a 1.3 ms quantum turns
+      # any JVM pause or page-fault storm into an audible underrun, which is
+      # how the crackle under Android Studio showed up. Keep the realtime
+      # module, but size the graph for a desktop instead of a game console.
       services.pipewire.extraConfig = {
-        pipewire."99-lowlatency" = {
-          "context.properties"."default.clock.min-quantum" = 64;
+        pipewire."99-desktop-latency" = {
+          "context.properties" = {
+            "default.clock.quantum" = 1024;
+            "default.clock.min-quantum" = 256;
+            "default.clock.max-quantum" = 4096;
+          };
           "context.modules" = [
             {
               name = "libpipewire-module-rt";
@@ -107,16 +113,32 @@ in
             }
           ];
         };
-        pipewire-pulse."99-lowlatency"."pulse.properties" = {
+        pipewire-pulse."99-desktop-latency"."pulse.properties" = {
           "server.address" = [ "unix:native" ];
-          "pulse.min.req" = quantumRate;
-          "pulse.min.quantum" = quantumRate;
-          "pulse.min.frag" = quantumRate;
+          "pulse.min.req" = "1024/48000";
+          "pulse.min.quantum" = "1024/48000";
+          "pulse.min.frag" = "1024/48000";
         };
-        client."99-lowlatency"."stream.properties" = {
-          "node.latency" = quantumRate;
-          "resample.quality" = 1;
-        };
+        client."99-desktop-latency"."stream.properties".node.latency = "2048/48000";
+      };
+
+      # The HDA codec powers down between streams and the resume click is
+      # audible on the internal speakers. Keep the controller awake.
+      boot.extraModprobeConfig = ''
+        options snd_hda_intel power_save=0 power_save_controller=N
+      '';
+
+      # Headroom absorbs scheduler jitter before the graph reports an
+      # underrun. WirePlumber applies this to every ALSA output node.
+      services.pipewire.wireplumber.extraConfig."50-alsa-headroom" = {
+        "monitor.alsa.rules" = [
+          {
+            matches = [
+              { "node.name" = "~alsa_output.*"; }
+            ];
+            actions.update-props."api.alsa.headroom" = 2048;
+          }
+        ];
       };
     })
   ];
