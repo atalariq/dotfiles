@@ -9,6 +9,7 @@ font_family = "Inter"
 # environment. Do not add launch_apps_custom_command here.
 screen_time_enabled = true
 settings_show_advanced = false
+launch_apps_as_systemd_services = true
 
 [shell.panel]
 clipboard_placement = "attached"
