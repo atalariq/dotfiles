@@ -11,9 +11,11 @@
     # its minimal profile: no language servers, just a usable editor for the
     # occasional config fix over SSH.
     packages = with pkgs; [
+      aria2
       btop
       fastfetch
       yazi
+      yt-dlp
     ];
     # beets tags and moves music into the Navidrome library; keeping the
     # config here means the command behaves the same after a reinstall.
