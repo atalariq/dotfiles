@@ -204,6 +204,9 @@
     after = [ "data.mount" ];
     requires = [ "data.mount" ];
     wantedBy = [ "multi-user.target" ];
+    # The token lives in an EnvironmentFile, which systemd does not re-read on
+    # its own; rotating the sops secret must restart the daemon.
+    restartTriggers = [ config.sops.secrets.aria2_env.path ];
     serviceConfig = {
       User = "aria2";
       EnvironmentFile = [ config.sops.secrets.aria2_env.path ];
