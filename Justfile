@@ -223,6 +223,64 @@ cache-push *PATHS:
 update *inputs:
     nix flake update {{ inputs }}
 
+# Queue URLs on the homelab aria2 daemon. --music targets the beets folder.
+download *ARGS:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    set -- {{ ARGS }}
+    dir=/data/media/downloads/incoming
+    urls=()
+    for arg in "$@"; do
+      case "$arg" in
+        --music) dir=/data/media/downloads/music-incoming ;;
+        -*) printf 'unknown flag: %s\n' "$arg" >&2; exit 1 ;;
+        *) urls+=("$arg") ;;
+      esac
+    done
+    if [ "${#urls[@]}" -eq 0 ]; then
+      printf 'usage: just download [--music] URL...\n' >&2
+      exit 1
+    fi
+    host=homelab-ts
+    ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
+    # The RPC port is only opened on tailscale0, so the direct cable cannot
+    # carry it; the daemon still writes to the media disk.
+    rpc=homelab-x456urk
+    token="$(ssh "$host" "sudo -n sh -c '. /run/secrets/aria2_env; printf %s \"\$ARIA2_RPC_SECRET\"'")"
+    for url in "${urls[@]}"; do
+      body="$(TOKEN="$token" jq -cn --arg u "$url" --arg d "$dir" \
+        '{jsonrpc:"2.0",id:"dotfiles",method:"aria2.addUri",
+          params:[("token:" + env.TOKEN),[$u],{dir:$d}]}')"
+      gid="$(curl -fsS -H 'Content-Type: application/json' --data "$body" \
+        "http://$rpc:6800/jsonrpc" | jq -r '.result')"
+      printf '%s -> %s (%s)\n' "$url" "$gid" "$dir"
+    done
+
+# Show active downloads by name, progress and speed.
+downloads:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    host=homelab-ts
+    ping -c1 -W1 10.42.0.2 >/dev/null 2>&1 && host=atalariq@10.42.0.2
+    # The RPC port is only opened on tailscale0, so the direct cable cannot
+    # carry it; the daemon still writes to the media disk.
+    rpc=homelab-x456urk
+    token="$(ssh "$host" "sudo -n sh -c '. /run/secrets/aria2_env; printf %s \"\$ARIA2_RPC_SECRET\"'")"
+    body="$(TOKEN="$token" jq -cn '{jsonrpc:"2.0",id:"dotfiles",method:"aria2.tellActive",params:[("token:" + env.TOKEN)]}')"
+    curl -fsS -H 'Content-Type: application/json' --data "$body" \
+      "http://$rpc:6800/jsonrpc" |
+      jq -r '.result[] |
+        [ .gid,
+          .status,
+          (if (.totalLength|tonumber) > 0 then
+             (((.completedLength|tonumber) * 100 / (.totalLength|tonumber)) | floor | tostring) + "%"
+           else
+             (((.completedLength|tonumber) / 1048576 * 10 | floor) / 10 | tostring) + " MB"
+           end),
+          (((.downloadSpeed|tonumber) / 1048576 * 10 | floor) / 10 | tostring) + " MB/s",
+          (.files[0] | (.path // (.uris[0].uri // "?")))
+        ] | @tsv'
+
 # ── Store hygiene ──────────────────────────────────────────────────────────
 # Keep 14 days and the 5 newest generations; everything older is collectable.
 gc:
