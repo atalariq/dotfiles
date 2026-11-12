@@ -28,6 +28,18 @@ No manual metadata step: Sonarr/Radarr query TheTVDB/TMDB during import. If a
 release is still downloading on the laptop, `just media-push <path>` copies it
 into the same folder over the direct link or tailnet.
 
+A link can also be queued directly:
+
+```sh
+just download "https://example/file.mkv"    # *arr import folder
+just download --music "https://example/album.zip"
+just downloads
+```
+
+The RPC is reached over the tailnet because its port is only opened there.
+For sites aria2 cannot parse, `yt-dlp` and `aria2c` are both installed on the
+homelab, so an SSH session is enough.
+
 Files land as `atalariq:media 0664` regardless of how they were downloaded:
 setgid directories decide the group, and the recipes set the mode. Nothing
 needs a manual chmod before Jellyfin or Navidrome can read it.
