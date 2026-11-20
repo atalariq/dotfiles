@@ -4,7 +4,8 @@ Terminal-first dotfiles for NixOS, generic Linux, macOS, and WSL.
 
 This repository is the **public framework**: it contains the reusable Home
 Manager and NixOS modules for my terminal workflow — fish, starship, Atuin,
-Neovim (nvf), yazi, tmux, btop, fastfetch, gh, git, helix, typst, and yt-dlp.
+Neovim (nvf), yazi, tmux, lazygit, btop, fastfetch, gh, git, helix, typst, and
+yt-dlp.
 It contains **no secrets and no private host inventory**.
 
 The Dune names are examples: `caladan` is the generic NixOS example, `ix` the

@@ -1,0 +1,16 @@
+os:
+  # vim is part of the CLI floor on every managed host. nvim is a per-host
+  # choice; edit this file live if a host should open nvim instead.
+  editPreset: 'vim'
+
+git:
+  diffRenderers:
+    - command: >-
+        delta --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - type: extDiff
+      command: difft --color=always --context={{diffContext}}
+    - type: rawGit
+      name: default
+
+gui:
+  nerdFontsVersion: "3"
