@@ -14,7 +14,8 @@ in
   config = lib.mkIf config.dotfiles.programs.cli.yazi.enable {
     programs.yazi = {
       enable = true;
-      initLua = builtins.readFile ./config/yazi/init.lua;
+      # init.lua and plugins are linked below so live mode actually picks up
+      # edits; initLua would otherwise be frozen at evaluation time.
       enableBashIntegration = false;
       enableFishIntegration = false;
       enableZshIntegration = false;
@@ -31,49 +32,6 @@ in
               "on" = "<A-q>";
               "run" = "close";
               "desc" = "Close the current tab, or quit if it's last";
-            }
-            {
-              "on" = "s";
-              "run" = "search --via=fd";
-              "desc" = "Search files by name via fd";
-            }
-            {
-              "on" = "S";
-              "run" = "search --via=rg";
-              "desc" = "Search files by content via ripgrep";
-            }
-            {
-              "on" = "<C-s>";
-              "run" = "escape --search";
-              "desc" = "Cancel the ongoing search";
-            }
-            {
-              "on" = [
-                "g"
-                "h"
-              ];
-              "run" = "cd ~";
-            }
-            {
-              "on" = [
-                "g"
-                "c"
-              ];
-              "run" = "cd ~/.config";
-            }
-            {
-              "on" = [
-                "g"
-                "C"
-              ];
-              "run" = "cd ~/.dotfiles";
-            }
-            {
-              "on" = [
-                "g"
-                "d"
-              ];
-              "run" = "cd ~/Downloads";
             }
             {
               "on" = "q";
@@ -126,23 +84,9 @@ in
               "desc" = "Show media preview image and hide metadata";
             }
             {
-              "on" = "<F12>";
-              "run" = "plugin mediainfo -- --show-preview --hide-metadata --reset --show-metadata --hide-preview";
-              "desc" = "Show media preview image and hide metadata";
-            }
-            {
               "on" = [ "C" ];
               "run" = "plugin ouch";
               "desc" = "Compress with ouch";
-            }
-          ];
-        };
-        "input" = {
-          "prepend_keymap" = [
-            {
-              "on" = "<Esc>";
-              "run" = "close";
-              "desc" = "Cancel input";
             }
           ];
         };
@@ -168,22 +112,22 @@ in
         "preview" = {
           "wrap" = "no";
           "tab_size" = 2;
-          "image_delay" = 0;
+          "image_delay" = 40;
           "image_quality" = 70;
         };
         "tasks" = {
-          "image_alloc" = 1073741824;
+          "image_alloc" = 536870912;
         };
         "opener" = {
           "extract" = [
             {
-              "run" = "ouch d -y %*";
-              "desc" = "Extract here with ouch";
+              "run" = "ouch d -y %s";
+              "desc" = "Extract with ouch";
               "for" = "windows";
             }
             {
-              "run" = "ouch d -y \"$@\"";
-              "desc" = "Extract here with ouch";
+              "run" = "ouch d -y %s";
+              "desc" = "Extract with ouch";
               "for" = "unix";
             }
           ];
@@ -227,8 +171,19 @@ in
       ffmpeg
       imagemagick
     ];
+    xdg.configFile."yazi/init.lua" = {
+      source =
+        if live then
+          config.lib.file.mkOutOfStoreSymlink "${checkout}/modules/home-manager/programs/cli/config/yazi/init.lua"
+        else
+          ./config/yazi/init.lua;
+    };
     xdg.configFile."yazi/plugins" = {
-      source = ./config/yazi/plugins;
+      source =
+        if live then
+          config.lib.file.mkOutOfStoreSymlink "${checkout}/modules/home-manager/programs/cli/config/yazi/plugins"
+        else
+          ./config/yazi/plugins;
     };
     xdg.configFile."fish/conf.d/yazi.fish" = lib.mkIf config.programs.fish.enable {
       source =
