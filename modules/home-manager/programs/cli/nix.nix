@@ -28,7 +28,7 @@
     # diff itself, replacing the separate nom and dix packages.
     programs.nh = {
       enable = true;
-      flake = config.dotfiles.deployment.checkout;
+      flake = config.dotfiles.deployment.inventory;
     };
   };
 }

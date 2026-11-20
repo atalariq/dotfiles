@@ -61,8 +61,13 @@ in
     };
     checkout = lib.mkOption {
       type = lib.types.addCheck lib.types.str (lib.hasPrefix "/");
+      default = "${config.home.homeDirectory}/Repos/dotfiles";
+      description = "Absolute public framework checkout used by live native configurations.";
+    };
+    inventory = lib.mkOption {
+      type = lib.types.addCheck lib.types.str (lib.hasPrefix "/");
       default = "${config.home.homeDirectory}/.dotfiles";
-      description = "Absolute source checkout used by live native configurations.";
+      description = "Absolute private inventory checkout used by inventory-owned live configuration.";
     };
   };
 
@@ -84,12 +89,19 @@ in
       {
         assertion =
           config.dotfiles.deployment.mode != "live"
-          || (
-            lib.hasPrefix (config.home.homeDirectory + "/") config.dotfiles.deployment.checkout
-            && !lib.hasInfix "/../" config.dotfiles.deployment.checkout
-            && !lib.hasInfix "/./" config.dotfiles.deployment.checkout
+          || (lib.all
+            (
+              path:
+              lib.hasPrefix (config.home.homeDirectory + "/") path
+              && !lib.hasInfix "/../" path
+              && !lib.hasInfix "/./" path
+            )
+            [
+              config.dotfiles.deployment.checkout
+              config.dotfiles.deployment.inventory
+            ]
           );
-        message = "dotfiles.deployment.checkout must stay inside the home directory without '.' or '..' segments.";
+        message = "dotfiles.deployment.checkout and inventory must stay inside the home directory without '.' or '..' segments.";
       }
     ];
   };
