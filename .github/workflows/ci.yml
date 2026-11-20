@@ -22,7 +22,7 @@ jobs:
         run: |
           nix run nixpkgs#deadnix -- --fail flake.nix modules hosts home
           nix run nixpkgs#statix -- check .
-          nix fmt -- --check .
+          nix run nixpkgs#nixfmt -- --check $(git ls-files '*.nix')
 
   darwin:
     runs-on: macos-latest

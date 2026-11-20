@@ -6,7 +6,7 @@ default:
     @just --list
 
 fmt:
-    nix fmt
+    nixfmt $(git ls-files '*.nix')
 
 lint:
     deadnix --fail flake.nix modules hosts home templates
