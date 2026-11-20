@@ -1,0 +1,2 @@
+--downloader aria2c
+--output "%(title)s.%(ext)s"

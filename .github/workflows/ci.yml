@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+      - name: Build the standalone profile
+        run: nix build .#homeConfigurations."atalariq@x86_64-linux".activationPackage --no-link
+      - name: Evaluate the NixOS example
+        run: nix eval .#nixosConfigurations.caladan.config.system.build.toplevel.drvPath
+      - name: Lint
+        run: |
+          nix run nixpkgs#deadnix -- --fail flake.nix modules hosts home
+          nix run nixpkgs#statix -- check .
+          nix fmt -- --check .
+
+  darwin:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+      - name: Build the Darwin profile
+        run: nix build .#homeConfigurations."atalariq@aarch64-darwin".activationPackage --no-link
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

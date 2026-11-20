@@ -1,0 +1,76 @@
+{
+  "Main": {
+    "prefix": "main",
+    "body": ["fn main() {", "\t$0", "}"]
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": ["fn $1($2) -> $3 {", "\t$0", "}"]
+  },
+  "Struct": {
+    "prefix": "st",
+    "body": ["struct $1 {", "\t$0", "}"]
+  },
+  "Impl": {
+    "prefix": "impl",
+    "body": ["impl $1 {", "\t$0", "}"]
+  },
+  "Enum": {
+    "prefix": "en",
+    "body": ["enum $1 {", "\t$0", "}"]
+  },
+  "Trait": {
+    "prefix": "trait",
+    "body": ["trait $1 {", "\t$0", "}"]
+  },
+  "Match": {
+    "prefix": "match",
+    "body": ["match $1 {", "\t$2 => $0,", "}"]
+  },
+  "Result return": {
+    "prefix": "res",
+    "body": "Result<$1, $2>"
+  },
+  "Option": {
+    "prefix": "opt",
+    "body": "Option<$0>"
+  },
+  "If let": {
+    "prefix": "ifl",
+    "body": ["if let $1 = $2 {", "\t$0", "}"]
+  },
+  "While let": {
+    "prefix": "whl",
+    "body": ["while let $1 = $2 {", "\t$0", "}"]
+  },
+  "Test module": {
+    "prefix": "testmod",
+    "body": [
+      "#[cfg(test)]",
+      "mod tests {",
+      "\tuse super::*;",
+      "",
+      "\t#[test]",
+      "\tfn $1() {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "Derive": {
+    "prefix": "der",
+    "body": "#[derive($0)]"
+  },
+  "Println": {
+    "prefix": "pl",
+    "body": "println!(\"$1\", $0);"
+  },
+  "Vec new": {
+    "prefix": "vec",
+    "body": "let $1: Vec<$2> = Vec::new();"
+  },
+  "HashMap": {
+    "prefix": "hmap",
+    "body": "let $1: HashMap<$2, $3> = HashMap::new();"
+  }
+}

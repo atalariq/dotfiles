@@ -1,0 +1,13 @@
+# Session template — copy to e.g. sessions/project.kitty
+# Usage: kitty --session ~/.config/kitty/sessions/project.kitty
+
+new_tab home
+cd ~
+launch zsh
+
+new_tab code
+cd ~/projects
+launch zsh
+
+new_tab terminal
+launch zsh

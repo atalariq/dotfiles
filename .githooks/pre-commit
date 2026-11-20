@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="$(git rev-parse --show-toplevel)"
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --config "$repo/.gitleaks.toml"
+else
+  printf 'gitleaks is required: nix shell nixpkgs#gitleaks\n' >&2
+  exit 1
+fi
+
+"$repo/scripts/check-public.sh"

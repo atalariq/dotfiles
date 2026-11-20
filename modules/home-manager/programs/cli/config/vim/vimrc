@@ -1,0 +1,177 @@
+" ~/.vimrc — minimal pure-vim config, no plugins.
+" The universal editor floor for servers/VPS that ship vim/vi but not nvim.
+" Copy this file alone for an SSH-friendly editor; no network or plugins.
+
+set nocompatible
+filetype plugin indent on
+syntax on
+
+" Leader
+let mapleader = " "
+let maplocalleader = " "
+
+" UI
+set number
+if exists('+relativenumber') | set relativenumber | endif
+set cursorline
+if exists('+signcolumn') | set signcolumn=yes | endif
+set ruler
+set laststatus=2
+set showcmd
+set wildmenu
+set mouse=a
+if has('termguicolors')
+  set termguicolors
+endif
+
+" Search
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+nnoremap <silent> <Esc> :nohlsearch<CR>
+
+" Indent / wrap
+set tabstop=2
+set shiftwidth=2
+set expandtab
+set autoindent
+if exists('+breakindent') | set breakindent | endif
+set linebreak
+set wrap
+
+" ASCII whitespace hints work without a patched font.
+set list
+set listchars=tab:>-,trail:.,nbsp:+
+
+" Behaviour
+set hidden
+set backspace=indent,eol,start
+set updatetime=300
+set scrolloff=4
+
+" Clipboard: use system clipboard when vim is built with it, else stay local
+if has('clipboard')
+  if has('unnamedplus')
+    set clipboard=unnamedplus
+  else
+    set clipboard=unnamed
+  endif
+endif
+
+" Persistent undo under ~/.vim/undo (created on demand)
+if has('persistent_undo')
+  let s:undodir = expand('~/.vim/undo')
+  if !isdirectory(s:undodir)
+    call mkdir(s:undodir, 'p', 0700)
+  endif
+  let &undodir = s:undodir
+  set undofile
+endif
+
+" Optional vendored palette, with a built-in fallback for a standalone .vimrc.
+try
+  colorscheme dotfiles
+catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme default
+endtry
+
+" Server workflow uses Vim's own buffers, netrw, quickfix and diff support.
+" Avoid plugin bootstraps: a copied vimrc must work before network recovery.
+set splitbelow
+set splitright
+set wildmode=longest:full,full
+set path+=**
+set wildignore+=*/.git/*,*/node_modules/*,*/vendor/*,*/target/*
+set grepprg=grep\ -RIn\ --exclude-dir=.git\ --exclude-dir=node_modules\ --exclude-dir=vendor\ --
+set grepformat=%f:%l:%m
+nnoremap <leader>e :Explore<CR>
+nnoremap <leader>b :ls<CR>:buffer<Space>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap <leader>q :copen<CR>
+nnoremap <leader>Q :cclose<CR>
+nnoremap <leader>m :make<CR>
+nnoremap <leader>d :diffthis<CR>
+nnoremap <leader>D :diffoff!<CR>
+" Search text literally; shellescape prevents the prompt becoming shell code.
+function! ServerGrep() abort
+  let l:query = input('Search: ')
+  if !empty(l:query)
+    execute 'silent grep! ' . shellescape(l:query) . ' .'
+    copen
+    redraw!
+  endif
+endfunction
+nnoremap <leader>/ :call ServerGrep()<CR>
+
+" ── Neovim-feel floor (2026-10): built-ins only, guards for ancient vim ────
+if exists('+inccommand')
+  set inccommand=split
+endif
+if exists('+termsync')
+  set termsync
+endif
+set display+=lastline
+set scrolloff=4
+set sidescrolloff=4
+set virtualedit=block
+set shortmess+=I
+set lazyredraw
+set completeopt=menu,menuone,noselect
+if v:version >= 900
+  set completeopt+=fuzzy
+endif
+if exists('+breakindent')
+  set breakindentopt=shift:1
+  set showbreak=>
+endif
+" ripgrep is the nvim parity here; grep stays the fallback.
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --smart-case
+  set grepformat=%f:%l:%c:%m
+endif
+" Search/window/motion parity with the nvf runtime layer.
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+nnoremap <silent> # #zz
+nnoremap <C-u> <C-u>zz
+nnoremap <C-d> <C-d>zz
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+nnoremap J mzJ`z
+nnoremap <leader>uw :set wrap!<CR>
+inoremap jk <Esc>
+inoremap kj <Esc>
+" Smart split by window shape (like nvf <leader>sv intent).
+nnoremap <silent> <C-w>v :let s:w = winwidth(0) > 160 \| exe s:w ? 'vsplit' : 'split'<CR>
+" Yank flash via TextYankPost (Neovim has vim.hl.on_yank; Vim needs marks).
+if v:version >= 800
+  function! s:YankFlash() abort
+    if exists('w:yank_match')
+      call matchdelete(w:yank_match)
+    endif
+    let l:pos = getpos("'<")[1]
+    if l:pos > 0
+      let w:yank_match = matchaddpos('IncSearch', [[l:pos]], 99)
+      call timer_start(250, { _ -> exists('w:yank_match') ? matchdelete(w:yank_match) : 0 })
+    endif
+  endfunction
+  augroup dotfiles_yank
+    autocmd!
+    autocmd TextYankPost * call s:YankFlash()
+  augroup END
+endif
+" Terminal buffers: quit insert like nvim, drop the buffer like the shell floor.
+if has('terminal') && exists('##TermOpen') && exists('##TermClose')
+  augroup dotfiles_term
+    autocmd!
+    autocmd TermOpen * startinsert
+    autocmd TermClose * stopinsert | execute 'bdelete! ' . expand('<abuf>')
+  augroup END
+endif

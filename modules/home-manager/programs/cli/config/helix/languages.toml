@@ -1,0 +1,4 @@
+# Minimal profile: Helix auto-starts language servers that happen to be on
+# PATH; none are added by this module, matching the nvf minimal preset.
+# Add per-language settings here. The file is live-linked from the checkout,
+# so edits need no rebuild (restart or `:config-reload`).

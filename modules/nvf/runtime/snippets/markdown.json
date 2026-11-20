@@ -1,0 +1,69 @@
+{
+  "Frontmatter": {
+    "prefix": "fm",
+    "body": [
+      "---",
+      "title: $1",
+      "description: $2",
+      "date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+      "tags: [$3]",
+      "draft: ${4:true}",
+      "---",
+      "",
+      "$0"
+    ]
+  },
+  "Frontmatter Astro": {
+    "prefix": "fma",
+    "body": [
+      "---",
+      "title: $1",
+      "description: $2",
+      "pubDate: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+      "updatedDate: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+      "heroImage: ${3:./assets/cover.png}",
+      "tags: [$4]",
+      "draft: ${5:true}",
+      "---",
+      "",
+      "$0"
+    ]
+  },
+  "Callout Note": {
+    "prefix": "cn",
+    "body": ["> [!NOTE]", "> $0"]
+  },
+  "Callout Warning": {
+    "prefix": "cw",
+    "body": ["> [!WARNING]", "> $0"]
+  },
+  "Callout Tip": {
+    "prefix": "ct",
+    "body": ["> [!TIP]", "> $0"]
+  },
+  "Code Block": {
+    "prefix": "cb",
+    "body": ["```${1:lang}", "$0", "```"]
+  },
+  "Link": {
+    "prefix": "lk",
+    "body": "[$1]($2)$0"
+  },
+  "Image": {
+    "prefix": "img",
+    "body": "![$1]($2)$0"
+  },
+  "Table": {
+    "prefix": "tbl",
+    "body": [
+      "| $1 | $2 | $3 |",
+      "| --- | --- | --- |",
+      "| $4 | $5 | $6 |",
+      "$0"
+    ]
+  },
+  "Details/Summary": {
+    "prefix": "details",
+    "body": ["<details>", "<summary>$1</summary>", "", "$0", "", "</details>"]
+  }
+}

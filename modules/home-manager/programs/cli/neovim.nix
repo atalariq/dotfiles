@@ -1,0 +1,110 @@
+# Thin Home Manager wrapper around the shared nvf kernel in `modules/nvf/`.
+#
+# Everything editor-behavioural lives there (imported by both this wrapper and
+# the standalone `nix run .#neovim` package). This file owns only the
+# Home-Manager-specific glue: the opt-in flag, the live runtime path, the
+# stylix/wana theme gate, the Nerd Font gate, and editor environment variables.
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
+let
+  # "neovim" is a live app: the runtime tree links back to the checkout, so
+  # after/ftplugin, queries and snippets can be edited without a rebuild.
+  # Keymaps, options and autocmds are declared in Nix and rebuild normally.
+  runtime =
+    if config.dotfiles.deployment.mode == "live" then
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.deployment.checkout}/modules/nvf/runtime"
+    else
+      ../../../nvf/runtime;
+  cfg = config.dotfiles.programs.cli.neovim;
+  nvfPlugins = import ../../../nvf/plugins.nix {
+    inherit pkgs;
+    inherit (cfg) profile;
+  };
+in
+{
+  imports = [ inputs.nvf.homeModules.nvf ];
+
+  options.dotfiles.programs.cli.neovim = {
+    enable = lib.mkEnableOption "nvf workstation editor";
+    profile = lib.mkOption {
+      type = lib.types.enum [
+        "full"
+        "minimal"
+      ];
+      default = "minimal";
+      description = ''
+        "full" enables language servers, formatters, linters and the language
+        modules. "minimal" keeps the editor self-contained on hosts that only
+        have Nix: no toolchain beyond git, ripgrep, fd and fzf.
+      '';
+    };
+    nerdFont = lib.mkOption {
+      type = lib.types.bool;
+      default = config.dotfiles.appearance.gui;
+      description = "Use Nerd Font glyphs in Neovim. Defaults to selecting a GUI host.";
+    };
+  };
+
+  config = lib.mkIf config.dotfiles.programs.cli.neovim.enable {
+    programs.nvf = {
+      enable = true;
+      # EDITOR, so `git commit` and every agent that edits $EDITOR land here.
+      defaultEditor = true;
+      # One nvf kernel, two consumers: package.nix next to it imports the same
+      # files for `nix run .#neovim`.
+      settings.imports = [
+        (import ../../../nvf/nvf.nix {
+          inherit runtime;
+          inherit (cfg) profile nerdFont;
+        })
+        nvfPlugins.module
+        (import ../../../nvf/runtime-layer.nix { inherit runtime; })
+      ]
+      ++ lib.optionals (cfg.profile == "full") [
+        (import ../../../nvf/langs.nix { stacks = config.dotfiles.programs.development.stacks; })
+      ];
+      # Theme: Stylix owns the palette. When Stylix is off (lab/wsl-class
+      # hosts) the owner's wana.nvim loads, with habamax as the in-editor
+      # fallback.
+      settings.vim.startPlugins = lib.optionals (!config.stylix.enable) [
+        nvfPlugins.packages.wana
+      ];
+      settings.vim.luaConfigRC.dotfilesTheme = lib.mkIf (!config.stylix.enable) ''
+        vim.g.dotfiles_theme = "wana"
+      '';
+      settings.vim.theme = lib.mkIf (config.stylix.enable && config.dotfiles.appearance.gui) {
+        enable = true;
+        name = "base16";
+        base16-colors = {
+          inherit (config.lib.stylix.colors.withHashtag)
+            base00
+            base01
+            base02
+            base03
+            base04
+            base05
+            base06
+            base07
+            base08
+            base09
+            base0A
+            base0B
+            base0C
+            base0D
+            base0E
+            base0F
+            ;
+        };
+      };
+    };
+    home.sessionVariables = {
+      VISUAL = "nvim";
+      GIT_EDITOR = "nvim";
+    };
+  };
+}

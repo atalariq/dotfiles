@@ -1,0 +1,63 @@
+{
+  "PHP tag": {
+    "prefix": "php",
+    "body": ["<?php", "", "$0"]
+  },
+  "Echo": {
+    "prefix": "ec",
+    "body": "echo $0;"
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": ["function $1($2): $3 {", "\t$0", "}"]
+  },
+  "Class": {
+    "prefix": "cls",
+    "body": [
+      "class $1 {",
+      "\tpublic function __construct($2) {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "Interface": {
+    "prefix": "iface",
+    "body": ["interface $1 {", "\t$0", "}"]
+  },
+  "Foreach": {
+    "prefix": "fore",
+    "body": ["foreach ($1 as $2) {", "\t$0", "}"]
+  },
+  "Try/catch": {
+    "prefix": "tc",
+    "body": [
+      "try {",
+      "\t$0",
+      "} catch (\\Exception $e) {",
+      "\t$1",
+      "}"
+    ]
+  },
+  "Array": {
+    "prefix": "arr",
+    "body": "[$0]"
+  },
+  "Var dump": {
+    "prefix": "vd",
+    "body": "var_dump($0);"
+  },
+  "PDO query": {
+    "prefix": "pdo",
+    "body": [
+      "$stmt = $pdo->prepare('$1');",
+      "$stmt->execute([$2]);",
+      "$result = $stmt->fetchAll(PDO::FETCH_ASSOC);",
+      "$0"
+    ]
+  },
+  "Null coalesce": {
+    "prefix": "nc",
+    "body": "$1 ?? $0"
+  }
+}

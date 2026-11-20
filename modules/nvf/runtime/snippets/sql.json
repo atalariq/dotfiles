@@ -1,0 +1,66 @@
+{
+  "Select all": {
+    "prefix": "sel",
+    "body": "SELECT * FROM $0;"
+  },
+  "Select columns": {
+    "prefix": "selc",
+    "body": "SELECT $1 FROM $2 WHERE $3;"
+  },
+  "Select with join": {
+    "prefix": "selj",
+    "body": [
+      "SELECT $1",
+      "FROM $2 AS $3",
+      "JOIN $4 AS $5 ON $3.$6 = $5.$7",
+      "WHERE $0;"
+    ]
+  },
+  "Insert": {
+    "prefix": "ins",
+    "body": "INSERT INTO $1 ($2) VALUES ($3);"
+  },
+  "Update": {
+    "prefix": "upd",
+    "body": "UPDATE $1 SET $2 = $3 WHERE $0;"
+  },
+  "Delete": {
+    "prefix": "del",
+    "body": "DELETE FROM $1 WHERE $0;"
+  },
+  "Create table": {
+    "prefix": "ct",
+    "body": [
+      "CREATE TABLE $1 (",
+      "\tid SERIAL PRIMARY KEY,",
+      "\t$0,",
+      "\tcreated_at TIMESTAMP DEFAULT NOW()",
+      ");"
+    ]
+  },
+  "Alter table add column": {
+    "prefix": "atac",
+    "body": "ALTER TABLE $1 ADD COLUMN $2 $0;"
+  },
+  "Create index": {
+    "prefix": "ci",
+    "body": "CREATE INDEX idx_$1 ON $2 ($3);"
+  },
+  "Transaction": {
+    "prefix": "tx",
+    "body": ["BEGIN;", "$0", "COMMIT;"]
+  },
+  "CTE": {
+    "prefix": "cte",
+    "body": [
+      "WITH $1 AS (",
+      "\t$0",
+      ")",
+      "SELECT * FROM $1;"
+    ]
+  },
+  "Window function": {
+    "prefix": "win",
+    "body": "$1 OVER (PARTITION BY $2 ORDER BY $3) AS $0"
+  }
+}
